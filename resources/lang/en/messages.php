@@ -13,5 +13,6 @@ return [
     'logout' => 'Logout',
     'admin' => 'Admin panel',
     'main_navigation' => 'Main navigation',
+    'track_order' => 'Track order',
     'footer' => 'Nilak Store',
 ];

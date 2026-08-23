@@ -13,5 +13,6 @@ return [
     'logout' => 'خروج',
     'admin' => 'پنل مدیریت',
     'main_navigation' => 'منوی اصلی',
+    'track_order' => 'پیگیری سفارش',
     'footer' => 'فروشگاه نیلک',
 ];

@@ -19,6 +19,11 @@
         .site-date { color: #6c757d; font-size: .875rem; white-space: nowrap; }
         .site-tools .dropdown { position: relative; }
         .site-tools .dropdown-menu { position: absolute; z-index: 1030; inset-inline-end: 0; }
+        .category-menu { position: relative; }
+        .category-menu > .dropdown-menu { position: absolute; z-index: 1030; min-width: 18rem; padding: 1rem; inset-inline-start: 0; }
+        .category-menu .category-column { min-width: 9rem; }
+        .category-menu .category-heading { font-weight: 700; color: #212529; }
+        .category-menu .category-child { display: block; padding: .25rem 0; color: #6c757d; }
         [dir="rtl"] .site-tools { margin-right: auto; }
         [dir="ltr"] .site-tools { margin-left: auto; }
     </style>
@@ -96,18 +101,36 @@
                     </a>
                 </li>
 
-                {{-- دسته‌بندی‌ها (داینامیک) --}}
+                {{-- دسته‌بندی‌های چندسطحی از دیتابیس --}}
                 @php
-    $categories = \App\Models\Category::active()->orderBy('position')->get();
-@endphp
+                    $categories = \App\Models\Category::active()
+                        ->whereNull('parent_id')
+                        ->with(['children' => fn ($query) => $query->active()->with('children')])
+                        ->orderBy('position')
+                        ->get();
+                @endphp
 
-@foreach($categories as $cat)
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('shop.index', ['category' => $cat->slug]) }}">
-            {{ $cat->name }}
-        </a>
-    </li>
-@endforeach
+                @foreach($categories as $category)
+                    <li class="nav-item dropdown category-menu">
+                        <a class="nav-link dropdown-toggle" href="{{ route('shop.index', ['category' => $category->slug]) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ $category->name }}
+                        </a>
+                        @if($category->children->isNotEmpty())
+                            <div class="dropdown-menu">
+                                <div class="row g-3">
+                                    @foreach($category->children as $child)
+                                        <div class="col category-column">
+                                            <a class="category-heading" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->name }}</a>
+                                            @foreach($child->children as $grandchild)
+                                                <a class="category-child" href="{{ route('shop.index', ['category' => $grandchild->slug]) }}">{{ $grandchild->name }}</a>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </li>
+                @endforeach
 
 
                 {{-- سبد خرید --}}
@@ -126,7 +149,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('orders.track*') ? 'active' : '' }}" href="{{ route('orders.track.form') }}">
-                        پیگیری سفارش
+                        {{ __('messages.track_order') }}
                     </a>
                 </li>
 
