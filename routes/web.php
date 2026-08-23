@@ -49,6 +49,14 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::get('/language/{locale}', function (string $locale) {
+    abort_unless(in_array($locale, ['fa', 'en'], true), 404);
+
+    session(['locale' => $locale]);
+
+    return redirect()->back();
+})->name('language.switch');
+
 // بارگذاری مسیرهای پنل ادمین زیر پیشوند /admin و نام admin.
 Route::prefix('admin')->name('admin.')->middleware(['web'])->group(function () {
     require __DIR__.'/admin.php';

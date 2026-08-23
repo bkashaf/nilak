@@ -1,27 +1,28 @@
 {{-- View: C:/xampp/htdocs/nilak/resources/views/themes/default/layouts/shop.blade.php --}}
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'fa' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'فروشگاه نیلک')</title>
+    <title>@yield('title', __('messages.brand'))</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        body { background-color: #f8f9fa; font-family: Vazirmatn, sans-serif; }
+        body { background-color: #f8f9fa; font-family: Vazirmatn, sans-serif; text-align: start; }
         .navbar { margin-bottom: 20px; }
         footer { margin-top: 40px; padding: 20px 0; background: #eee; text-align: center; }
+        [dir="rtl"] .navbar-nav { margin-right: auto !important; margin-left: 0 !important; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+<nav class="navbar navbar-expand-md navbar-light bg-light shadow-sm">
     <div class="container">
 
         {{-- لوگو --}}
         <a class="navbar-brand fw-bold" href="{{ route('home') }}">
-            فروشگاه نیلک
+            {{ __('messages.brand') }}
         </a>
 
         {{-- دکمه موبایل --}}
@@ -36,14 +37,14 @@
                 {{-- خانه --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                        خانه
+                        {{ __('messages.home') }}
                     </a>
                 </li>
 
                 {{-- فروشگاه --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('shop.index') ? 'active' : '' }}" href="{{ route('shop.index') }}">
-                        فروشگاه
+                        {{ __('messages.shop') }}
                     </a>
                 </li>
 
@@ -64,17 +65,26 @@
                 {{-- سبد خرید --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('cart.index') ? 'active' : '' }}" href="{{ route('cart.index') }}">
-                        سبد خرید
+                        {{ __('messages.cart') }}
                     </a>
                 </li>
 
                 {{-- تسویه حساب --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('checkout.index') ? 'active' : '' }}" href="{{ route('checkout.index') }}">
-                        تسویه حساب
+                        {{ __('messages.checkout') }}
                     </a>
                 </li>
 
+                <li class="nav-item dropdown ms-md-3">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ __('messages.language') }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('language.switch', 'fa') }}">{{ __('messages.persian') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">{{ __('messages.english') }}</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
 
@@ -87,7 +97,7 @@
 </div>
 
 <footer>
-    <p>© {{ date('Y') }} فروشگاه نیلک</p>
+    <p>© {{ date('Y') }} {{ __('messages.footer') }}</p>
 </footer>
 
 </body>
