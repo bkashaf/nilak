@@ -74,11 +74,17 @@
         @endif
 
         {{-- دکمه افزودن به سبد --}}
-        <div class="mt-4">
-            <button class="btn btn-success btn-lg w-100" disabled>
-                افزودن به سبد خرید (در حال توسعه)
+        <form action="{{ route('cart.add') }}" method="POST" class="mt-4">
+            @csrf
+            <input type="hidden" name="product_id" value="{{ $product->id }}">
+            <div class="input-group mb-2">
+                <label class="input-group-text" for="quantity">تعداد</label>
+                <input id="quantity" type="number" name="qty" value="1" min="1" max="{{ max(1, $product->stock) }}" class="form-control" {{ $product->stock < 1 ? 'disabled' : '' }}>
+            </div>
+            <button type="submit" class="btn btn-success btn-lg w-100" {{ $product->stock < 1 ? 'disabled' : '' }}>
+                افزودن به سبد خرید
             </button>
-        </div>
+        </form>
 
     </div>
 
