@@ -93,19 +93,25 @@ class ShopController extends Controller
             ->orderBy('position')
             ->get();
 
+        $priceBounds = [
+            'min' => (int) (Product::where('is_active', true)->min('price') ?? 0),
+            'max' => (int) (Product::where('is_active', true)->max('price') ?? 0),
+        ];
+        $priceBounds['max'] = max($priceBounds['max'], $priceBounds['min']);
+
         $products->load(['translations', 'category.translations']);
         $products->appends($request->query());
 
         // نمایش ویو
         if (view()->exists('themes.default.shop')) {
-            return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes'));
+            return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds'));
         }
 
         if (view()->exists('themes.shop')) {
-            return view('themes.shop', compact('products', 'pageTitle', 'filterableAttributes'));
+            return view('themes.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds'));
         }
 
-        return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes'));
+        return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds'));
     }
 
     private function categoryTreeIds(Category $category): array

@@ -34,13 +34,20 @@
                     <option value="discount" @selected(request('sort') === 'discount')>بیشترین تخفیف</option>
                 </select>
             </div>
-            <div class="col-md-4">
-                <label for="price_min" class="form-label">حداقل قیمت</label>
-                <input id="price_min" name="price_min" type="number" min="0" value="{{ request('price_min') }}" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label for="price_max" class="form-label">حداکثر قیمت</label>
-                <input id="price_max" name="price_max" type="number" min="0" value="{{ request('price_max') }}" class="form-control">
+            <div class="col-md-8">
+                @php
+                    $selectedMinPrice = (int) request('price_min', $priceBounds['min']);
+                    $selectedMaxPrice = (int) request('price_max', $priceBounds['max']);
+                @endphp
+                <div class="d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">بازه قیمت</label>
+                    <small class="text-muted"><span id="price_min_output">{{ number_format($selectedMinPrice) }}</span> تا <span id="price_max_output">{{ number_format($selectedMaxPrice) }}</span> تومان</small>
+                </div>
+                <div class="price-range" aria-label="بازه قیمت">
+                    <div class="price-range-track"></div>
+                    <input id="price_min_range" name="price_min" type="range" min="{{ $priceBounds['min'] }}" max="{{ $priceBounds['max'] }}" value="{{ $selectedMinPrice }}" aria-label="حداقل قیمت">
+                    <input id="price_max_range" name="price_max" type="range" min="{{ $priceBounds['min'] }}" max="{{ $priceBounds['max'] }}" value="{{ $selectedMaxPrice }}" aria-label="حداکثر قیمت">
+                </div>
             </div>
             <div class="col-md-4 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary">اعمال فیلتر</button>

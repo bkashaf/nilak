@@ -7,6 +7,12 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+.price-range { position: relative; height: 2rem; }
+.price-range input[type="range"] { position: absolute; inset: .25rem 0 auto; width: 100%; pointer-events: none; appearance: none; background: transparent; }
+.price-range input[type="range"]::-webkit-slider-thumb { pointer-events: auto; appearance: none; width: 1rem; height: 1rem; border-radius: 50%; background: #009688; cursor: pointer; }
+.price-range input[type="range"]::-moz-range-thumb { pointer-events: auto; width: 1rem; height: 1rem; border: 0; border-radius: 50%; background: #009688; cursor: pointer; }
+.price-range-track { position: absolute; inset: .7rem 0 auto; height: .25rem; border-radius: .25rem; background: #dee2e6; }
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
