@@ -1,3 +1,5 @@
+@import 'bootstrap/dist/css/bootstrap.rtl.min.css';
+@import '../../public/themes/default/css/style.css';
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

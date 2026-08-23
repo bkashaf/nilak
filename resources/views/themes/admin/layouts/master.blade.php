@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'پنل مدیریت نیلاک')</title>
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: Vazirmatn, sans-serif; background-color: #f8f9fa; }
         header { background: #343a40; color: #fff; padding: 10px 20px; }
@@ -55,6 +55,5 @@
     <small>© {{ date('Y') }} پنل مدیریت نیلاک</small>
 </footer>
 
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>
