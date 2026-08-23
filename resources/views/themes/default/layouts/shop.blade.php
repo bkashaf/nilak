@@ -25,14 +25,9 @@
             {{ __('messages.brand') }}
         </a>
 
-        {{-- دکمه موبایل --}}
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
         {{-- منو --}}
-        <div class="collapse navbar-collapse" id="mainMenu">
-            <ul class="navbar-nav ms-auto">
+        <div id="mainMenu" class="flex-grow-1">
+            <ul class="navbar-nav ms-auto flex-row flex-wrap justify-content-end gap-1">
 
                 {{-- خانه --}}
                 <li class="nav-item">
