@@ -73,7 +73,9 @@ class OrderService
                 'payment_method_id' => $paymentMethod->id,
                 'amount' => $total,
                 'status' => $paymentMethod->type === 'cod' ? 'pending' : 'initiated',
-                'gateway_name' => $paymentMethod->type === 'gateway' ? $paymentMethod->name : null,
+                'gateway_name' => $paymentMethod->type === 'gateway'
+                    ? ($paymentMethod->config['gateway'] ?? $paymentMethod->name)
+                    : null,
             ]);
 
             $cart->clear();
