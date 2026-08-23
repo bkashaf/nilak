@@ -22,14 +22,14 @@
 
                  {{-- تصویر محصول --}}
                  <img src="{{ $product->image_url }}"
-                     alt="{{ $product->name }}"
+                     alt="{{ $product->localized_name }}"
                      class="card-img-top"
                      style="height:200px; object-fit:contain; background:#f0f0f0;">
 
                 <div class="card-body">
 
                     {{-- نام محصول --}}
-                    <h5 class="card-title">{{ $product->name }}</h5>
+                    <h5 class="card-title">{{ $product->localized_name }}</h5>
 
                     {{-- قیمت --}}
                     <p class="card-text">

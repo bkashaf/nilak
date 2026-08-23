@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\CategoryTranslation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -39,9 +40,11 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => ['required','string','max:255'],
+            'name_fa'      => ['required','string','max:255'],
+            'name_en'      => ['nullable','string','max:255'],
+            'description_fa' => ['nullable','string'],
+            'description_en' => ['nullable','string'],
             'slug'        => ['nullable','string','max:255','unique:categories,slug'],
-            'description' => ['nullable','string'],
             'parent_id'   => ['nullable','exists:categories,id'],
             'status'      => ['sometimes','boolean'],
             'position'    => ['nullable','integer','min:0'],
@@ -54,7 +57,10 @@ class CategoryController extends Controller
         $data['status'] = $request->has('status') ? 1 : 0;
         $data['position'] = $data['position'] ?? 0;
 
-        Category::create($data);
+        $data['name'] = $data['name_fa'];
+        $data['description'] = $data['description_fa'] ?? null;
+        $category = Category::create($data);
+        $this->saveTranslations($category, $data);
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'دسته‌بندی با موفقیت ایجاد شد.');
@@ -74,9 +80,11 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $data = $request->validate([
-            'name'        => ['required','string','max:255'],
+            'name_fa'      => ['required','string','max:255'],
+            'name_en'      => ['nullable','string','max:255'],
+            'description_fa' => ['nullable','string'],
+            'description_en' => ['nullable','string'],
             'slug'        => ['nullable','string','max:255', Rule::unique('categories','slug')->ignore($category->id)],
-            'description' => ['nullable','string'],
             'parent_id'   => ['nullable','exists:categories,id'],
             'status'      => ['sometimes','boolean'],
             'position'    => ['nullable','integer','min:0'],
@@ -89,7 +97,10 @@ class CategoryController extends Controller
         $data['status'] = $request->has('status') ? 1 : 0;
         $data['position'] = $data['position'] ?? $category->position;
 
+        $data['name'] = $data['name_fa'];
+        $data['description'] = $data['description_fa'] ?? null;
         $category->update($data);
+        $this->saveTranslations($category, $data);
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'دسته‌بندی به‌روزرسانی شد.');
@@ -109,5 +120,24 @@ class CategoryController extends Controller
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'دسته‌بندی حذف شد.');
+    }
+
+    private function saveTranslations(Category $category, array $data): void
+    {
+        foreach (['fa', 'en'] as $locale) {
+            $name = $data['name_' . $locale] ?? null;
+            if ($name === null || $name === '') {
+                continue;
+            }
+
+            CategoryTranslation::updateOrCreate(
+                ['category_id' => $category->id, 'locale' => $locale],
+                [
+                    'name' => $name,
+                    'description' => $data['description_' . $locale] ?? null,
+                    'is_published' => true,
+                ]
+            );
+        }
     }
 }

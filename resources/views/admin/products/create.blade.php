@@ -27,8 +27,13 @@
         <div class="card-body">
 
             <div class="mb-3">
-                <label class="form-label">نام محصول *</label>
-                <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
+                <label class="form-label">نام فارسی *</label>
+                <input type="text" name="name_fa" class="form-control" value="{{ old('name_fa') }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">نام انگلیسی</label>
+                <input type="text" name="name_en" class="form-control" value="{{ old('name_en') }}" dir="ltr">
             </div>
 
             <div class="mb-3">
@@ -37,13 +42,23 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">توضیح کوتاه</label>
-                <textarea name="short_description" class="form-control" rows="2">{{ old('short_description') }}</textarea>
+                <label class="form-label">توضیح کوتاه فارسی</label>
+                <textarea name="short_description_fa" class="form-control" rows="2">{{ old('short_description_fa') }}</textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">توضیحات کامل</label>
-                <textarea name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
+                <label class="form-label">توضیح کوتاه انگلیسی</label>
+                <textarea name="short_description_en" class="form-control" rows="2" dir="ltr">{{ old('short_description_en') }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">توضیحات کامل فارسی</label>
+                <textarea name="description_fa" class="form-control" rows="5">{{ old('description_fa') }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">توضیحات کامل انگلیسی</label>
+                <textarea name="description_en" class="form-control" rows="5" dir="ltr">{{ old('description_en') }}</textarea>
             </div>
 
         </div>
@@ -83,7 +98,7 @@
                     <option value="">— بدون دسته‌بندی —</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
-                            {{ $cat->name }}
+                            {{ $cat->localized_name }}
                         </option>
                     @endforeach
                 </select>

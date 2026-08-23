@@ -1,7 +1,7 @@
 {{-- View: C:/xampp/htdocs/nilak/resources/views/themes/default/product.blade.php --}}
 @extends('themes.default.layouts.shop')
 
-@section('title', $product->name)
+@section('title', $product->localized_name)
 
 @section('content')
 
@@ -16,7 +16,7 @@
 
            {{-- تصویر اصلی با fallback برای فایل ناموجود --}}
            <img src="{{ $product->image_url }}"
-               alt="{{ $product->name }}"
+               alt="{{ $product->localized_name }}"
                class="img-fluid rounded shadow-sm mb-3"
                style="width:100%; height:350px; object-fit:contain; background:#f0f0f0;">
 
@@ -36,7 +36,7 @@
     {{-- ستون اطلاعات محصول --}}
     <div class="col-md-7">
 
-        <h2 class="mb-3">{{ $product->name }}</h2>
+        <h2 class="mb-3">{{ $product->localized_name }}</h2>
 
         {{-- قیمت --}}
         <div class="mb-3">
@@ -52,7 +52,7 @@
         {{-- دسته‌بندی --}}
         <p class="mb-2">
             <strong>دسته‌بندی:</strong>
-            {{ $product->category->name ?? '—' }}
+            {{ $product->category?->localized_name ?? '—' }}
         </p>
 
         {{-- موجودی --}}
@@ -62,14 +62,14 @@
         </p>
 
         {{-- توضیح کوتاه --}}
-        @if($product->short_description)
-            <p class="text-muted">{{ $product->short_description }}</p>
+        @if($product->localized_short_description)
+            <p class="text-muted">{{ $product->localized_short_description }}</p>
         @endif
 
         {{-- توضیحات کامل --}}
-        @if($product->description)
+        @if($product->localized_description)
             <div class="mt-3">
-                {!! nl2br(e($product->description)) !!}
+            {!! nl2br(e($product->localized_description)) !!}
             </div>
         @endif
 

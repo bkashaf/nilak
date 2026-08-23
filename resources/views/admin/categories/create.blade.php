@@ -27,9 +27,14 @@
         <div class="card-body">
 
             <div class="mb-3">
-                <label class="form-label">نام دسته‌بندی *</label>
-                <input type="text" name="name" class="form-control"
-                       value="{{ old('name') }}" required>
+                <label class="form-label">نام فارسی *</label>
+                <input type="text" name="name_fa" class="form-control"
+                       value="{{ old('name_fa') }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">نام انگلیسی</label>
+                <input type="text" name="name_en" class="form-control" value="{{ old('name_en') }}" dir="ltr">
             </div>
 
             <div class="mb-3">
@@ -39,8 +44,13 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">توضیحات</label>
-                <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
+                <label class="form-label">توضیحات فارسی</label>
+                <textarea name="description_fa" class="form-control" rows="3">{{ old('description_fa') }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">توضیحات انگلیسی</label>
+                <textarea name="description_en" class="form-control" rows="3" dir="ltr">{{ old('description_en') }}</textarea>
             </div>
 
         </div>
@@ -57,7 +67,7 @@
                     @foreach($parents as $parent)
                         <option value="{{ $parent->id }}"
                             {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
-                            {{ $parent->name }}
+                            {{ $parent->localized_name }}
                         </option>
                     @endforeach
                 </select>

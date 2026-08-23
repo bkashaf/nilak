@@ -69,6 +69,38 @@ class Product extends Model
         return $this->hasMany(ProductAttributeValue::class, 'product_id');
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ProductTranslation::class);
+    }
+
+    public function translation(?string $locale = null): ?ProductTranslation
+    {
+        $locale ??= app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale);
+
+        if ($translation?->is_published) {
+            return $translation;
+        }
+
+        return $this->translations->firstWhere('locale', config('app.fallback_locale', 'fa'));
+    }
+
+    public function getLocalizedNameAttribute(): string
+    {
+        return $this->translation()?->name ?? $this->name;
+    }
+
+    public function getLocalizedShortDescriptionAttribute(): ?string
+    {
+        return $this->translation()?->short_description ?? $this->short_description;
+    }
+
+    public function getLocalizedDescriptionAttribute(): ?string
+    {
+        return $this->translation()?->description ?? $this->description;
+    }
+
     /**
      * دسترسی سریع به قیمت فرمت‌شده
      */

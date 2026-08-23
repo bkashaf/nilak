@@ -4,7 +4,7 @@
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>ویرایش محصول: {{ $product->name }}</h2>
+    <h2>ویرایش محصول: {{ $product->localized_name }}</h2>
     <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">بازگشت</a>
 </div>
 
@@ -29,9 +29,14 @@
         <div class="card-body">
 
             <div class="mb-3">
-                <label class="form-label">نام محصول *</label>
-                <input type="text" name="name" class="form-control"
-                       value="{{ old('name', $product->name) }}" required>
+                  <label class="form-label">نام فارسی *</label>
+                  <input type="text" name="name_fa" class="form-control"
+                      value="{{ old('name_fa', $product->translation('fa')?->name ?? $product->name) }}" required>
+                 </div>
+
+                 <div class="mb-3">
+                  <label class="form-label">نام انگلیسی</label>
+                  <input type="text" name="name_en" class="form-control" value="{{ old('name_en', $product->translation('en')?->name) }}" dir="ltr">
             </div>
 
             <div class="mb-3">
@@ -41,13 +46,23 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">توضیح کوتاه</label>
-                <textarea name="short_description" class="form-control" rows="2">{{ old('short_description', $product->short_description) }}</textarea>
+                <label class="form-label">توضیح کوتاه فارسی</label>
+                <textarea name="short_description_fa" class="form-control" rows="2">{{ old('short_description_fa', $product->translation('fa')?->short_description ?? $product->short_description) }}</textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">توضیحات کامل</label>
-                <textarea name="description" class="form-control" rows="5">{{ old('description', $product->description) }}</textarea>
+                <label class="form-label">توضیح کوتاه انگلیسی</label>
+                <textarea name="short_description_en" class="form-control" rows="2" dir="ltr">{{ old('short_description_en', $product->translation('en')?->short_description) }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">توضیحات کامل فارسی</label>
+                <textarea name="description_fa" class="form-control" rows="5">{{ old('description_fa', $product->translation('fa')?->description ?? $product->description) }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">توضیحات کامل انگلیسی</label>
+                <textarea name="description_en" class="form-control" rows="5" dir="ltr">{{ old('description_en', $product->translation('en')?->description) }}</textarea>
             </div>
 
         </div>
@@ -91,7 +106,7 @@
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}"
                             {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>
-                            {{ $cat->name }}
+                            {{ $cat->localized_name }}
                         </option>
                     @endforeach
                 </select>

@@ -32,9 +32,9 @@
             <tr>
                 <td>{{ $cat->id }}</td>
 
-                <td>{{ $cat->name }}</td>
+                <td>{{ $cat->localized_name }}</td>
 
-                <td>{{ $cat->parent->name ?? '—' }}</td>
+                <td>{{ $cat->parent?->localized_name ?? '—' }}</td>
 
                 <td>
                     @if($cat->status)

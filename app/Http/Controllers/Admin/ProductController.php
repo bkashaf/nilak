@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductTranslation;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -36,10 +37,13 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required','string','max:255'],
+            'name_fa' => ['required','string','max:255'],
+            'name_en' => ['nullable','string','max:255'],
+            'short_description_fa' => ['nullable','string'],
+            'short_description_en' => ['nullable','string'],
+            'description_fa' => ['nullable','string'],
+            'description_en' => ['nullable','string'],
             'slug' => ['nullable','string','max:255','unique:products,slug'],
-            'short_description' => ['nullable','string'],
-            'description' => ['nullable','string'],
             'price' => ['required','numeric','min:0'],
             'compare_price' => ['nullable','numeric','min:0'],
             'stock' => ['required','integer','min:0'],
@@ -60,7 +64,11 @@ class ProductController extends Controller
 
         DB::beginTransaction();
         try {
+            $data['name'] = $data['name_fa'];
+            $data['short_description'] = $data['short_description_fa'] ?? null;
+            $data['description'] = $data['description_fa'] ?? null;
             $product = Product::create($data);
+            $this->saveTranslations($product, $data);
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $idx => $file) {
@@ -91,10 +99,13 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $data = $request->validate([
-            'name' => ['required','string','max:255'],
+            'name_fa' => ['required','string','max:255'],
+            'name_en' => ['nullable','string','max:255'],
+            'short_description_fa' => ['nullable','string'],
+            'short_description_en' => ['nullable','string'],
+            'description_fa' => ['nullable','string'],
+            'description_en' => ['nullable','string'],
             'slug' => ['nullable','string','max:255', Rule::unique('products','slug')->ignore($product->id)],
-            'short_description' => ['nullable','string'],
-            'description' => ['nullable','string'],
             'price' => ['required','numeric','min:0'],
             'compare_price' => ['nullable','numeric','min:0'],
             'stock' => ['required','integer','min:0'],
@@ -117,7 +128,11 @@ class ProductController extends Controller
 
         DB::beginTransaction();
         try {
+            $data['name'] = $data['name_fa'];
+            $data['short_description'] = $data['short_description_fa'] ?? null;
+            $data['description'] = $data['description_fa'] ?? null;
             $product->update($data);
+            $this->saveTranslations($product, $data);
 
             if (!empty($data['remove_images'])) {
                 $imagesToRemove = $product->images()->whereIn('id', $data['remove_images'])->get();
@@ -158,6 +173,26 @@ class ProductController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', 'خطا در به‌روزرسانی محصول.');
+        }
+    }
+
+    private function saveTranslations(Product $product, array $data): void
+    {
+        foreach (['fa', 'en'] as $locale) {
+            $name = $data['name_' . $locale] ?? null;
+            if ($name === null || $name === '') {
+                continue;
+            }
+
+            ProductTranslation::updateOrCreate(
+                ['product_id' => $product->id, 'locale' => $locale],
+                [
+                    'name' => $name,
+                    'short_description' => $data['short_description_' . $locale] ?? null,
+                    'description' => $data['description_' . $locale] ?? null,
+                    'is_published' => true,
+                ]
+            );
         }
     }
 

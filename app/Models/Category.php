@@ -49,6 +49,33 @@ class Category extends Model
         return $this->hasMany(Product::class, 'category_id');
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(CategoryTranslation::class);
+    }
+
+    public function translation(?string $locale = null): ?CategoryTranslation
+    {
+        $locale ??= app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale);
+
+        if ($translation?->is_published) {
+            return $translation;
+        }
+
+        return $this->translations->firstWhere('locale', config('app.fallback_locale', 'fa'));
+    }
+
+    public function getLocalizedNameAttribute(): string
+    {
+        return $this->translation()?->name ?? $this->name;
+    }
+
+    public function getLocalizedDescriptionAttribute(): ?string
+    {
+        return $this->translation()?->description ?? $this->description;
+    }
+
     /**
      * Scope برای دسته‌های فعال
      */

@@ -112,15 +112,15 @@
                 @if($productCategoryRoot)
                     <li class="nav-item dropdown category-menu">
                         <a class="nav-link dropdown-toggle" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ $productCategoryRoot->name }}
+                            {{ $productCategoryRoot->localized_name }}
                         </a>
                         <div class="dropdown-menu">
                             <div class="row g-3">
                                 @foreach($productCategoryRoot->children as $category)
                                     <div class="col category-column">
-                                        <a class="category-heading" href="{{ route('shop.index', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                        <a class="category-heading" href="{{ route('shop.index', ['category' => $category->slug]) }}">{{ $category->localized_name }}</a>
                                         @foreach($category->children as $child)
-                                            <a class="category-child" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->name }}</a>
+                                            <a class="category-child" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->localized_name }}</a>
                                         @endforeach
                                     </div>
                                 @endforeach

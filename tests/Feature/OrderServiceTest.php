@@ -11,6 +11,7 @@ use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Payment;
 use App\Models\Role;
+use App\Models\CategoryTranslation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -121,5 +122,26 @@ class OrderServiceTest extends TestCase
         $response->assertRedirect(route('admin.orders.edit', $order));
         $this->assertSame('shipped', $order->fresh()->status);
         $this->assertSame('paid', $payment->fresh()->status);
+    }
+
+    public function test_product_and_category_use_the_current_locale_translation(): void
+    {
+        $category = Category::create([
+            'name' => 'لباس',
+            'slug' => 'clothing',
+            'status' => 1,
+            'position' => 1,
+        ]);
+        CategoryTranslation::create([
+            'category_id' => $category->id,
+            'locale' => 'en',
+            'name' => 'Clothing',
+            'is_published' => true,
+        ]);
+
+        app()->setLocale('en');
+
+        $this->assertSame('Clothing', $category->fresh()->localized_name);
+        $this->assertSame('clothing', $category->fresh()->slug);
     }
 }

@@ -37,7 +37,7 @@
                          style="width:50px; height:50px; object-fit:contain;">
                 </td>
 
-                <td>{{ $product->name }}</td>
+                <td>{{ $product->localized_name }}</td>
 
                 <td>{{ $product->category->name ?? '—' }}</td>
 

@@ -36,7 +36,7 @@
                 <tbody>
                     @foreach($order->items as $item)
                         <tr>
-                            <td>{{ $item->product->name ?? 'محصول حذف‌شده' }}</td>
+                            <td>{{ $item->product->localized_name ?? 'محصول حذف‌شده' }}</td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ number_format($item->price) }} تومان</td>
                             <td>{{ number_format($item->total) }} تومان</td>
