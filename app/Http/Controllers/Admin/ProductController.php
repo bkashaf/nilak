@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductTranslation;
+use App\Models\Attribute;
+use App\Models\ProductAttributeValue;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -31,7 +33,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::where('status', 1)->orderBy('name')->get();
-        return view('admin.products.create', compact('categories'));
+        $attributes = Attribute::with('values')->orderBy('position')->get();
+        return view('admin.products.create', compact('categories', 'attributes'));
     }
 
     public function store(Request $request)
@@ -50,7 +53,9 @@ class ProductController extends Controller
             'is_active' => ['sometimes','boolean'],
             'is_featured' => ['sometimes','boolean'],
             'category_id' => ['nullable','exists:categories,id'],
-            'meta' => ['nullable','array'],
+            'meta' => ['nullable','json'],
+            'attribute_values' => ['nullable','array'],
+            'attribute_values.*' => ['nullable','integer','exists:attribute_values,id'],
             'images.*' => ['nullable','image','max:5120'],
         ]);
 
@@ -60,7 +65,7 @@ class ProductController extends Controller
 
         $data['is_active'] = $request->has('is_active');
         $data['is_featured'] = $request->has('is_featured');
-        $data['meta'] = $request->meta ? json_encode($request->meta) : null;
+            $data['meta'] = $request->filled('meta') ? json_decode($request->meta, true, 512, JSON_THROW_ON_ERROR) : null;
 
         DB::beginTransaction();
         try {
@@ -69,6 +74,7 @@ class ProductController extends Controller
             $data['description'] = $data['description_fa'] ?? null;
             $product = Product::create($data);
             $this->saveTranslations($product, $data);
+            $this->syncAttributeValues($product, $request->input('attribute_values', []));
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $idx => $file) {
@@ -93,7 +99,9 @@ class ProductController extends Controller
     {
         $categories = Category::where('status', 1)->orderBy('name')->get();
         $product->load('images');
-        return view('admin.products.edit', compact('product', 'categories'));
+        $attributes = Attribute::with('values')->orderBy('position')->get();
+        $selectedAttributeValues = $product->attributeValues()->pluck('attribute_value_id')->all();
+        return view('admin.products.edit', compact('product', 'categories', 'attributes', 'selectedAttributeValues'));
     }
 
     public function update(Request $request, Product $product)
@@ -112,7 +120,9 @@ class ProductController extends Controller
             'is_active' => ['sometimes','boolean'],
             'is_featured' => ['sometimes','boolean'],
             'category_id' => ['nullable','exists:categories,id'],
-            'meta' => ['nullable','array'],
+            'meta' => ['nullable','json'],
+            'attribute_values' => ['nullable','array'],
+            'attribute_values.*' => ['nullable','integer','exists:attribute_values,id'],
             'images.*' => ['nullable','image','max:5120'],
             'remove_images' => ['nullable','array'],
             'remove_images.*' => ['integer'],
@@ -124,7 +134,7 @@ class ProductController extends Controller
 
         $data['is_active'] = $request->has('is_active');
         $data['is_featured'] = $request->has('is_featured');
-        $data['meta'] = $request->meta ? json_encode($request->meta) : $product->meta;
+        $data['meta'] = $request->filled('meta') ? json_decode($request->meta, true, 512, JSON_THROW_ON_ERROR) : null;
 
         DB::beginTransaction();
         try {
@@ -133,6 +143,7 @@ class ProductController extends Controller
             $data['description'] = $data['description_fa'] ?? null;
             $product->update($data);
             $this->saveTranslations($product, $data);
+            $this->syncAttributeValues($product, $request->input('attribute_values', []));
 
             if (!empty($data['remove_images'])) {
                 $imagesToRemove = $product->images()->whereIn('id', $data['remove_images'])->get();
@@ -193,6 +204,22 @@ class ProductController extends Controller
                     'is_published' => true,
                 ]
             );
+        }
+    }
+
+    private function syncAttributeValues(Product $product, array $attributeValueIds): void
+    {
+        $product->attributeValues()->delete();
+
+        foreach (array_unique(array_filter($attributeValueIds)) as $attributeValueId) {
+            $attributeValue = \App\Models\AttributeValue::find($attributeValueId);
+            if ($attributeValue) {
+                ProductAttributeValue::create([
+                    'product_id' => $product->id,
+                    'attribute_id' => $attributeValue->attribute_id,
+                    'attribute_value_id' => $attributeValue->id,
+                ]);
+            }
         }
     }
 

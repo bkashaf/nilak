@@ -117,6 +117,25 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header">ویژگی‌های محصول</div>
+        <div class="card-body">
+            @forelse($attributes as $attribute)
+                <div class="mb-3">
+                    <label class="form-label">{{ $attribute->name }}</label>
+                    <select name="attribute_values[]" class="form-select">
+                        <option value="">انتخاب {{ $attribute->name }}</option>
+                        @foreach($attribute->values as $value)
+                            <option value="{{ $value->id }}" @selected(old('attribute_values.' . $loop->parent->index) == $value->id)>{{ $value->value }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @empty
+                <p class="text-muted mb-0">هنوز ویژگی‌ای تعریف نشده است.</p>
+            @endforelse
+        </div>
+    </div>
+
 
     <div class="card mb-4">
         <div class="card-header">اطلاعات اضافی (Meta)</div>

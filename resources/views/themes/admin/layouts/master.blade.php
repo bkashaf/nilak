@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'پنل مدیریت نیلاک')</title>
+    <title>@yield('title', 'پنل مدیریت نیلک')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: Vazirmatn, sans-serif; background-color: #f8f9fa; }
@@ -23,7 +23,7 @@
 
 <header>
     <div class="container-fluid d-flex justify-content-between align-items-center">
-        <a href="{{ route('admin.dashboard') }}" class="admin-brand">پنل مدیریت نیلاک</a>
+        <a href="{{ route('admin.dashboard') }}" class="admin-brand">پنل مدیریت نیلک</a>
         <div class="admin-tools">
             <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm">فروشگاه</a>
             <form action="{{ route('logout') }}" method="POST" class="m-0">
@@ -44,6 +44,7 @@
                     <li><a href="{{ route('admin.dashboard') }}" class="sidebar-link">داشبورد</a></li>
                     <li><a href="{{ route('admin.users.index') }}" class="sidebar-link">مدیریت کاربران</a></li>
                     <li><a href="{{ route('admin.products.index') }}" class="sidebar-link">مدیریت محصولات</a></li>
+                    <li><a href="{{ route('admin.attributes.index') }}" class="sidebar-link">ویژگی‌های محصولات</a></li>
                     <li><a href="{{ route('admin.categories.index') }}" class="sidebar-link">مدیریت دسته‌بندی‌ها</a></li>
                     <li><a href="{{ route('admin.orders.index') }}" class="sidebar-link">مدیریت سفارش‌ها</a></li>
                     <li><a href="{{ route('admin.payments.index') }}" class="sidebar-link">مدیریت پرداخت‌ها</a></li>
@@ -63,7 +64,7 @@
 </div>
 
 <footer class="text-center mt-4 py-3 bg-light border-top">
-    <small>© {{ app(\App\Support\DateFormatter::class)->format(now()) }} پنل مدیریت نیلاک</small>
+    <small>© {{ app(\App\Support\DateFormatter::class)->format(now()) }} پنل مدیریت نیلک</small>
 </footer>
 
 </body>

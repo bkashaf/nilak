@@ -127,6 +127,25 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header">ویژگی‌های محصول</div>
+        <div class="card-body">
+            @forelse($attributes as $attribute)
+                <div class="mb-3">
+                    <label class="form-label">{{ $attribute->name }}</label>
+                    <select name="attribute_values[]" class="form-select">
+                        <option value="">انتخاب {{ $attribute->name }}</option>
+                        @foreach($attribute->values as $value)
+                            <option value="{{ $value->id }}" @selected(in_array($value->id, old('attribute_values', $selectedAttributeValues ?? [])))>{{ $value->value }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @empty
+                <p class="text-muted mb-0">هنوز ویژگی‌ای تعریف نشده است.</p>
+            @endforelse
+        </div>
+    </div>
+
     {{-- Meta --}}
     <div class="card mb-4">
         <div class="card-header">اطلاعات اضافی (Meta)</div>
@@ -134,7 +153,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Meta (JSON)</label>
-                <textarea name="meta" class="form-control" rows="3">{{ old('meta', $product->meta) }}</textarea>
+                <textarea name="meta" class="form-control" rows="3">{{ old('meta', $product->meta ? json_encode($product->meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : '') }}</textarea>
             </div>
 
         </div>

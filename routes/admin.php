@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController;
+use App\Http\Controllers\Admin\AttributeController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -27,6 +28,12 @@ Route::prefix('payments')->name('payments.')->group(function () {
 Route::prefix('payment-methods')->name('payment-methods.')->group(function () {
     Route::get('/', [PaymentMethodController::class, 'index'])->name('index');
     Route::put('/{paymentMethod}', [PaymentMethodController::class, 'update'])->name('update');
+});
+
+Route::prefix('attributes')->name('attributes.')->group(function () {
+    Route::get('/', [AttributeController::class, 'index'])->name('index');
+    Route::post('/', [AttributeController::class, 'store'])->name('store');
+    Route::post('/{attribute}/values', [AttributeController::class, 'storeValue'])->name('values.store');
 });
 
 // مدیریت کاربران
