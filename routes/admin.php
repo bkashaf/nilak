@@ -5,8 +5,15 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::prefix('orders')->name('orders.')->group(function () {
+    Route::get('/', [OrderController::class, 'index'])->name('index');
+    Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
+    Route::put('/{order}', [OrderController::class, 'update'])->name('update');
+});
 
 // مدیریت کاربران
 Route::prefix('users')->name('users.')->group(function () {
