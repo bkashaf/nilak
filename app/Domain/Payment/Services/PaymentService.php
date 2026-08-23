@@ -14,6 +14,14 @@ class PaymentService
      */
     public function initiate(Payment $payment)
     {
+        if ($payment->status !== 'initiated') {
+            throw new \LogicException('این پرداخت در وضعیت شروع پرداخت نیست.');
+        }
+
+        if (! $payment->gateway_name) {
+            throw new \LogicException('درگاه پرداخت برای این پرداخت تنظیم نشده است.');
+        }
+
         $gateway = $this->resolveGateway($payment->gateway_name);
 
         return $gateway->initiate($payment);
@@ -24,6 +32,18 @@ class PaymentService
      */
     public function verify(Payment $payment, array $callbackData)
     {
+        if ($payment->status === 'paid') {
+            return [
+                'status' => 'paid',
+                'payment_id' => $payment->id,
+                'message' => 'این پرداخت قبلاً تأیید شده است.',
+            ];
+        }
+
+        if ($payment->status !== 'initiated') {
+            throw new \LogicException('این پرداخت قابل تأیید نیست.');
+        }
+
         $gateway = $this->resolveGateway($payment->gateway_name);
 
         return $gateway->verify($payment, $callbackData);

@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,7 +22,20 @@ class OrderService
             throw new \InvalidArgumentException('سبد خرید خالی است.');
         }
 
-        return DB::transaction(function () use ($user, $cart, $cartItems, $address, $paymentMethodName) {
+        $items = $cartItems->map(fn ($item) => [
+            'product_id' => $item->product_id,
+            'quantity' => $item->quantity,
+        ])->all();
+
+        $result = $this->createFromItems($user, $items, $address, $paymentMethodName);
+        $cart->clear();
+
+        return $result;
+    }
+
+    public function createFromItems(User $user, array $items, string $address, string $paymentMethodName): array
+    {
+        return DB::transaction(function () use ($user, $items, $address, $paymentMethodName) {
             $paymentMethod = PaymentMethod::query()
                 ->where('name', $paymentMethodName)
                 ->where('is_active', true)
@@ -37,20 +51,20 @@ class OrderService
 
             $total = 0;
 
-            foreach ($cartItems as $cartItem) {
-                $product = $cartItem->product_id
-                    ? \App\Models\Product::query()->lockForUpdate()->find($cartItem->product_id)
+            foreach ($items as $item) {
+                $product = ! empty($item['product_id'])
+                    ? Product::query()->lockForUpdate()->find($item['product_id'])
                     : null;
 
                 if (! $product || ! $product->is_active) {
                     throw new \RuntimeException('یکی از محصولات سبد دیگر قابل سفارش نیست.');
                 }
 
-                if ($product->stock < $cartItem->quantity) {
+                if ($product->stock < $item['quantity']) {
                     throw new \RuntimeException("موجودی محصول «{$product->name}» کافی نیست.");
                 }
 
-                $quantity = max(1, (int) $cartItem->quantity);
+                $quantity = max(1, (int) $item['quantity']);
                 $unitPrice = (int) $product->price;
                 $itemTotal = $unitPrice * $quantity;
 
@@ -77,8 +91,6 @@ class OrderService
                     ? ($paymentMethod->config['gateway'] ?? $paymentMethod->name)
                     : null,
             ]);
-
-            $cart->clear();
 
             return [
                 'order' => $order->load('items'),
