@@ -8,6 +8,7 @@ class Payment extends Model
 {
     protected $fillable = [
         'order_id',
+        'idempotency_key',
         'payment_method_id',
         'amount',
         'status',
@@ -15,11 +16,13 @@ class Payment extends Model
         'gateway_transaction_id',
         'callback_data',
         'paid_at',
+        'expires_at',
     ];
 
     protected $casts = [
         'callback_data' => 'array',
         'paid_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
     public function order()
@@ -35,5 +38,10 @@ class Payment extends Model
     public function method()
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
+    public function statusHistories()
+    {
+        return $this->hasMany(PaymentStatusHistory::class)->latest();
     }
 }

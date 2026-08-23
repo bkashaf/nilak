@@ -1,6 +1,7 @@
 <?php
 
 return [
+	'expiration_minutes' => (int) env('PAYMENT_EXPIRATION_MINUTES', 30),
 	'default_gateway' => env('PAYMENT_DEFAULT_GATEWAY', 'fake'),
 	'gateways' => [
 		'fake' => [

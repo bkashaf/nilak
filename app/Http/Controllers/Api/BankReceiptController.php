@@ -62,9 +62,9 @@ class BankReceiptController extends Controller
         }
 
         if ($request->approved) {
-            app(PaymentStatusService::class)->markPaid($payment);
+            app(PaymentStatusService::class)->markPaid($payment, null, null, $request->user()->id);
         } else {
-            app(PaymentStatusService::class)->markFailed($payment, 'rejected');
+            app(PaymentStatusService::class)->markFailed($payment, 'rejected', null, $request->user()->id);
         }
 
         return response()->json([

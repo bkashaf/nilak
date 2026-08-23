@@ -64,7 +64,7 @@ class ApiSecurityTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/orders', [
+        $payload = [
             'items' => [[
                 'product_id' => $product->id,
                 'quantity' => 2,
@@ -72,10 +72,18 @@ class ApiSecurityTest extends TestCase
             ]],
             'address' => 'تهران، خیابان نمونه، پلاک ۱',
             'payment_method' => 'cod',
-        ]);
+        ];
+
+        $response = $this->withHeader('Idempotency-Key', 'api-order-test-1')
+            ->postJson('/api/orders', $payload);
+        $duplicateResponse = $this->withHeader('Idempotency-Key', 'api-order-test-1')
+            ->postJson('/api/orders', $payload);
 
         $response->assertCreated()
             ->assertJsonPath('order.total_amount', 240000)
             ->assertJsonPath('payment.amount', 240000);
+        $duplicateResponse->assertCreated()
+            ->assertJsonPath('order.id', $response->json('order.id'));
+        $this->assertDatabaseCount('orders', 1);
     }
 }

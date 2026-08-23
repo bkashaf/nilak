@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\PaymentStatusHistory;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,6 +50,12 @@ class PaymentWorkflowTest extends TestCase
         $response->assertOk();
         $this->assertSame('paid', $payment->fresh()->status);
         $this->assertSame('paid', $payment->order->fresh()->status);
+        $this->assertDatabaseHas('payment_status_histories', [
+            'payment_id' => $payment->id,
+            'from_status' => 'pending_review',
+            'to_status' => 'paid',
+            'changed_by' => $admin->id,
+        ]);
     }
 
     private function createPayment(string $type, string $status): array

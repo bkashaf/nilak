@@ -14,6 +14,10 @@ class PaymentService
      */
     public function initiate(Payment $payment)
     {
+        if ($payment->expires_at?->isPast()) {
+            throw new \LogicException('مهلت این پرداخت به پایان رسیده است.');
+        }
+
         if ($payment->method?->type !== 'gateway') {
             throw new \LogicException('این پرداخت از نوع درگاه آنلاین نیست.');
         }
@@ -36,6 +40,10 @@ class PaymentService
      */
     public function verify(Payment $payment, array $callbackData)
     {
+        if ($payment->expires_at?->isPast()) {
+            throw new \LogicException('مهلت این پرداخت به پایان رسیده است.');
+        }
+
         if ($payment->method?->type !== 'gateway') {
             throw new \LogicException('این پرداخت از نوع درگاه آنلاین نیست.');
         }

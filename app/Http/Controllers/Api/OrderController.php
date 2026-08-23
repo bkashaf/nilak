@@ -40,6 +40,7 @@ class OrderController extends Controller
             $request->items,
             $request->address,
             $request->payment_method,
+            $request->header('Idempotency-Key'),
         );
 
         return response()->json([

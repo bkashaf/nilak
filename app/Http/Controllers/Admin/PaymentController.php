@@ -24,13 +24,13 @@ class PaymentController extends Controller
     public function update(Request $request, Payment $payment)
     {
         $data = $request->validate([
-            'status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected'],
+            'status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected,expired'],
         ]);
 
         if ($data['status'] === 'paid') {
-            app(PaymentStatusService::class)->markPaid($payment);
+            app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
         } elseif (in_array($data['status'], ['failed', 'rejected'], true)) {
-            app(PaymentStatusService::class)->markFailed($payment, $data['status']);
+            app(PaymentStatusService::class)->markFailed($payment, $data['status'], null, auth()->id());
         } else {
             $payment->update(['status' => $data['status'], 'paid_at' => null]);
         }

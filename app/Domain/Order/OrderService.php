@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class OrderService
 {
-    public function createFromCart(User $user, CartService $cart, string $address, string $paymentMethodName): array
+    public function createFromCart(User $user, CartService $cart, string $address, string $paymentMethodName, ?string $idempotencyKey = null): array
     {
         $cartItems = $cart->items();
 
@@ -27,15 +27,22 @@ class OrderService
             'quantity' => $item->quantity,
         ])->all();
 
-        $result = $this->createFromItems($user, $items, $address, $paymentMethodName);
+        $result = $this->createFromItems($user, $items, $address, $paymentMethodName, $idempotencyKey);
         $cart->clear();
 
         return $result;
     }
 
-    public function createFromItems(User $user, array $items, string $address, string $paymentMethodName): array
+    public function createFromItems(User $user, array $items, string $address, string $paymentMethodName, ?string $idempotencyKey = null): array
     {
-        return DB::transaction(function () use ($user, $items, $address, $paymentMethodName) {
+        if ($idempotencyKey) {
+            $existing = Payment::where('idempotency_key', $idempotencyKey)->with(['order.items', 'method'])->first();
+            if ($existing) {
+                return ['order' => $existing->order, 'payment' => $existing];
+            }
+        }
+
+        return DB::transaction(function () use ($user, $items, $address, $paymentMethodName, $idempotencyKey) {
             $paymentMethod = PaymentMethod::query()
                 ->where('name', $paymentMethodName)
                 ->where('is_active', true)
@@ -87,6 +94,8 @@ class OrderService
                 'payment_method_id' => $paymentMethod->id,
                 'amount' => $total,
                 'status' => $paymentMethod->type === 'cod' ? 'pending' : 'initiated',
+                'idempotency_key' => $idempotencyKey,
+                'expires_at' => $paymentMethod->type === 'gateway' ? now()->addMinutes((int) config('payment.expiration_minutes', 30)) : null,
                 'gateway_name' => $paymentMethod->type === 'gateway'
                     ? ($paymentMethod->config['gateway'] ?? $paymentMethod->name)
                     : null,
