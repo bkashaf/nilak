@@ -9,6 +9,8 @@
     <style>
         body { font-family: Vazirmatn, sans-serif; background-color: #f8f9fa; }
         header { background: #343a40; color: #fff; padding: 10px 20px; }
+        .admin-brand { color: #fff; font-weight: 700; text-decoration: none; }
+        .admin-tools { display: flex; align-items: center; gap: .75rem; }
         aside { background: #f1f1f1; min-height: calc(100vh - 65px); padding: 15px; }
         main { padding: 20px; }
         a { text-decoration: none; }
@@ -19,13 +21,17 @@
 </head>
 <body>
 
-<header class="d-flex justify-content-between align-items-center">
-    <h2 class="m-0">پنل مدیریت نیلاک</h2>
-    <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm">فروشگاه</a>
-    <form action="{{ route('logout') }}" method="POST" class="m-0">
-        @csrf
-        <button type="submit" class="btn btn-danger btn-sm">خروج</button>
-    </form>
+<header>
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a href="{{ route('admin.dashboard') }}" class="admin-brand">پنل مدیریت نیلاک</a>
+        <div class="admin-tools">
+            <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm">فروشگاه</a>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm">خروج</button>
+            </form>
+        </div>
+    </div>
 </header>
 
 <div class="container-fluid">

@@ -101,36 +101,33 @@
                     </a>
                 </li>
 
-                {{-- دسته‌بندی‌های چندسطحی از دیتابیس --}}
+                {{-- دسته‌بندی محصولات و زیرشاخه‌های آن از دیتابیس --}}
                 @php
-                    $categories = \App\Models\Category::active()
-                        ->whereNull('parent_id')
+                    $productCategoryRoot = \App\Models\Category::active()
+                        ->where('slug', 'product-categories')
                         ->with(['children' => fn ($query) => $query->active()->with('children')])
-                        ->orderBy('position')
-                        ->get();
+                        ->first();
                 @endphp
 
-                @foreach($categories as $category)
+                @if($productCategoryRoot)
                     <li class="nav-item dropdown category-menu">
-                        <a class="nav-link dropdown-toggle" href="{{ route('shop.index', ['category' => $category->slug]) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ $category->name }}
+                        <a class="nav-link dropdown-toggle" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ $productCategoryRoot->name }}
                         </a>
-                        @if($category->children->isNotEmpty())
-                            <div class="dropdown-menu">
-                                <div class="row g-3">
-                                    @foreach($category->children as $child)
-                                        <div class="col category-column">
-                                            <a class="category-heading" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->name }}</a>
-                                            @foreach($child->children as $grandchild)
-                                                <a class="category-child" href="{{ route('shop.index', ['category' => $grandchild->slug]) }}">{{ $grandchild->name }}</a>
-                                            @endforeach
-                                        </div>
-                                    @endforeach
-                                </div>
+                        <div class="dropdown-menu">
+                            <div class="row g-3">
+                                @foreach($productCategoryRoot->children as $category)
+                                    <div class="col category-column">
+                                        <a class="category-heading" href="{{ route('shop.index', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                        @foreach($category->children as $child)
+                                            <a class="category-child" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->name }}</a>
+                                        @endforeach
+                                    </div>
+                                @endforeach
                             </div>
-                        @endif
+                        </div>
                     </li>
-                @endforeach
+                @endif
 
 
                 {{-- سبد خرید --}}
