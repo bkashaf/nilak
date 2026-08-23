@@ -27,6 +27,11 @@ class Payment extends Model
         return $this->belongsTo(Order::class);
     }
 
+    public function user()
+    {
+        return $this->hasOneThrough(User::class, Order::class, 'id', 'id', 'order_id', 'user_id');
+    }
+
     public function method()
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');

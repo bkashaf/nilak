@@ -33,16 +33,22 @@ Route::delete('/cart/{product}', [CartController::class, 'remove'])->name('cart.
 // مسیر تسویه حساب (Checkout)
 Route::get('/checkout', function () {
     $cart = session('cart', collect());
+    $paymentMethods = \App\Models\PaymentMethod::query()
+        ->where('is_active', true)
+        ->orderBy('id')
+        ->get();
     if (view()->exists('themes.default.checkout')) {
-        return view('themes.default.checkout', compact('cart'));
+        return view('themes.default.checkout', compact('cart', 'paymentMethods'));
     }
     if (view()->exists('themes.checkout')) {
-        return view('themes.checkout', compact('cart'));
+        return view('themes.checkout', compact('cart', 'paymentMethods'));
     }
     abort(404);
 })->name('checkout.index');
 
-Route::post('/checkout/process', [CartController::class, 'checkout'])->name('checkout.process');
+Route::post('/checkout/process', [CartController::class, 'checkout'])
+    ->middleware('auth')
+    ->name('checkout.process');
 
 // مسیرهای احراز هویت
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

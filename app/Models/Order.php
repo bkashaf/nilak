@@ -10,10 +10,22 @@ class Order extends Model
         'user_id',
         'total_amount',
         'status',
+        'tracking_code',
+        'address',
     ];
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

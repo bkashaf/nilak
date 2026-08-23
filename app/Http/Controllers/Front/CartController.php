@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Domain\Cart\CartService;
+use App\Domain\Order\OrderService;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
     protected CartService $cartService;
+    protected OrderService $orderService;
 
-    public function __construct(CartService $cartService)
+    public function __construct(CartService $cartService, OrderService $orderService)
     {
         $this->cartService = $cartService;
+        $this->orderService = $orderService;
     }
 
     /**
@@ -79,9 +83,25 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'سبد خرید خالی است.');
         }
 
-        // اینجا منطق ایجاد سفارش یا پرداخت قرار می‌گیرد
-        $this->cartService->clear();
+        $data = $request->validate([
+            'address' => ['required', 'string', 'min:10', 'max:2000'],
+            'payment_method' => ['required', 'string', 'exists:payment_methods,name'],
+        ]);
 
-        return redirect()->route('shop.index')->with('success', 'سفارش ثبت شد (نمونه).');
+        try {
+            $result = $this->orderService->createFromCart(
+                Auth::user(),
+                $this->cartService,
+                $data['address'],
+                $data['payment_method'],
+            );
+        } catch (\Throwable $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('shop.index')->with(
+            'success',
+            'سفارش شماره ' . $result['order']->id . ' با موفقیت ثبت شد.'
+        );
     }
 }
