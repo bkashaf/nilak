@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Payment;
+use App\Models\BankReceipt;
 use App\Domain\Payment\Services\PaymentStatusService;
 use Illuminate\Support\Facades\Storage;
 
@@ -38,6 +39,11 @@ class BankReceiptController extends Controller
             ],
             'status' => 'pending_review',
         ]);
+        BankReceipt::create([
+            'payment_id' => $payment->id,
+            'file_path' => $path,
+            'status' => 'pending_review',
+        ]);
 
         return response()->json([
             'message' => 'رسید با موفقیت آپلود شد',
@@ -53,6 +59,7 @@ class BankReceiptController extends Controller
         $request->validate([
             'payment_id' => 'required|exists:payments,id',
             'approved' => 'required|boolean',
+            'rejection_reason' => 'nullable|string|max:1000',
         ]);
 
         $payment = Payment::findOrFail($request->payment_id);
@@ -66,6 +73,13 @@ class BankReceiptController extends Controller
         } else {
             app(PaymentStatusService::class)->markFailed($payment, 'rejected', null, $request->user()->id);
         }
+
+        $payment->bankReceipts()->latest('id')->first()?->update([
+            'status' => $request->approved ? 'approved' : 'rejected',
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+            'rejection_reason' => $request->approved ? null : $request->input('rejection_reason'),
+        ]);
 
         return response()->json([
             'message' => $request->approved ? 'پرداخت تأیید شد' : 'پرداخت رد شد',

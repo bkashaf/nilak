@@ -44,4 +44,9 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentStatusHistory::class)->latest();
     }
+
+    public function bankReceipts()
+    {
+        return $this->hasMany(BankReceipt::class);
+    }
 }

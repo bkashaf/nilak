@@ -16,7 +16,7 @@ class PaymentController extends Controller
 
     public function index()
     {
-        $payments = Payment::with(['order.user', 'method'])->latest()->paginate(20);
+        $payments = Payment::with(['order.user', 'method', 'bankReceipts'])->latest()->paginate(20);
 
         return view('themes.admin.payments.index', compact('payments'));
     }

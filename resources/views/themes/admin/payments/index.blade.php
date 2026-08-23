@@ -20,7 +20,7 @@
                 </thead>
                 <tbody>
                     @forelse($payments as $payment)
-                        @php($receiptPath = data_get($payment->callback_data, 'receipt_path'))
+                        @php($receipt = $payment->bankReceipts->sortByDesc('id')->first())
                         <tr>
                             <td>#{{ $payment->id }}</td>
                             <td>{{ $payment->order ? '#' . $payment->order->id : '—' }}</td>
@@ -29,8 +29,8 @@
                             <td>{{ number_format($payment->amount) }} تومان</td>
                             <td>{{ __('messages.payment_statuses.' . $payment->status) }}</td>
                             <td>
-                                @if($receiptPath)
-                                    <a href="{{ asset('storage/' . $receiptPath) }}" target="_blank">مشاهده رسید</a>
+                                @if($receipt)
+                                    <a href="{{ asset('storage/' . $receipt->file_path) }}" target="_blank">مشاهده رسید</a>
                                 @else
                                     —
                                 @endif
