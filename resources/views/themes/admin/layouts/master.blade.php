@@ -1,6 +1,6 @@
 {{-- View: C:/xampp/htdocs/nilak/resources/views/themes/admin/layouts/master.blade.php --}}
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'fa' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,17 +9,19 @@
     <style>
         body { font-family: Vazirmatn, sans-serif; background-color: #f8f9fa; }
         header { background: #343a40; color: #fff; padding: 10px 20px; }
-        aside { background: #f1f1f1; height: 100vh; padding: 15px; }
+        aside { background: #f1f1f1; min-height: calc(100vh - 65px); padding: 15px; }
         main { padding: 20px; }
         a { text-decoration: none; }
         .sidebar-link { display: block; padding: 8px 0; color: #333; }
         .sidebar-link:hover { color: #007bff; }
+        [dir="rtl"] .sidebar-link { text-align: right; }
     </style>
 </head>
 <body>
 
 <header class="d-flex justify-content-between align-items-center">
     <h2 class="m-0">پنل مدیریت نیلاک</h2>
+    <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm">فروشگاه</a>
     <form action="{{ route('logout') }}" method="POST" class="m-0">
         @csrf
         <button type="submit" class="btn btn-danger btn-sm">خروج</button>

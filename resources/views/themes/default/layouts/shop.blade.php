@@ -124,6 +124,12 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('orders.track*') ? 'active' : '' }}" href="{{ route('orders.track.form') }}">
+                        پیگیری سفارش
+                    </a>
+                </li>
+
                 </ul>
             </div>
         </nav>

@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderService
 {
@@ -30,6 +31,7 @@ class OrderService
                 'user_id' => $user->id,
                 'total_amount' => 0,
                 'status' => 'pending',
+                'tracking_code' => $this->generateTrackingCode(),
                 'address' => $address,
             ]);
 
@@ -81,5 +83,14 @@ class OrderService
                 'payment' => $payment->load('method'),
             ];
         });
+    }
+
+    private function generateTrackingCode(): string
+    {
+        do {
+            $code = 'NLK-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6));
+        } while (Order::where('tracking_code', $code)->exists());
+
+        return $code;
     }
 }

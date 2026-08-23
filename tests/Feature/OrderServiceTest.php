@@ -51,6 +51,7 @@ class OrderServiceTest extends TestCase
         );
 
         $this->assertSame(250000, (int) $result['order']->total_amount);
+        $this->assertMatchesRegularExpression('/^NLK-\d{8}-[A-Z0-9]{6}$/', $result['order']->tracking_code);
         $this->assertSame(250000, (int) $result['order']->items->first()->total);
         $this->assertSame('pending', $result['payment']->status);
         $this->assertSame(3, (int) $product->fresh()->stock);

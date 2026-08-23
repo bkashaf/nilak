@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Front\ShopController;
 use App\Http\Controllers\Front\CartController;
 use App\Http\Controllers\Front\HomeController;   // ← اضافه شد
+use App\Http\Controllers\Front\OrderTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 // صفحه محصول (نام‌دار)
 Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.product');
+
+Route::get('/order-tracking', [OrderTrackingController::class, 'index'])->name('orders.track.form');
+Route::post('/order-tracking', [OrderTrackingController::class, 'show'])->name('orders.track');
 
 // مسیرهای سبد خرید (CartController فرانت)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

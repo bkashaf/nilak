@@ -1,5 +1,5 @@
 {{-- View: C:/xampp/htdocs/nilak/resources/views/admin/categories/edit.blade.php --}}
-@extends('layouts.admin')
+@extends('themes.admin.layouts.master')
 
 @section('content')
 
