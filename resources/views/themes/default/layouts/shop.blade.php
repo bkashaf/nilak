@@ -16,6 +16,8 @@
         .site-tools { display: flex; align-items: center; gap: .5rem; }
         .site-tools .nav-link { white-space: nowrap; }
         .cart-badge { min-width: 1.25rem; }
+        .site-tools .dropdown { position: relative; }
+        .site-tools .dropdown-menu { position: absolute; z-index: 1030; inset-inline-end: 0; }
         [dir="rtl"] .site-tools { margin-right: auto; }
         [dir="ltr"] .site-tools { margin-left: auto; }
     </style>
