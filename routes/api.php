@@ -31,17 +31,18 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 use App\Http\Controllers\Api\OrderController;
 
-Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders', [OrderController::class, 'store']);
-Route::get('/orders/{id}', [OrderController::class, 'show']);
-
 use App\Http\Controllers\Api\PaymentController;
-
-Route::post('/payment/initiate', [PaymentController::class, 'initiate']);
-Route::post('/payment/verify', [PaymentController::class, 'verify']);
 
 
 use App\Http\Controllers\Api\BankReceiptController;
 
-Route::post('/payment/upload-receipt', [BankReceiptController::class, 'upload']);
-Route::post('/payment/approve-receipt', [BankReceiptController::class, 'approve']);
+Route::middleware('auth:sanctum')->group(function () {
+	Route::get('/orders', [OrderController::class, 'index']);
+	Route::post('/orders', [OrderController::class, 'store']);
+	Route::get('/orders/{id}', [OrderController::class, 'show']);
+	Route::post('/payment/initiate', [PaymentController::class, 'initiate']);
+	Route::post('/payment/verify', [PaymentController::class, 'verify']);
+	Route::post('/payment/upload-receipt', [BankReceiptController::class, 'upload']);
+	Route::post('/payment/approve-receipt', [BankReceiptController::class, 'approve'])
+		->middleware('admin');
+});

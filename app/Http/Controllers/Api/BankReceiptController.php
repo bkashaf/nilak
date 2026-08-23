@@ -20,7 +20,8 @@ class BankReceiptController extends Controller
             'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        $payment = Payment::findOrFail($request->payment_id);
+        $payment = Payment::whereHas('order', fn ($query) => $query->where('user_id', $request->user()->id))
+            ->findOrFail($request->payment_id);
 
         if ($payment->status !== 'initiated') {
             return response()->json(['error' => 'این پرداخت در وضعیت قابل آپلود نیست'], 422);

@@ -26,7 +26,10 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return response()->json(['user' => $user], 201);
+        return response()->json([
+            'user' => $user,
+            'token' => $user->createToken('api')->plainTextToken,
+        ], 201);
     }
 
     /**
@@ -45,6 +48,9 @@ class AuthController extends Controller
             return response()->json(['message' => 'invalid credentials'], 401);
         }
 
-        return response()->json(['user' => $user], 200);
+        return response()->json([
+            'user' => $user,
+            'token' => $user->createToken('api')->plainTextToken,
+        ], 200);
     }
 }

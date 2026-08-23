@@ -25,7 +25,8 @@ class PaymentController extends Controller
             'payment_id' => 'required|exists:payments,id',
         ]);
 
-        $payment = Payment::findOrFail($request->payment_id);
+        $payment = Payment::whereHas('order', fn ($query) => $query->where('user_id', $request->user()->id))
+            ->findOrFail($request->payment_id);
 
         $result = $this->service->initiate($payment);
 
@@ -42,7 +43,8 @@ class PaymentController extends Controller
             'callback_data' => 'required|array',
         ]);
 
-        $payment = Payment::findOrFail($request->payment_id);
+        $payment = Payment::whereHas('order', fn ($query) => $query->where('user_id', $request->user()->id))
+            ->findOrFail($request->payment_id);
 
         $result = $this->service->verify($payment, $request->callback_data);
 
