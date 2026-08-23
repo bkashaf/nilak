@@ -1,0 +1,88 @@
+/* === نیلَک Theme Base Styles === */
+
+/* فونت و رنگ عمومی */
+body {
+    background-color: #f9fafc;
+    font-family: Vazirmatn, sans-serif;
+    color: #333;
+    line-height: 1.7;
+}
+
+/* ناوبار */
+.navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.navbar-brand {
+    color: #009688 !important;
+    font-weight: 700;
+}
+.nav-link {
+    color: #555 !important;
+    transition: color 0.2s;
+}
+.nav-link:hover {
+    color: #009688 !important;
+}
+
+/* کارت‌ها و محصولات */
+.card {
+    border: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-3px);
+}
+
+/* دکمه‌ها */
+.btn-primary {
+    background-color: #009688;
+    border-color: #009688;
+}
+.btn-primary:hover {
+    background-color: #00796b;
+    border-color: #00796b;
+}
+
+a.btn-primary, .btn-primary {
+    color: #fff !important;
+}
+
+
+
+/* فوتر */
+footer {
+    background: #f0f0f0;
+    color: #666;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* تصویر پیش‌فرض محصولات */
+img.no-image {
+    width: 100%;
+    height: auto;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 40px;
+    object-fit: contain;
+}
+
+/* تیترها */
+h1, h2, h3, h4, h5 {
+    font-weight: 600;
+    color: #222;
+}
+
+/* لینک‌ها */
+a {
+    color: #009688;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}

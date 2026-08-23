@@ -1,0 +1,7 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f0f0f0"/>
+  <circle cx="200" cy="150" r="60" stroke="#ccc" stroke-width="3" fill="none"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#999" font-size="20" font-family="Vazirmatn">
+    تصویر محصول در دسترس نیست
+  </text>
+</svg>
