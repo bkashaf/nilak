@@ -65,4 +65,38 @@ class ShopFilterTest extends TestCase
         $response->assertSee('محصول قرمز');
         $response->assertDontSee('محصول دیگر');
     }
+
+    public function test_shop_sorts_and_filters_by_price_range(): void
+    {
+        $category = Category::create([
+            'name' => 'لباس',
+            'slug' => 'sort-clothing',
+            'status' => 1,
+            'position' => 1,
+        ]);
+        Product::create([
+            'category_id' => $category->id,
+            'sku' => 'SORT-LOW',
+            'name' => 'محصول ارزان',
+            'slug' => 'sort-low',
+            'price' => 1000,
+            'stock' => 1,
+            'is_active' => true,
+        ]);
+        Product::create([
+            'category_id' => $category->id,
+            'sku' => 'SORT-HIGH',
+            'name' => 'محصول گران',
+            'slug' => 'sort-high',
+            'price' => 5000,
+            'stock' => 1,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/shop?sort=price_desc&price_min=4000');
+
+        $response->assertOk();
+        $response->assertSee('محصول گران');
+        $response->assertDontSee('محصول ارزان');
+    }
 }

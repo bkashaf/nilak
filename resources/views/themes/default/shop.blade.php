@@ -24,6 +24,24 @@
                     </select>
                 </div>
             @endforeach
+            <div class="col-md-4">
+                <label for="sort" class="form-label">مرتب‌سازی</label>
+                <select id="sort" name="sort" class="form-select">
+                    <option value="newest" @selected(request('sort', 'newest') === 'newest')>جدیدترین</option>
+                    <option value="oldest" @selected(request('sort') === 'oldest')>قدیمی‌ترین</option>
+                    <option value="price_asc" @selected(request('sort') === 'price_asc')>ارزان‌ترین</option>
+                    <option value="price_desc" @selected(request('sort') === 'price_desc')>گران‌ترین</option>
+                    <option value="discount" @selected(request('sort') === 'discount')>بیشترین تخفیف</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="price_min" class="form-label">حداقل قیمت</label>
+                <input id="price_min" name="price_min" type="number" min="0" value="{{ request('price_min') }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label for="price_max" class="form-label">حداکثر قیمت</label>
+                <input id="price_max" name="price_max" type="number" min="0" value="{{ request('price_max') }}" class="form-control">
+            </div>
             <div class="col-md-4 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
                 <a href="{{ route('shop.index') }}" class="btn btn-outline-secondary ms-2">پاک‌کردن</a>

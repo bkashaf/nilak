@@ -66,6 +66,10 @@ class ProductController extends Controller
                     $query->orderBy('created_at', 'desc');
                     break;
 
+                case 'oldest':
+                    $query->orderBy('created_at', 'asc');
+                    break;
+
                 case 'discount':
                     $query->orderByRaw('(compare_price - price) DESC');
                     break;
@@ -74,10 +78,9 @@ class ProductController extends Controller
 
         if ($request->has('attributes')) {
             foreach ($request->attributes as $slug => $value) {
-                $query->whereHas('attributeValues.attribute', function ($q) use ($slug) {
-                    $q->where('slug', $slug);
-                })->whereHas('attributeValues.attributeValue', function ($q) use ($value) {
-                    $q->where('value', $value);
+                $query->whereHas('attributeValues', function ($q) use ($slug, $value) {
+                    $q->where('attribute_value_id', (int) $value)
+                        ->whereHas('attribute', fn ($attribute) => $attribute->where('slug', $slug));
                 });
             }
         }

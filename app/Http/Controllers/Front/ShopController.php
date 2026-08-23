@@ -29,6 +29,9 @@ class ShopController extends Controller
         // -------------------------------
         $categorySlug = $request->get('category');
         $attributeFilters = array_filter((array) $request->input('attributes', []));
+        $sort = $request->input('sort', 'newest');
+        $priceMin = $request->integer('price_min');
+        $priceMax = $request->integer('price_max');
 
         if ($categorySlug) {
 
@@ -44,7 +47,9 @@ class ShopController extends Controller
                 $products = Product::where('is_active', true)
                     ->whereIn('category_id', $categoryIds)
                     ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
-                    ->orderBy('created_at', 'desc')
+                    ->when($priceMin, fn ($query) => $query->where('price', '>=', $priceMin))
+                    ->when($priceMax, fn ($query) => $query->where('price', '<=', $priceMax))
+                    ->tap(fn ($query) => $this->applySort($query, $sort))
                     ->paginate($perPage);
 
                 $pageTitle = 'محصولات دسته ' . $category->localized_name;
@@ -54,7 +59,9 @@ class ShopController extends Controller
                 // اگر دسته پیدا نشد
                 $products = Product::where('is_active', true)
                     ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
-                    ->orderBy('created_at', 'desc')
+                    ->when($priceMin, fn ($query) => $query->where('price', '>=', $priceMin))
+                    ->when($priceMax, fn ($query) => $query->where('price', '<=', $priceMax))
+                    ->tap(fn ($query) => $this->applySort($query, $sort))
                     ->paginate($perPage);
 
                 $pageTitle = 'فروشگاه نیلَک';
@@ -72,7 +79,9 @@ class ShopController extends Controller
             // ✔ نسخهٔ جدید بدون دسته انتخاب‌شده
             $products = Product::where('is_active', true)
                 ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
-                ->orderBy('created_at', 'desc')
+                ->when($priceMin, fn ($query) => $query->where('price', '>=', $priceMin))
+                ->when($priceMax, fn ($query) => $query->where('price', '<=', $priceMax))
+                ->tap(fn ($query) => $this->applySort($query, $sort))
                 ->paginate($perPage);
 
             $pageTitle = 'فروشگاه نیلَک';
@@ -118,6 +127,17 @@ class ShopController extends Controller
                     ->where('attribute_value_id', (int) $attributeValueId);
             });
         }
+    }
+
+    private function applySort($query, string $sort): void
+    {
+        match ($sort) {
+            'oldest' => $query->orderBy('created_at', 'asc'),
+            'price_asc' => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'discount' => $query->orderByRaw('(COALESCE(compare_price, price) - price) DESC'),
+            default => $query->orderBy('created_at', 'desc'),
+        };
     }
 
     /**
