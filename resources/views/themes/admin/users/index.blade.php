@@ -33,7 +33,7 @@
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->created_at }}</td>
+                    <td>{{ app(\App\Support\DateFormatter::class)->format($user->created_at) }}</td>
                     <td>
                         <a href="{{ route('admin.users.edit', $user) }}" style="margin-left:8px;">ویرایش</a>
 

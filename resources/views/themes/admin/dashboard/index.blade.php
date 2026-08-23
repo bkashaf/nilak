@@ -24,7 +24,7 @@
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->created_at }}</td>
+                    <td>{{ app(\App\Support\DateFormatter::class)->format($user->created_at) }}</td>
                 </tr>
             @empty
                 <tr>

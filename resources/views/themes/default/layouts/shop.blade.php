@@ -16,6 +16,7 @@
         .site-tools { display: flex; align-items: center; gap: .5rem; }
         .site-tools .nav-link { white-space: nowrap; }
         .cart-badge { min-width: 1.25rem; }
+        .site-date { color: #6c757d; font-size: .875rem; white-space: nowrap; }
         .site-tools .dropdown { position: relative; }
         .site-tools .dropdown-menu { position: absolute; z-index: 1030; inset-inline-end: 0; }
         [dir="rtl"] .site-tools { margin-right: auto; }
@@ -35,6 +36,9 @@
                 $cartItemCount = app(\App\Domain\Cart\CartService::class)->items()->sum('quantity');
             @endphp
             <ul class="navbar-nav site-tools flex-row flex-wrap">
+                <li class="nav-item site-date d-none d-lg-flex align-items-center">
+                    {{ app(\App\Support\DateFormatter::class)->format(now()) }}
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('cart.index') }}" aria-label="{{ __('messages.cart') }}">
                         <span aria-hidden="true">🛒</span>

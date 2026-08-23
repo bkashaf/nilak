@@ -52,7 +52,7 @@
 </div>
 
 <footer class="text-center mt-4 py-3 bg-light border-top">
-    <small>© {{ date('Y') }} پنل مدیریت نیلاک</small>
+    <small>© {{ app(\App\Support\DateFormatter::class)->format(now()) }} پنل مدیریت نیلاک</small>
 </footer>
 
 </body>
