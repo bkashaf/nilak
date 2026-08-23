@@ -19,7 +19,7 @@
     </div>
 @endif
 
-<form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="product-form">
     @csrf
     @method('PUT')
 

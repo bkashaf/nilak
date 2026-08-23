@@ -17,6 +17,15 @@
         .sidebar-link { display: block; padding: 8px 0; color: #333; }
         .sidebar-link:hover { color: #007bff; }
         [dir="rtl"] .sidebar-link { text-align: right; }
+        .product-form .card-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+        .product-form .card-body > .mb-3 { margin-bottom: 0 !important; }
+        .product-form .card-body > .mb-3:has(textarea) { grid-column: 1 / -1; }
+        .product-form .card-body > .form-check { align-self: end; margin-bottom: .5rem; }
+        .product-form .card-body > .row { grid-column: 1 / -1; }
+        @media (max-width: 768px) {
+            .product-form .card-body { grid-template-columns: 1fr; }
+            .product-form .card-body > .mb-3:has(textarea), .product-form .card-body > .row { grid-column: auto; }
+        }
     </style>
 </head>
 <body>
