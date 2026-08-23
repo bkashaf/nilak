@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\PaymentController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -15,6 +16,11 @@ Route::prefix('orders')->name('orders.')->group(function () {
     Route::get('/', [OrderController::class, 'index'])->name('index');
     Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
     Route::put('/{order}', [OrderController::class, 'update'])->name('update');
+});
+
+Route::prefix('payments')->name('payments.')->group(function () {
+    Route::get('/', [PaymentController::class, 'index'])->name('index');
+    Route::put('/{payment}', [PaymentController::class, 'update'])->name('update');
 });
 
 // مدیریت کاربران

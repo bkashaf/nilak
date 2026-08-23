@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Domain\Payment\Services\PaymentStatusService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -46,10 +47,13 @@ class OrderController extends Controller
 
         $payment = $order->payments()->latest('id')->first();
         if ($payment) {
-            $payment->update([
-                'status' => $data['payment_status'],
-                'paid_at' => $data['payment_status'] === 'paid' ? ($payment->paid_at ?? now()) : null,
-            ]);
+            if ($data['payment_status'] === 'paid') {
+                app(PaymentStatusService::class)->markPaid($payment);
+            } elseif (in_array($data['payment_status'], ['failed', 'rejected'], true)) {
+                app(PaymentStatusService::class)->markFailed($payment, $data['payment_status']);
+            } else {
+                $payment->update(['status' => $data['payment_status'], 'paid_at' => null]);
+            }
         }
 
         return redirect()

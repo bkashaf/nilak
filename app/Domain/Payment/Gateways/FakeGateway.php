@@ -3,6 +3,7 @@
 namespace App\Domain\Payment\Gateways;
 
 use App\Models\Payment;
+use App\Domain\Payment\Services\PaymentStatusService;
 
 class FakeGateway implements GatewayInterface
 {
@@ -24,13 +25,11 @@ class FakeGateway implements GatewayInterface
      */
     public function verify(Payment $payment, array $callbackData)
     {
-        // شبیه‌سازی موفقیت پرداخت
-        $payment->update([
-            'status' => 'paid',
-            'gateway_transaction_id' => 'FAKE-' . uniqid(),
-            'callback_data' => $callbackData,
-            'paid_at' => now(),
-        ]);
+        app(PaymentStatusService::class)->markPaid(
+            $payment,
+            'FAKE-' . uniqid(),
+            $callbackData,
+        );
 
         return [
             'status' => 'paid',

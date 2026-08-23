@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Payment;
+use App\Domain\Payment\Services\PaymentStatusService;
 use Illuminate\Support\Facades\Storage;
 
 class BankReceiptController extends Controller
@@ -56,14 +57,9 @@ class BankReceiptController extends Controller
         $payment = Payment::findOrFail($request->payment_id);
 
         if ($request->approved) {
-            $payment->update([
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
+            app(PaymentStatusService::class)->markPaid($payment);
         } else {
-            $payment->update([
-                'status' => 'rejected',
-            ]);
+            app(PaymentStatusService::class)->markFailed($payment, 'rejected');
         }
 
         return response()->json([
