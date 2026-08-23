@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentMethod;
 use App\Models\Product;
+use App\Models\Payment;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,5 +85,41 @@ class OrderServiceTest extends TestCase
         $response->assertOk();
         $response->assertSee('NLK-20260823-ABC123');
         $response->assertDontSee('Undefined array key');
+    }
+
+    public function test_admin_can_update_order_and_payment_status_separately(): void
+    {
+        $admin = User::factory()->create();
+        $adminRole = Role::create(['name' => 'admin', 'label' => 'مدیر']);
+        $admin->roles()->attach($adminRole);
+        $order = Order::create([
+            'user_id' => $admin->id,
+            'total_amount' => 99000,
+            'status' => 'pending',
+            'tracking_code' => 'NLK-20260823-ADMIN01',
+            'address' => 'تهران، خیابان نمونه، پلاک ۱',
+        ]);
+        $paymentMethod = PaymentMethod::create([
+            'name' => 'cod',
+            'type' => 'cod',
+            'title' => 'پرداخت در محل',
+            'is_active' => true,
+        ]);
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'payment_method_id' => $paymentMethod->id,
+            'amount' => 99000,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.orders.update', $order), [
+            'status' => 'shipped',
+            'payment_status' => 'paid',
+            'tracking_code' => $order->tracking_code,
+        ]);
+
+        $response->assertRedirect(route('admin.orders.edit', $order));
+        $this->assertSame('shipped', $order->fresh()->status);
+        $this->assertSame('paid', $payment->fresh()->status);
     }
 }

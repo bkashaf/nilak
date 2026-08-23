@@ -26,18 +26,31 @@ class OrderController extends Controller
     public function edit(Order $order)
     {
         $order->load(['user', 'items.product', 'payments.method']);
+        $payment = $order->payments->sortByDesc('id')->first();
 
-        return view('themes.admin.orders.edit', compact('order'));
+        return view('themes.admin.orders.edit', compact('order', 'payment'));
     }
 
     public function update(Request $request, Order $order)
     {
         $data = $request->validate([
             'status' => ['required', 'string', 'in:pending,paid,canceled,shipped,delivered'],
+            'payment_status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected'],
             'tracking_code' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $order->update($data);
+        $order->update([
+            'status' => $data['status'],
+            'tracking_code' => $data['tracking_code'],
+        ]);
+
+        $payment = $order->payments()->latest('id')->first();
+        if ($payment) {
+            $payment->update([
+                'status' => $data['payment_status'],
+                'paid_at' => $data['payment_status'] === 'paid' ? ($payment->paid_at ?? now()) : null,
+            ]);
+        }
 
         return redirect()
             ->route('admin.orders.edit', $order)

@@ -32,8 +32,8 @@
                         <td>#{{ $order->id }}</td>
                         <td>{{ $order->user->name ?? $order->user->email ?? '—' }}</td>
                         <td>{{ number_format($order->total_amount) }} تومان</td>
-                        <td>{{ $order->status }}</td>
-                        <td>{{ $payment?->status ?? '—' }}</td>
+                        <td>{{ __('messages.order_statuses.' . $order->status) }}</td>
+                        <td>{{ $payment ? __('messages.payment_statuses.' . $payment->status) : '—' }}</td>
                         <td>{{ $order->tracking_code ?? '—' }}</td>
                         <td>{{ app(\App\Support\DateFormatter::class)->format($order->created_at) }}</td>
                         <td>

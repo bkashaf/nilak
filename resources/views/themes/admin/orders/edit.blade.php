@@ -56,8 +56,16 @@
                 <div class="mb-3">
                     <label for="status" class="form-label">وضعیت سفارش</label>
                     <select id="status" name="status" class="form-select" required>
-                        @foreach(['pending' => 'در انتظار', 'paid' => 'پرداخت‌شده', 'canceled' => 'لغوشده', 'shipped' => 'ارسال‌شده', 'delivered' => 'تحویل‌شده'] as $value => $label)
-                            <option value="{{ $value }}" @selected($order->status === $value)>{{ $label }}</option>
+                        @foreach(['pending', 'paid', 'canceled', 'shipped', 'delivered'] as $value)
+                            <option value="{{ $value }}" @selected($order->status === $value)>{{ __('messages.order_statuses.' . $value) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="payment_status" class="form-label">وضعیت پرداخت</label>
+                    <select id="payment_status" name="payment_status" class="form-select" required>
+                        @foreach(['pending', 'initiated', 'pending_review', 'paid', 'failed', 'rejected'] as $value)
+                            <option value="{{ $value }}" @selected(($payment?->status ?? 'pending') === $value)>{{ __('messages.payment_statuses.' . $value) }}</option>
                         @endforeach
                     </select>
                 </div>

@@ -30,8 +30,8 @@
                             @php($payment = $order->payments->sortByDesc('id')->first())
                             <div class="border rounded p-3">
                                 <h2 class="h5">سفارش {{ $order->tracking_code }}</h2>
-                                <p>وضعیت سفارش: <strong>{{ $order->status }}</strong></p>
-                                <p>وضعیت پرداخت: <strong>{{ $payment?->status ?? '—' }}</strong></p>
+                                <p>{{ __('messages.order_status') }}: <strong>{{ __('messages.order_statuses.' . $order->status) }}</strong></p>
+                                <p>{{ __('messages.payment_status') }}: <strong>{{ $payment ? __('messages.payment_statuses.' . $payment->status) : '—' }}</strong></p>
                                 <p>مبلغ: <strong>{{ number_format($order->total_amount) }} تومان</strong></p>
                                 <h3 class="h6 mt-4">اقلام سفارش</h3>
                                 <ul class="mb-0">

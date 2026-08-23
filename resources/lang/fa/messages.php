@@ -14,5 +14,22 @@ return [
     'admin' => 'پنل مدیریت',
     'main_navigation' => 'منوی اصلی',
     'track_order' => 'پیگیری سفارش',
+    'order_status' => 'وضعیت سفارش',
+    'payment_status' => 'وضعیت پرداخت',
+    'order_statuses' => [
+        'pending' => 'در انتظار',
+        'paid' => 'پرداخت‌شده',
+        'canceled' => 'لغوشده',
+        'shipped' => 'ارسال‌شده',
+        'delivered' => 'تحویل‌شده',
+    ],
+    'payment_statuses' => [
+        'pending' => 'در انتظار پرداخت',
+        'initiated' => 'آغازشده',
+        'pending_review' => 'در انتظار بررسی',
+        'paid' => 'پرداخت‌شده',
+        'failed' => 'ناموفق',
+        'rejected' => 'ردشده',
+    ],
     'footer' => 'فروشگاه نیلک',
 ];

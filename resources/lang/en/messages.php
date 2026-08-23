@@ -14,5 +14,22 @@ return [
     'admin' => 'Admin panel',
     'main_navigation' => 'Main navigation',
     'track_order' => 'Track order',
+    'order_status' => 'Order status',
+    'payment_status' => 'Payment status',
+    'order_statuses' => [
+        'pending' => 'Pending',
+        'paid' => 'Paid',
+        'canceled' => 'Canceled',
+        'shipped' => 'Shipped',
+        'delivered' => 'Delivered',
+    ],
+    'payment_statuses' => [
+        'pending' => 'Awaiting payment',
+        'initiated' => 'Initiated',
+        'pending_review' => 'Pending review',
+        'paid' => 'Paid',
+        'failed' => 'Failed',
+        'rejected' => 'Rejected',
+    ],
     'footer' => 'Nilak Store',
 ];
