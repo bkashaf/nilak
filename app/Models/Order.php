@@ -29,4 +29,9 @@ class Order extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function statusHistories()
+    {
+        return $this->hasMany(OrderStatusHistory::class)->latest();
+    }
 }

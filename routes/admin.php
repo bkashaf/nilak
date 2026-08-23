@@ -23,6 +23,7 @@ Route::prefix('orders')->name('orders.')->group(function () {
 Route::prefix('payments')->name('payments.')->group(function () {
     Route::get('/', [PaymentController::class, 'index'])->name('index');
     Route::put('/{payment}', [PaymentController::class, 'update'])->name('update');
+    Route::post('/{payment}/refund', [PaymentController::class, 'refund'])->name('refund');
 });
 
 Route::prefix('payment-methods')->name('payment-methods.')->group(function () {

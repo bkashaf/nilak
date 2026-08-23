@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Domain\Payment\Services\PaymentStatusService;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Domain\Payment\Services\RefundService;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -36,5 +37,21 @@ class PaymentController extends Controller
         }
 
         return redirect()->route('admin.payments.index')->with('success', 'وضعیت پرداخت به‌روزرسانی شد.');
+    }
+
+    public function refund(Request $request, Payment $payment, RefundService $refundService)
+    {
+        $data = $request->validate([
+            'amount' => ['required', 'integer', 'min:1'],
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            $refundService->process($payment, $data['amount'], auth()->id(), $data['reason'] ?? null);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return back()->with('success', 'بازپرداخت با موفقیت ثبت شد.');
     }
 }

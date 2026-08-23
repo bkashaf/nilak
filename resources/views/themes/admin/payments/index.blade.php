@@ -11,6 +11,9 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     <div class="card shadow-sm">
         <div class="table-responsive">
@@ -36,7 +39,7 @@
                                 @endif
                             </td>
                             <td>
-                                <form method="POST" action="{{ route('admin.payments.update', $payment) }}" class="d-flex gap-1">
+                                <form method="POST" action="{{ route('admin.payments.update', $payment) }}" class="d-flex gap-1 mb-2">
                                     @csrf
                                     @method('PUT')
                                     <select name="status" class="form-select form-select-sm" aria-label="وضعیت پرداخت">
@@ -46,6 +49,14 @@
                                     </select>
                                     <button class="btn btn-sm btn-primary text-nowrap">ذخیره</button>
                                 </form>
+                                @if($payment->status === 'paid')
+                                    <form method="POST" action="{{ route('admin.payments.refund', $payment) }}" class="d-flex gap-1">
+                                        @csrf
+                                        <input name="amount" type="number" min="1" max="{{ $payment->amount }}" class="form-control form-control-sm" placeholder="مبلغ بازپرداخت" required>
+                                        <input name="reason" class="form-control form-control-sm" placeholder="دلیل">
+                                        <button class="btn btn-sm btn-outline-danger text-nowrap">بازپرداخت</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

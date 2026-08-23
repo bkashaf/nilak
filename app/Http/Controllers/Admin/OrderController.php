@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Domain\Payment\Services\PaymentStatusService;
+use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -40,14 +41,25 @@ class OrderController extends Controller
             'tracking_code' => ['nullable', 'string', 'max:100'],
         ]);
 
+        $oldStatus = $order->status;
         $order->update([
             'status' => $data['status'],
             'tracking_code' => $data['tracking_code'],
         ]);
+        if ($oldStatus !== $data['status']) {
+            OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'from_status' => $oldStatus,
+                'to_status' => $data['status'],
+                'changed_by' => auth()->id(),
+            ]);
+        }
 
         $payment = $order->payments()->latest('id')->first();
         if ($payment) {
-            if ($data['payment_status'] === 'paid') {
+            if ($data['status'] === 'delivered' && $payment->method?->type === 'cod') {
+                app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
+            } elseif ($data['payment_status'] === 'paid') {
                 app(PaymentStatusService::class)->markPaid($payment);
             } elseif (in_array($data['payment_status'], ['failed', 'rejected'], true)) {
                 app(PaymentStatusService::class)->markFailed($payment, $data['payment_status']);

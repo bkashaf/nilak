@@ -49,4 +49,9 @@ class Payment extends Model
     {
         return $this->hasMany(BankReceipt::class);
     }
+
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
+    }
 }
