@@ -10,6 +10,7 @@ class Order extends Model
         'user_id',
         'total_amount',
         'status',
+        'inventory_status',
         'tracking_code',
         'address',
     ];

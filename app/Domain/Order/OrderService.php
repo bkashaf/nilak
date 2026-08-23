@@ -52,6 +52,7 @@ class OrderService
                 'user_id' => $user->id,
                 'total_amount' => 0,
                 'status' => 'pending',
+                'inventory_status' => 'none',
                 'tracking_code' => $this->generateTrackingCode(),
                 'address' => $address,
             ]);
@@ -67,7 +68,7 @@ class OrderService
                     throw new \RuntimeException('یکی از محصولات سبد دیگر قابل سفارش نیست.');
                 }
 
-                if ($product->stock < $item['quantity']) {
+                if (($product->stock - (int) $product->reserved_stock) < $item['quantity']) {
                     throw new \RuntimeException("موجودی محصول «{$product->name}» کافی نیست.");
                 }
 
@@ -83,9 +84,10 @@ class OrderService
                     'total' => $itemTotal,
                 ]);
 
-                $product->decrement('stock', $quantity);
                 $total += $itemTotal;
             }
+
+            app(\App\Domain\Inventory\InventoryReservationService::class)->reserve($order->load('items'));
 
             $order->update(['total_amount' => $total]);
 

@@ -20,7 +20,7 @@ class OrderServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_creates_cod_order_from_cart_and_decrements_stock(): void
+    public function test_it_creates_cod_order_and_reserves_stock(): void
     {
         $user = User::factory()->create();
         $category = Category::create([
@@ -59,7 +59,9 @@ class OrderServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/^NLK-\d{8}-[A-Z0-9]{6}$/', $result['order']->tracking_code);
         $this->assertSame(250000, (int) $result['order']->items->first()->total);
         $this->assertSame('pending', $result['payment']->status);
-        $this->assertSame(3, (int) $product->fresh()->stock);
+        $this->assertSame(5, (int) $product->fresh()->stock);
+        $this->assertSame(2, (int) $product->fresh()->reserved_stock);
+        $this->assertSame('reserved', $result['order']->fresh()->inventory_status);
         $this->assertTrue($cart->all()->isEmpty());
         $this->assertDatabaseHas('orders', [
             'id' => $result['order']->id,

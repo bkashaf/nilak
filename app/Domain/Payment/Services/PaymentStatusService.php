@@ -18,6 +18,7 @@ class PaymentStatusService
                 'callback_data' => $callbackData ?? $payment->callback_data,
                 'paid_at' => $payment->paid_at ?? now(),
             ]);
+            app(\App\Domain\Inventory\InventoryReservationService::class)->commit($payment->order->load('items'));
             $this->record($payment, $oldStatus, 'paid', $changedBy);
 
             $payment->order()->where('status', 'pending')->update(['status' => 'paid']);
@@ -34,6 +35,7 @@ class PaymentStatusService
             'callback_data' => $callbackData ?? $payment->callback_data,
             'paid_at' => null,
         ]);
+        app(\App\Domain\Inventory\InventoryReservationService::class)->release($payment->order->load('items'));
         $this->record($payment, $oldStatus, $status, $changedBy);
 
         return $payment->fresh(['order', 'method']);
