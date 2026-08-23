@@ -9,5 +9,9 @@ return [
     'language' => 'زبان',
     'persian' => 'فارسی',
     'english' => 'English',
+    'login' => 'ورود',
+    'logout' => 'خروج',
+    'admin' => 'پنل مدیریت',
+    'main_navigation' => 'منوی اصلی',
     'footer' => 'فروشگاه نیلک',
 ];

@@ -10,24 +10,71 @@
 
     <style>
         body { background-color: #f8f9fa; font-family: Vazirmatn, sans-serif; text-align: start; }
-        .navbar { margin-bottom: 20px; }
+        .site-header { margin-bottom: 20px; }
         footer { margin-top: 40px; padding: 20px 0; background: #eee; text-align: center; }
-        [dir="rtl"] .navbar-nav { margin-right: auto !important; margin-left: 0 !important; }
+        .site-header .navbar-nav { align-items: center; }
+        .site-tools { display: flex; align-items: center; gap: .5rem; }
+        .site-tools .nav-link { white-space: nowrap; }
+        .cart-badge { min-width: 1.25rem; }
+        [dir="rtl"] .site-tools { margin-right: auto; }
+        [dir="ltr"] .site-tools { margin-left: auto; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-md navbar-light bg-light shadow-sm">
+<header class="site-header bg-white shadow-sm">
     <div class="container">
+        <nav class="navbar navbar-light py-2">
+            <a class="navbar-brand fw-bold me-0" href="{{ route('home') }}">
+                {{ __('messages.brand') }}
+            </a>
 
-        {{-- لوگو --}}
-        <a class="navbar-brand fw-bold" href="{{ route('home') }}">
-            {{ __('messages.brand') }}
-        </a>
+            @php
+                $cartItemCount = app(\App\Domain\Cart\CartService::class)->items()->sum('quantity');
+            @endphp
+            <ul class="navbar-nav site-tools flex-row flex-wrap">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('cart.index') }}" aria-label="{{ __('messages.cart') }}">
+                        <span aria-hidden="true">🛒</span>
+                        <span class="visually-hidden">{{ __('messages.cart') }}</span>
+                        <span class="badge rounded-pill text-bg-primary cart-badge">{{ $cartItemCount }}</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ __('messages.language') }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('language.switch', 'fa') }}">{{ __('messages.persian') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">{{ __('messages.english') }}</a></li>
+                    </ul>
+                </li>
+                @auth
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ auth()->user()->name }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            @if(auth()->user()->hasRole('admin'))
+                                <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">{{ __('messages.admin') }}</a></li>
+                            @endif
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">{{ __('messages.logout') }}</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                @else
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">{{ __('messages.login') }}</a></li>
+                @endauth
+            </ul>
+        </nav>
 
-        {{-- منو --}}
-        <div id="mainMenu" class="flex-grow-1">
-            <ul class="navbar-nav ms-auto flex-row flex-wrap justify-content-end gap-1">
+        <nav class="navbar navbar-expand-md navbar-light border-top py-1" aria-label="{{ __('messages.main_navigation') }}">
+            <div id="mainMenu" class="w-100">
+                <ul class="navbar-nav flex-row flex-wrap justify-content-start gap-1">
 
                 {{-- خانه --}}
                 <li class="nav-item">
@@ -71,20 +118,12 @@
                     </a>
                 </li>
 
-                <li class="nav-item dropdown ms-md-3">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ __('messages.language') }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('language.switch', 'fa') }}">{{ __('messages.persian') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">{{ __('messages.english') }}</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+                </ul>
+            </div>
+        </nav>
 
     </div>
-</nav>
+</header>
 
 
 <div class="container">
