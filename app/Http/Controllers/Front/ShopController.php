@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Attribute;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -27,6 +28,7 @@ class ShopController extends Controller
         // 🔥 فیلتر دسته‌بندی (جدید)
         // -------------------------------
         $categorySlug = $request->get('category');
+        $attributeFilters = array_filter((array) $request->input('attributes', []));
 
         if ($categorySlug) {
 
@@ -36,22 +38,22 @@ class ShopController extends Controller
             if ($category) {
 
                 // گرفتن ID دسته و زیر‌دسته‌ها
-                $categoryIds = collect([$category->id])
-                    ->merge($category->children()->pluck('id'))
-                    ->toArray();
+                $categoryIds = $this->categoryTreeIds($category);
 
                 // محصولات دسته
                 $products = Product::where('is_active', true)
                     ->whereIn('category_id', $categoryIds)
+                    ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
                     ->orderBy('created_at', 'desc')
                     ->paginate($perPage);
 
-                $pageTitle = 'محصولات دسته ' . $category->name;
+                $pageTitle = 'محصولات دسته ' . $category->localized_name;
 
             } else {
 
                 // اگر دسته پیدا نشد
                 $products = Product::where('is_active', true)
+                    ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
                     ->orderBy('created_at', 'desc')
                     ->paginate($perPage);
 
@@ -69,22 +71,53 @@ class ShopController extends Controller
 
             // ✔ نسخهٔ جدید بدون دسته انتخاب‌شده
             $products = Product::where('is_active', true)
+                ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
             $pageTitle = 'فروشگاه نیلَک';
         }
 
+        $filterableAttributes = Attribute::query()
+            ->where('is_filterable', true)
+            ->with(['values' => fn ($query) => $query->orderBy('position')])
+            ->orderBy('position')
+            ->get();
+
+        $products->load(['translations', 'category.translations']);
+        $products->appends($request->query());
+
         // نمایش ویو
         if (view()->exists('themes.default.shop')) {
-            return view('themes.default.shop', compact('products', 'pageTitle'));
+            return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes'));
         }
 
         if (view()->exists('themes.shop')) {
-            return view('themes.shop', compact('products', 'pageTitle'));
+            return view('themes.shop', compact('products', 'pageTitle', 'filterableAttributes'));
         }
 
-        return view('themes.default.shop', compact('products', 'pageTitle'));
+        return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes'));
+    }
+
+    private function categoryTreeIds(Category $category): array
+    {
+        $ids = [$category->id];
+
+        foreach ($category->children()->get() as $child) {
+            $ids = array_merge($ids, $this->categoryTreeIds($child));
+        }
+
+        return $ids;
+    }
+
+    private function applyAttributeFilters($query, array $filters): void
+    {
+        foreach ($filters as $attributeSlug => $attributeValueId) {
+            $query->whereHas('attributeValues', function ($relation) use ($attributeSlug, $attributeValueId) {
+                $relation->whereHas('attribute', fn ($attribute) => $attribute->where('slug', $attributeSlug))
+                    ->where('attribute_value_id', (int) $attributeValueId);
+            });
+        }
     }
 
     /**

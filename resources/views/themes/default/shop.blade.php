@@ -6,8 +6,31 @@
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>فروشگاه</h2>
+    <h2>{{ $pageTitle ?? 'فروشگاه' }}</h2>
 </div>
+
+<form method="GET" action="{{ route('shop.index') }}" class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h3 class="h5">فیلتر محصولات</h3>
+        <div class="row g-3">
+            @foreach($filterableAttributes ?? [] as $attribute)
+                <div class="col-md-4">
+                    <label for="attribute-{{ $attribute->slug }}" class="form-label">{{ $attribute->name }}</label>
+                    <select id="attribute-{{ $attribute->slug }}" name="attributes[{{ $attribute->slug }}]" class="form-select">
+                        <option value="">همه</option>
+                        @foreach($attribute->values as $value)
+                            <option value="{{ $value->id }}" @selected(request('attributes.' . $attribute->slug) == $value->id)>{{ $value->value }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endforeach
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
+                <a href="{{ route('shop.index') }}" class="btn btn-outline-secondary ms-2">پاک‌کردن</a>
+            </div>
+        </div>
+    </div>
+</form>
 
 @if($products->count() === 0)
     <div class="alert alert-info">هیچ محصولی یافت نشد.</div>
