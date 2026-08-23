@@ -14,7 +14,7 @@
                         @csrf
                         <div class="col-md-9">
                             <label for="tracking_code" class="visually-hidden">شماره پیگیری</label>
-                            <input id="tracking_code" name="tracking_code" value="{{ old('tracking_code') }}" class="form-control" placeholder="مثلاً NLK-20260823-ABC123" required>
+                            <input id="tracking_code" name="tracking_code" value="{{ old('tracking_code', $trackingCode ?? '') }}" class="form-control" placeholder="مثلاً NLK-20260823-ABC123" required>
                         </div>
                         <div class="col-md-3 d-grid">
                             <button type="submit" class="btn btn-primary">پیگیری</button>

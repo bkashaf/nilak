@@ -24,7 +24,9 @@ class OrderTrackingController extends Controller
             ->where('tracking_code', strtoupper(trim($data['tracking_code'])))
             ->first();
 
-        return view('themes.default.order-tracking', compact('order'))
-            ->withInput();
+        return view('themes.default.order-tracking', [
+            'order' => $order,
+            'trackingCode' => $data['tracking_code'],
+        ]);
     }
 }

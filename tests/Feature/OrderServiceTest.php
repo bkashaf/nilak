@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Domain\Cart\CartService;
 use App\Domain\Order\OrderService;
 use App\Models\Category;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\User;
@@ -61,5 +63,25 @@ class OrderServiceTest extends TestCase
             'user_id' => $user->id,
             'address' => 'تهران، خیابان نمونه، پلاک ۱',
         ]);
+    }
+
+    public function test_customer_can_track_an_order_by_tracking_code(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_amount' => 99000,
+            'status' => 'pending',
+            'tracking_code' => 'NLK-20260823-ABC123',
+            'address' => 'تهران، خیابان نمونه، پلاک ۱',
+        ]);
+
+        $response = $this->post(route('orders.track'), [
+            'tracking_code' => 'nlk-20260823-abc123',
+        ]);
+
+        $response->assertOk();
+        $response->assertSee('NLK-20260823-ABC123');
+        $response->assertDontSee('Undefined array key');
     }
 }
