@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\SettingsController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -41,16 +43,13 @@ Route::prefix('menu')->name('menu.')->group(function () {
 
 // گزارش‌ها
 Route::prefix('reports')->name('reports.')->group(function () {
-    Route::get('/', function () {
-        return 'گزارش‌ها';
-    })->name('index');
+    Route::get('/', [ReportsController::class, 'index'])->name('index');
 });
 
 // تنظیمات
 Route::prefix('settings')->name('settings.')->group(function () {
-    Route::get('/', function () {
-        return 'تنظیمات سیستم';
-    })->name('index');
+    Route::get('/', [SettingsController::class, 'index'])->name('index');
+    Route::put('/', [SettingsController::class, 'update'])->name('update');
 });
 
 // مدیریت دسته‌ها
