@@ -23,7 +23,7 @@ class BankReceiptController extends Controller
         $payment = Payment::whereHas('order', fn ($query) => $query->where('user_id', $request->user()->id))
             ->findOrFail($request->payment_id);
 
-        if ($payment->status !== 'initiated') {
+        if ($payment->method?->type !== 'receipt' || $payment->status !== 'initiated') {
             return response()->json(['error' => 'این پرداخت در وضعیت قابل آپلود نیست'], 422);
         }
 
@@ -56,6 +56,10 @@ class BankReceiptController extends Controller
         ]);
 
         $payment = Payment::findOrFail($request->payment_id);
+
+        if ($payment->method?->type !== 'receipt' || $payment->status !== 'pending_review') {
+            return response()->json(['error' => 'این رسید در وضعیت قابل بررسی نیست'], 422);
+        }
 
         if ($request->approved) {
             app(PaymentStatusService::class)->markPaid($payment);

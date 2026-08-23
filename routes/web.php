@@ -6,6 +6,7 @@ use App\Http\Controllers\Front\ShopController;
 use App\Http\Controllers\Front\CartController;
 use App\Http\Controllers\Front\HomeController;   // ← اضافه شد
 use App\Http\Controllers\Front\OrderTrackingController;
+use App\Http\Controllers\Front\PaymentCallbackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,8 @@ Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.produ
 
 Route::get('/order-tracking', [OrderTrackingController::class, 'index'])->name('orders.track.form');
 Route::post('/order-tracking', [OrderTrackingController::class, 'show'])->name('orders.track');
+Route::get('/payment/zarinpal/callback/{payment}', [PaymentCallbackController::class, 'zarinpal'])
+    ->name('payment.zarinpal.callback');
 
 // مسیرهای سبد خرید (CartController فرانت)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

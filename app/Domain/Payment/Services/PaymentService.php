@@ -14,6 +14,10 @@ class PaymentService
      */
     public function initiate(Payment $payment)
     {
+        if ($payment->method?->type !== 'gateway') {
+            throw new \LogicException('این پرداخت از نوع درگاه آنلاین نیست.');
+        }
+
         if ($payment->status !== 'initiated') {
             throw new \LogicException('این پرداخت در وضعیت شروع پرداخت نیست.');
         }
@@ -32,6 +36,10 @@ class PaymentService
      */
     public function verify(Payment $payment, array $callbackData)
     {
+        if ($payment->method?->type !== 'gateway') {
+            throw new \LogicException('این پرداخت از نوع درگاه آنلاین نیست.');
+        }
+
         if ($payment->status === 'paid') {
             return [
                 'status' => 'paid',
@@ -58,6 +66,10 @@ class PaymentService
 
         if (!class_exists($class)) {
             throw new \Exception("Gateway class not found: {$class}");
+        }
+
+        if ($gatewayName !== 'fake' && ! config("payment.gateways.{$gatewayName}.enabled", false)) {
+            throw new \LogicException("درگاه {$gatewayName} فعال نیست.");
         }
 
         return App::make($class);
