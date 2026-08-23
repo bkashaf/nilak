@@ -36,7 +36,7 @@ class OrderController extends Controller
     {
         $data = $request->validate([
             'status' => ['required', 'string', 'in:pending,paid,canceled,shipped,delivered'],
-            'payment_status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected'],
+            'payment_status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected,expired'],
             'tracking_code' => ['nullable', 'string', 'max:100'],
         ]);
 

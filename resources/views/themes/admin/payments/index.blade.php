@@ -40,7 +40,7 @@
                                     @csrf
                                     @method('PUT')
                                     <select name="status" class="form-select form-select-sm" aria-label="وضعیت پرداخت">
-                                        @foreach(['pending', 'initiated', 'pending_review', 'paid', 'failed', 'rejected'] as $status)
+                                        @foreach(['pending', 'initiated', 'pending_review', 'paid', 'failed', 'rejected', 'expired'] as $status)
                                             <option value="{{ $status }}" @selected($payment->status === $status)>{{ __('messages.payment_statuses.' . $status) }}</option>
                                         @endforeach
                                     </select>

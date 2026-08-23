@@ -64,7 +64,7 @@
                 <div class="mb-3">
                     <label for="payment_status" class="form-label">وضعیت پرداخت</label>
                     <select id="payment_status" name="payment_status" class="form-select" required>
-                        @foreach(['pending', 'initiated', 'pending_review', 'paid', 'failed', 'rejected'] as $value)
+                        @foreach(['pending', 'initiated', 'pending_review', 'paid', 'failed', 'rejected', 'expired'] as $value)
                             <option value="{{ $value }}" @selected(($payment?->status ?? 'pending') === $value)>{{ __('messages.payment_statuses.' . $value) }}</option>
                         @endforeach
                     </select>

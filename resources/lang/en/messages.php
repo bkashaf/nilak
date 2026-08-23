@@ -30,6 +30,7 @@ return [
         'paid' => 'Paid',
         'failed' => 'Failed',
         'rejected' => 'Rejected',
+        'expired' => 'Expired',
     ],
     'footer' => 'Nilak Store',
 ];
