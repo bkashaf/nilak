@@ -18,8 +18,8 @@
                         @csrf
 
                         <div class="col-12">
-                            <label class="form-label" for="email">ایمیل</label>
-                            <input id="email" type="email" name="email" class="form-control form-control-lg" value="{{ old('email') }}" required autofocus>
+                            <label class="form-label" for="mobile">شماره موبایل</label>
+                            <input id="mobile" type="text" name="mobile" class="form-control form-control-lg" value="{{ old('mobile') }}" required autofocus>
                         </div>
 
                         <div class="col-12">

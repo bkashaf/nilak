@@ -8,7 +8,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4 p-md-5">
                     <h1 class="h4 mb-2">ایجاد حساب کاربری</h1>
-                    <p class="text-muted mb-4">با ساخت حساب، سفارش و آدرس شما سریع تر ثبت می شود.</p>
+                    <p class="text-muted mb-4">برای شروع فقط شماره موبایل و کلمه عبور لازم است. تکمیل پروفایل برای خرید الزامی خواهد بود.</p>
 
                     @if ($errors->any())
                         <div class="alert alert-danger">{{ $errors->first() }}</div>
@@ -17,39 +17,24 @@
                     <form method="POST" action="{{ route('register.post') }}" class="row g-3">
                         @csrf
 
-                        <div class="col-md-6">
-                            <label class="form-label" for="first_name">نام</label>
-                            <input id="first_name" type="text" name="first_name" class="form-control" value="{{ old('first_name') }}" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label" for="last_name">نام خانوادگی</label>
-                            <input id="last_name" type="text" name="last_name" class="form-control" value="{{ old('last_name') }}" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label" for="username">نام کاربری (اختیاری)</label>
-                            <input id="username" type="text" name="username" class="form-control" value="{{ old('username') }}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label" for="mobile">شماره موبایل</label>
+                        <div class="col-12">
+                            <label class="form-label" for="mobile">شماره موبایل <span class="text-danger">*</span></label>
                             <input id="mobile" type="text" name="mobile" class="form-control" value="{{ old('mobile') }}" required>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label" for="email">ایمیل</label>
-                            <input id="email" type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                            <label class="form-label" for="email">ایمیل (اختیاری)</label>
+                            <input id="email" type="email" name="email" class="form-control" value="{{ old('email') }}">
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label" for="password">کلمه عبور</label>
+                            <label class="form-label" for="password">کلمه عبور <span class="text-danger">*</span></label>
                             <input id="password" type="password" name="password" class="form-control" required>
                             <div class="form-text">حداقل 8 کاراکتر و شامل حداقل یک حرف انگلیسی و یک عدد باشد.</div>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label" for="password_confirmation">تکرار کلمه عبور</label>
+                            <label class="form-label" for="password_confirmation">تکرار کلمه عبور <span class="text-danger">*</span></label>
                             <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
                         </div>
 

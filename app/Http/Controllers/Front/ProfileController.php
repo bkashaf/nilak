@@ -23,8 +23,9 @@ class ProfileController extends Controller
             'last_name' => ['required', 'string', 'max:60'],
             'username' => ['nullable', 'string', 'max:60', 'unique:users,username,' . $user->id],
             'mobile' => ['required', 'string', 'max:20', 'unique:users,mobile,' . $user->id],
+            'email' => ['nullable', 'email', 'max:191', 'unique:users,email,' . $user->id],
             'secondary_phone' => ['required', 'string', 'max:20'],
-            'postal_code' => ['nullable', 'string', 'max:20'],
+            'postal_code' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'min:10', 'max:2000'],
         ]);
 
@@ -34,8 +35,9 @@ class ProfileController extends Controller
             'username' => $data['username'] ?? null,
             'name' => trim($data['first_name'] . ' ' . $data['last_name']),
             'mobile' => $data['mobile'],
+            'email' => $data['email'] ?? null,
             'secondary_phone' => $data['secondary_phone'],
-            'postal_code' => $data['postal_code'] ?? null,
+            'postal_code' => $data['postal_code'],
             'address' => $data['address'],
         ]);
 

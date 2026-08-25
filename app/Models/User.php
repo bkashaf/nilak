@@ -50,4 +50,28 @@ class User extends Authenticatable
     {
         return $this->permissions()->where('name', $permission)->count() > 0;
     }
+
+    public function isProfileComplete(): bool
+    {
+        return filled($this->first_name)
+            && filled($this->last_name)
+            && filled($this->mobile)
+            && filled($this->secondary_phone)
+            && filled($this->postal_code)
+            && filled($this->address);
+    }
+
+    public function profileMissingFields(): array
+    {
+        $missing = [];
+
+        if (! filled($this->first_name)) $missing[] = 'نام';
+        if (! filled($this->last_name)) $missing[] = 'نام خانوادگی';
+        if (! filled($this->mobile)) $missing[] = 'شماره موبایل';
+        if (! filled($this->secondary_phone)) $missing[] = 'شماره ضروری دوم';
+        if (! filled($this->postal_code)) $missing[] = 'کد پستی';
+        if (! filled($this->address)) $missing[] = 'آدرس';
+
+        return $missing;
+    }
 }

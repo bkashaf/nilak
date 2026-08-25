@@ -10,13 +10,13 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return view('Auth.login');
     }
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'mobile'    => ['required', 'string', 'max:20'],
             'password' => ['required'],
         ]);
 
@@ -32,8 +32,8 @@ class LoginController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'اطلاعات ورود نادرست است.',
-        ])->onlyInput('email');
+            'mobile' => 'اطلاعات ورود نادرست است.',
+        ])->onlyInput('mobile');
     }
 
     public function logout(Request $request)

@@ -185,6 +185,15 @@
 
 
 <div class="container">
+    @auth
+        @if(!auth()->user()->isProfileComplete() && !request()->routeIs('account.profile.edit'))
+            <div class="alert alert-warning mt-3 mb-3" role="alert">
+                برای ادامه خرید، تکمیل پروفایل الزامی است.
+                <a href="{{ route('account.profile.edit') }}" class="alert-link">تکمیل پروفایل</a>
+            </div>
+        @endif
+    @endauth
+
     @yield('content')
 </div>
 

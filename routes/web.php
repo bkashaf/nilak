@@ -56,10 +56,10 @@ Route::get('/checkout', function () {
         return view('themes.checkout', compact('cart', 'paymentMethods'));
     }
     abort(404);
-})->name('checkout.index');
+})->middleware(['auth', 'profile.complete'])->name('checkout.index');
 
 Route::post('/checkout/process', [CartController::class, 'checkout'])
-    ->middleware('auth')
+    ->middleware(['auth', 'profile.complete'])
     ->name('checkout.process');
 
 // مسیرهای احراز هویت
