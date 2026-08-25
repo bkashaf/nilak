@@ -8,7 +8,6 @@ import 'tinymce/plugins/autolink';
 import 'tinymce/plugins/charmap';
 import 'tinymce/plugins/code';
 import 'tinymce/plugins/fullscreen';
-import 'tinymce/plugins/help';
 import 'tinymce/plugins/image';
 import 'tinymce/plugins/link';
 import 'tinymce/plugins/lists';
@@ -48,10 +47,11 @@ function initPageEditor() {
         readonly: false,
         height: 620,
         menubar: 'file edit view insert format table tools help',
-        toolbar_mode: 'sliding',
-        plugins: 'anchor autolink charmap code fullscreen help image link lists media preview searchreplace table visualblocks wordcount directionality autoresize',
-        toolbar: 'undo redo | blocks fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | ltr rtl | bullist numlist outdent indent | link image media table snippets | removeformat code fullscreen preview',
+        skin: false,
         content_css: false,
+        toolbar_mode: 'sliding',
+        plugins: 'anchor autolink charmap code fullscreen image link lists media preview searchreplace table visualblocks wordcount directionality autoresize',
+        toolbar: 'undo redo | blocks fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | ltr rtl | bullist numlist outdent indent | link image media table snippets | removeformat code fullscreen preview',
         content_style: `
             body{font-family:Vazirmatn,sans-serif;padding:16px;line-height:1.9;color:#1f2937}
             body{direction:${isRtl ? 'rtl' : 'ltr'};text-align:${isRtl ? 'right' : 'left'}}
@@ -152,7 +152,6 @@ function initPageEditor() {
             formData.append('file', blobInfo.blob(), blobInfo.filename());
             xhr.send(formData);
         }),
-        templates: []
     }).catch(() => {
         editorEl.removeAttribute('readonly');
         editorEl.disabled = false;
