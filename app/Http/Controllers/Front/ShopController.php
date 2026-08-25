@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Attribute;
+use App\Support\SliderService;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -101,17 +102,18 @@ class ShopController extends Controller
 
         $products->load(['translations', 'category.translations']);
         $products->appends($request->query());
+        $shopSlider = app(SliderService::class)->byKey('shop_hero', 3);
 
         // نمایش ویو
         if (view()->exists('themes.default.shop')) {
-            return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds'));
+            return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds', 'shopSlider'));
         }
 
         if (view()->exists('themes.shop')) {
-            return view('themes.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds'));
+            return view('themes.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds', 'shopSlider'));
         }
 
-        return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds'));
+        return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds', 'shopSlider'));
     }
 
     private function categoryTreeIds(Category $category): array

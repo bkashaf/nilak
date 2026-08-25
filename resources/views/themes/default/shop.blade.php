@@ -5,6 +5,8 @@
 
 @section('content')
 
+@include('themes.default.partials.hero-slider', ['slides' => $shopSlider ?? collect(), 'sliderId' => 'shopHeroSlider'])
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>{{ $pageTitle ?? 'فروشگاه' }}</h2>
 </div>

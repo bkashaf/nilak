@@ -58,6 +58,8 @@
                     <li><a href="{{ route('admin.orders.index') }}" class="sidebar-link">مدیریت سفارش‌ها</a></li>
                     <li><a href="{{ route('admin.payments.index') }}" class="sidebar-link">مدیریت پرداخت‌ها</a></li>
                     <li><a href="{{ route('admin.payment-methods.index') }}" class="sidebar-link">روش‌های پرداخت</a></li>
+                    <li><a href="{{ route('admin.pages.index') }}" class="sidebar-link">مدیریت صفحات</a></li>
+                    <li><a href="{{ route('admin.sliders.index') }}" class="sidebar-link">مدیریت اسلایدر</a></li>
                     <li><a href="{{ route('admin.reports.index') }}" class="sidebar-link">گزارش‌ها</a></li>
                     <li><a href="{{ route('admin.settings.index') }}" class="sidebar-link">تنظیمات</a></li>
                 </ul>

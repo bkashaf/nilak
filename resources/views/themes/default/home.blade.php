@@ -12,9 +12,15 @@
         (object) [
             'title' => 'کالکشن جدید پاییز',
             'subtitle' => 'استایل خودت را بساز',
+            'description' => null,
             'image_path' => file_exists(public_path('images/hero-fashion.jpg')) ? 'images/hero-fashion.jpg' : null,
+            'mobile_image_path' => null,
             'link_url' => route('shop.index'),
             'link_text' => 'مشاهده محصولات',
+            'focal_x' => 50,
+            'focal_y' => 50,
+            'mobile_focal_x' => 50,
+            'mobile_focal_y' => 50,
         ]
     ]);
     $categoryImages = [
@@ -26,27 +32,7 @@
 @endphp
 
 {{-- Hero Section --}}
-<div id="homeHeroSlider" class="carousel slide mb-5" data-bs-ride="carousel">
-    <div class="carousel-inner rounded overflow-hidden">
-        @foreach($slides as $slide)
-            @php
-                $slideImage = $slide->image_path ? asset($slide->image_path) : $defaultImage;
-            @endphp
-            <div class="carousel-item {{ $loop->first ? 'active' : '' }} position-relative">
-                <img src="{{ $slideImage }}" alt="{{ $slide->title ?? 'اسلایدر' }}" class="w-100" style="height:420px; object-fit:cover;">
-                <div class="position-absolute top-50 start-50 translate-middle text-center text-white px-3">
-                    <h1 class="fw-bold display-5">{{ $slide->title ?? 'کالکشن جدید' }}</h1>
-                    <p class="fs-5">{{ $slide->subtitle ?? '' }}</p>
-                    <a href="{{ $slide->link_url ?? route('shop.index') }}" class="btn btn-light btn-lg mt-2">{{ $slide->link_text ?? 'مشاهده محصولات' }}</a>
-                </div>
-            </div>
-        @endforeach
-    </div>
-    @if($slides->count() > 1)
-        <button class="carousel-control-prev" type="button" data-bs-target="#homeHeroSlider" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span></button>
-        <button class="carousel-control-next" type="button" data-bs-target="#homeHeroSlider" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span></button>
-    @endif
-</div>
+@include('themes.default.partials.hero-slider', ['slides' => $slides, 'sliderId' => 'homeHeroSlider'])
 
 {{-- Categories --}}
 <h2 class="mb-4 fw-bold">دسته‌بندی‌ها</h2>

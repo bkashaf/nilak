@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Domain\Cart\CartService;
 use App\Domain\Order\OrderService;
+use App\Domain\Payment\Services\PaymentService;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,11 +14,13 @@ class CartController extends Controller
 {
     protected CartService $cartService;
     protected OrderService $orderService;
+    protected PaymentService $paymentService;
 
-    public function __construct(CartService $cartService, OrderService $orderService)
+    public function __construct(CartService $cartService, OrderService $orderService, PaymentService $paymentService)
     {
         $this->cartService = $cartService;
         $this->orderService = $orderService;
+        $this->paymentService = $paymentService;
     }
 
     /**
@@ -84,24 +87,87 @@ class CartController extends Controller
         }
 
         $data = $request->validate([
-            'address' => ['required', 'string', 'min:10', 'max:2000'],
+            'address_source' => ['required', 'in:profile,new'],
+            'address' => ['nullable', 'string', 'min:10', 'max:2000', 'required_if:address_source,new'],
             'payment_method' => ['required', 'string', 'exists:payment_methods,name'],
+            'recipient_name' => ['required', 'string', 'max:120'],
+            'recipient_mobile' => ['required', 'string', 'max:20'],
+            'recipient_phone_alt' => ['required', 'string', 'max:20'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'save_address_to_profile' => ['nullable', 'boolean'],
         ]);
 
+        $user = Auth::user();
+        $address = $data['address_source'] === 'profile'
+            ? trim((string) $user?->address)
+            : trim((string) ($data['address'] ?? ''));
+
+        if ($address === '') {
+            return redirect()->back()->withInput()->withErrors([
+                'address' => 'برای ادامه، آدرس تحویل را از پروفایل انتخاب کنید یا آدرس جدید وارد کنید.',
+            ]);
+        }
+
         try {
+            $deliveryDetails = [
+                'recipient_name' => $data['recipient_name'],
+                'recipient_mobile' => $data['recipient_mobile'],
+                'recipient_phone_alt' => $data['recipient_phone_alt'],
+                'postal_code' => $data['postal_code'] ?? null,
+            ];
+
+            if ($request->boolean('save_address_to_profile') && $user) {
+                $user->update([
+                    'mobile' => $data['recipient_mobile'],
+                    'secondary_phone' => $data['recipient_phone_alt'],
+                    'postal_code' => $data['postal_code'] ?? null,
+                    'address' => $address,
+                    'name' => $data['recipient_name'],
+                ]);
+            }
+
             $result = $this->orderService->createFromCart(
-                Auth::user(),
+                $user,
                 $this->cartService,
-                $data['address'],
+                $address,
                 $data['payment_method'],
+                null,
+                $deliveryDetails,
             );
         } catch (\Throwable $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('shop.index')->with(
-            'success',
-            'سفارش شماره ' . $result['order']->id . ' با موفقیت ثبت شد.'
-        );
+        $order = $result['order'];
+        $payment = $result['payment']->load('method');
+        $methodType = $payment->method?->type;
+
+        if ($methodType === 'gateway') {
+            try {
+                $initiation = $this->paymentService->initiate($payment->load('order.user'));
+
+                if (! empty($initiation['redirect_url'])) {
+                    return redirect()->away($initiation['redirect_url']);
+                }
+
+                return redirect()
+                    ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+                    ->with('warning', 'سفارش ثبت شد، اما لینک انتقال به درگاه در دسترس نیست.');
+            } catch (\Throwable $exception) {
+                return redirect()
+                    ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+                    ->with('error', 'سفارش ثبت شد، اما شروع پرداخت آنلاین ناموفق بود: ' . $exception->getMessage());
+            }
+        }
+
+        if ($methodType === 'receipt') {
+            return redirect()
+                ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+                ->with('success', 'سفارش ثبت شد. لطفا رسید بانکی را از بخش پیگیری سفارش ارسال کنید.');
+        }
+
+        return redirect()
+            ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+            ->with('success', 'سفارش شماره ' . $order->tracking_code . ' با موفقیت ثبت شد.');
     }
 }

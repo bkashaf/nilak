@@ -13,12 +13,16 @@
         .site-header { margin-bottom: 20px; }
         footer { margin-top: 40px; padding: 20px 0; background: #f4f4f4; border-top: 1px solid #ddd; }
         .site-header .navbar-nav { align-items: center; }
-        .site-tools { display: flex; align-items: center; gap: .5rem; }
+        .site-header .top-nav { position: relative; }
+        .site-tools { display: flex; align-items: center; gap: .35rem; flex-wrap: nowrap; }
         .site-tools .nav-link { white-space: nowrap; }
         .cart-badge { min-width: 1.25rem; }
         .site-date { color: #6c757d; font-size: .875rem; white-space: nowrap; }
         .site-tools .dropdown { position: relative; }
         .site-tools .dropdown-menu { position: absolute; z-index: 1030; inset-inline-end: 0; }
+        .primary-nav .nav-link { color: #374151; font-weight: 600; border-radius: 999px; padding: .45rem .9rem; transition: all .18s ease; }
+        .primary-nav .nav-link:hover { background: #e5f6f3; color: #0f766e; }
+        .primary-nav .nav-link.active { background: #0f766e; color: #fff; }
         .category-menu { position: relative; }
         .category-menu > .dropdown-menu { position: absolute; z-index: 1030; min-width: 18rem; padding: 1rem; inset-inline-start: 0; }
         .category-menu .category-column { min-width: 9rem; }
@@ -30,10 +34,40 @@
         .site-footer-title { font-weight: 700; margin-bottom: .5rem; }
         .site-footer-link { color: #4b5563; text-decoration: none; display: inline-block; margin-bottom: .25rem; }
         .site-footer-link:hover { color: #111827; }
-        .mobile-menu-panel { display: none; border-top: 1px solid #e5e7eb; padding: .5rem 0; }
-        .mobile-menu-panel.show { display: block; }
+        [dir="rtl"] .site-desktop-footer { text-align: right; }
+        [dir="ltr"] .site-desktop-footer { text-align: left; }
+        .mobile-hamburger { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #cfd8dc; background: #fff; display: inline-flex; align-items: center; justify-content: center; }
+        .mobile-hamburger svg { width: 16px; height: 16px; stroke: #111827; fill: none; stroke-width: 2; }
+        .mobile-menu-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            inset-inline-start: 0;
+            inset-inline-end: 0;
+            z-index: 1060;
+            border: 1px solid rgba(255, 255, 255, .35);
+            background: rgba(255, 255, 255, .78);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            padding: .5rem .75rem;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, .18);
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .mobile-menu-panel.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
         .mobile-menu-panel .nav-link { padding: .5rem .25rem; font-weight: 600; }
-        @media (max-width: 767.98px) { body { padding-bottom: 64px; } .site-desktop-footer { display: none; } .desktop-nav { display: none !important; } }
+        @media (max-width: 767.98px) {
+            body { padding-bottom: 64px; }
+            .site-desktop-footer { display: none; }
+            .desktop-nav { display: none !important; }
+            .site-tools .nav-link { font-size: .82rem; padding-inline: .3rem; }
+            .site-brand { font-size: 1.02rem; max-width: 44vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        }
         @media (min-width: 768px) { .mobile-bottom-nav { display: none !important; } }
         [dir="rtl"] .site-tools { margin-right: auto; }
         [dir="ltr"] .site-tools { margin-left: auto; }
@@ -43,8 +77,12 @@
 
 <header class="site-header bg-white shadow-sm">
     <div class="container">
-        <nav class="navbar navbar-light py-2">
-            <a class="navbar-brand fw-bold me-0" href="{{ route('home') }}">
+        <nav class="navbar navbar-light py-2 top-nav">
+            <button id="mobileMenuToggle" class="mobile-hamburger d-md-none me-2" type="button" aria-controls="mobileMenuPanel" aria-expanded="false" aria-label="Toggle navigation">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+
+            <a class="navbar-brand fw-bold me-0 site-brand" href="{{ route('home') }}">
                 {{ __('messages.brand') }}
             </a>
 
@@ -76,12 +114,13 @@
                 @auth
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ auth()->user()->name }}
+                            پروفایل کاربری
                         </a>
                         <ul class="dropdown-menu">
                             @if(auth()->user()->hasRole('admin'))
                                 <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">{{ __('messages.admin') }}</a></li>
                             @endif
+                            <li><a class="dropdown-item" href="{{ route('account.profile.edit') }}">پروفایل کاربری</a></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf
@@ -92,19 +131,28 @@
                     </li>
                 @else
                     <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">{{ __('messages.login') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">ثبت نام</a></li>
                 @endauth
             </ul>
+
+            <div id="mobileMenuPanel" class="mobile-menu-panel w-100 d-md-none">
+                <ul class="navbar-nav flex-column">
+                    @foreach($menuService->topLinks() as $link)
+                        <li class="nav-item"><a class="nav-link {{ $link['active'] ? 'active' : '' }}" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
+                    @endforeach
+                    @if($productCategoryRoot)
+                        <li class="nav-item"><a class="nav-link" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}">{{ $productCategoryRoot->localized_name }}</a></li>
+                    @endif
+                </ul>
+            </div>
         </nav>
 
         <nav class="navbar navbar-light border-top py-1" aria-label="{{ __('messages.main_navigation') }}">
-            <button id="mobileMenuToggle" class="navbar-toggler me-auto d-md-none" type="button" aria-controls="mobileMenuPanel" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="desktop-nav w-100 d-none d-md-block">
-                <ul class="navbar-nav flex-row flex-wrap justify-content-start gap-1 w-100">
+                <ul class="navbar-nav primary-nav flex-row flex-wrap justify-content-start gap-1 w-100">
 
                 @foreach($menuService->topLinks() as $link)
-                    <li class="nav-item"><a class="nav-link" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
+                    <li class="nav-item"><a class="nav-link {{ $link['active'] ? 'active' : '' }}" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
                 @endforeach
 
                 {{-- دسته‌بندی محصولات و زیرشاخه‌های آن از دیتابیس --}}
@@ -128,40 +176,6 @@
                     </li>
                 @endif
 
-
-                {{-- سبد خرید --}}
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('cart.index') ? 'active' : '' }}" href="{{ route('cart.index') }}">
-                        {{ __('messages.cart') }}
-                    </a>
-                </li>
-
-                {{-- تسویه حساب --}}
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('checkout.index') ? 'active' : '' }}" href="{{ route('checkout.index') }}">
-                        {{ __('messages.checkout') }}
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('orders.track*') ? 'active' : '' }}" href="{{ route('orders.track.form') }}">
-                        {{ __('messages.track_order') }}
-                    </a>
-                </li>
-
-                </ul>
-            </div>
-            <div id="mobileMenuPanel" class="mobile-menu-panel w-100 d-md-none">
-                <ul class="navbar-nav flex-column">
-                    @foreach($menuService->topLinks() as $link)
-                        <li class="nav-item"><a class="nav-link" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
-                    @endforeach
-                    @if($productCategoryRoot)
-                        <li class="nav-item"><a class="nav-link" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}">{{ $productCategoryRoot->localized_name }}</a></li>
-                    @endif
-                    <li class="nav-item"><a class="nav-link" href="{{ route('cart.index') }}">{{ __('messages.cart') }}</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('checkout.index') }}">{{ __('messages.checkout') }}</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('orders.track.form') }}">{{ __('messages.track_order') }}</a></li>
                 </ul>
             </div>
         </nav>
@@ -223,6 +237,12 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         panel.classList.toggle('show');
         toggle.setAttribute('aria-expanded', panel.classList.contains('show') ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (event) {
+        if (!panel.classList.contains('show')) return;
+        if (panel.contains(event.target) || toggle.contains(event.target)) return;
+        panel.classList.remove('show');
+        toggle.setAttribute('aria-expanded', 'false');
     });
     panel.querySelectorAll('a').forEach(function (link) {
         link.addEventListener('click', function () {

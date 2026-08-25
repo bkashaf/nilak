@@ -13,6 +13,10 @@ class Order extends Model
         'inventory_status',
         'tracking_code',
         'address',
+        'recipient_name',
+        'recipient_mobile',
+        'recipient_phone_alt',
+        'postal_code',
     ];
 
     public function items()

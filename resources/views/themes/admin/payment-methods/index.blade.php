@@ -8,6 +8,15 @@
         <p class="text-muted mb-0">روش‌های قابل انتخاب مشتری در checkout</p>
     </div>
 
+    <div class="alert alert-info">
+        <div class="fw-semibold mb-2">راهنمای JSON تنظیمات فنی</div>
+        <ul class="mb-0">
+            <li>پرداخت در محل (cod): می توانید گزینه هایی مثل <span dir="ltr">{"collect_cash":true,"note":"پرداخت هنگام تحویل"}</span> ثبت کنید تا برای سیاست داخلی استفاده شود.</li>
+            <li>رسید بانکی (receipt): نمونه <span dir="ltr">{"bank_name":"Melli","card_last4":"1234","account_holder":"Nilak"}</span> برای نمایش دستور پرداخت به مشتری.</li>
+            <li>درگاه آنلاین (gateway): نمونه <span dir="ltr">{"gateway":"zarinpal","merchant_id":"...","sandbox_mode":true}</span> که برای شروع/تایید پرداخت خوانده می شود.</li>
+        </ul>
+    </div>
+
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif

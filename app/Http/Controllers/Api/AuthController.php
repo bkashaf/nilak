@@ -17,12 +17,18 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6'
+            'mobile' => 'required|string|max:20|unique:users,mobile',
+            'password' => ['required', 'confirmed', 'min:8', 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/']
+        ], [
+            'password.confirmed' => 'تکرار کلمه عبور با کلمه عبور یکسان نیست.',
+            'password.min' => 'کلمه عبور باید حداقل 8 کاراکتر باشد.',
+            'password.regex' => 'فرمت کلمه عبور درست نیست. کلمه عبور باید شامل حداقل یک حرف انگلیسی و یک عدد باشد.',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'mobile' => $request->mobile,
             'password' => Hash::make($request->password),
         ]);
 

@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // 🔥 ثبت Middleware ادمین
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'installer.access' => \App\Http\Middleware\EnsureInstallerAccessible::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

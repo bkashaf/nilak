@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController;
 use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\SliderController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -49,16 +51,27 @@ Route::prefix('users')->name('users.')->group(function () {
 
 // مدیریت صفحات
 Route::prefix('pages')->name('pages.')->group(function () {
-    Route::get('/', function () {
-        return 'لیست صفحات';
-    })->name('index');
+    Route::get('/', [PageController::class, 'index'])->name('index');
+    Route::get('/create', [PageController::class, 'create'])->name('create');
+    Route::post('/', [PageController::class, 'store'])->name('store');
+    Route::post('/upload-image', [PageController::class, 'uploadImage'])->name('upload-image');
+    Route::get('/{page}/edit', [PageController::class, 'edit'])->name('edit');
+    Route::put('/{page}', [PageController::class, 'update'])->name('update');
+    Route::delete('/{page}', [PageController::class, 'destroy'])->name('destroy');
 });
 
 // مدیریت منو
 Route::prefix('menu')->name('menu.')->group(function () {
     Route::get('/', function () {
-        return 'مدیریت منو';
+        return redirect()->route('admin.pages.index');
     })->name('index');
+});
+
+Route::prefix('sliders')->name('sliders.')->group(function () {
+    Route::get('/', [SliderController::class, 'index'])->name('index');
+    Route::post('/', [SliderController::class, 'store'])->name('store');
+    Route::put('/{slider}', [SliderController::class, 'update'])->name('update');
+    Route::delete('/{slider}', [SliderController::class, 'destroy'])->name('destroy');
 });
 
 // گزارش‌ها

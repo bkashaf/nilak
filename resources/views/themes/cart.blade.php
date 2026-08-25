@@ -1,8 +1,6 @@
 ﻿@extends('themes.default.layouts.shop')
 @section('title', 'سبد خرید')
-@endsection
 @section('content')
-@php $cart = session('cart', collect()); @endphp
 {{-- View: C:/xampp/htdocs/nilak/resources/views/themes/cart.blade.php --}}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,7 +15,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
 @endif
 
-@if($cart->isEmpty())
+@if($items->isEmpty())
     <div class="alert alert-info">سبد خرید شما خالی است.</div>
 @else
 
@@ -34,7 +32,7 @@
     </thead>
     <tbody>
 
-        @foreach($cart->items() as $item)
+        @foreach($items as $item)
             <tr>
 
                 {{-- تصویر --}}
@@ -94,7 +92,7 @@
 {{-- جمع کل --}}
 <div class="card mt-4">
     <div class="card-body d-flex justify-content-between align-items-center">
-        <h4>جمع کل: {{ number_format($cart->total()) }} تومان</h4>
+        <h4>جمع کل: {{ number_format($total) }} تومان</h4>
 
         <div>
             <a href="{{ route('shop.index') }}" class="btn btn-secondary">ادامه خرید</a>

@@ -8,9 +8,22 @@ use Illuminate\Http\Request;
 
 class OrderTrackingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('themes.default.order-tracking');
+        $trackingCode = strtoupper(trim((string) $request->query('tracking_code', '')));
+        $order = null;
+
+        if ($trackingCode !== '') {
+            $order = Order::query()
+                ->with(['items.product', 'payments.method', 'statusHistories', 'payments.statusHistories'])
+                ->where('tracking_code', $trackingCode)
+                ->first();
+        }
+
+        return view('themes.default.order-tracking', [
+            'order' => $order,
+            'trackingCode' => $trackingCode,
+        ]);
     }
 
     public function show(Request $request)

@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class OrderService
 {
-    public function createFromCart(User $user, CartService $cart, string $address, string $paymentMethodName, ?string $idempotencyKey = null): array
+    public function createFromCart(User $user, CartService $cart, string $address, string $paymentMethodName, ?string $idempotencyKey = null, ?array $deliveryDetails = null): array
     {
         $cartItems = $cart->items();
 
@@ -27,13 +27,13 @@ class OrderService
             'quantity' => $item->quantity,
         ])->all();
 
-        $result = $this->createFromItems($user, $items, $address, $paymentMethodName, $idempotencyKey);
+        $result = $this->createFromItems($user, $items, $address, $paymentMethodName, $idempotencyKey, $deliveryDetails);
         $cart->clear();
 
         return $result;
     }
 
-    public function createFromItems(User $user, array $items, string $address, string $paymentMethodName, ?string $idempotencyKey = null): array
+    public function createFromItems(User $user, array $items, string $address, string $paymentMethodName, ?string $idempotencyKey = null, ?array $deliveryDetails = null): array
     {
         if ($idempotencyKey) {
             $existing = Payment::where('idempotency_key', $idempotencyKey)->with(['order.items', 'method'])->first();
@@ -42,11 +42,15 @@ class OrderService
             }
         }
 
-        return DB::transaction(function () use ($user, $items, $address, $paymentMethodName, $idempotencyKey) {
+        return DB::transaction(function () use ($user, $items, $address, $paymentMethodName, $idempotencyKey, $deliveryDetails) {
             $paymentMethod = PaymentMethod::query()
                 ->where('name', $paymentMethodName)
                 ->where('is_active', true)
                 ->firstOrFail();
+
+            $recipientName = trim((string) ($deliveryDetails['recipient_name'] ?? $user->name ?? ''));
+            $recipientMobile = trim((string) ($deliveryDetails['recipient_mobile'] ?? $user->mobile ?? ''));
+            $recipientPhoneAlt = trim((string) ($deliveryDetails['recipient_phone_alt'] ?? $user->secondary_phone ?? ''));
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -55,6 +59,10 @@ class OrderService
                 'inventory_status' => 'none',
                 'tracking_code' => $this->generateTrackingCode(),
                 'address' => $address,
+                'recipient_name' => $recipientName ?: $user->name,
+                'recipient_mobile' => $recipientMobile ?: $user->mobile,
+                'recipient_phone_alt' => $recipientPhoneAlt ?: null,
+                'postal_code' => $deliveryDetails['postal_code'] ?? null,
             ]);
 
             $total = 0;
