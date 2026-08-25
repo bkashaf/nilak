@@ -19,7 +19,14 @@
 
                         <div class="col-12">
                             <label class="form-label" for="mobile">شماره موبایل <span class="text-danger">*</span></label>
-                            <input id="mobile" type="text" name="mobile" class="form-control" value="{{ old('mobile') }}" required>
+                            <div class="input-group">
+                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px;" required>
+                                    <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
+                                    <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
+                                </select>
+                                <input id="mobile" type="text" name="mobile" class="form-control js-digit-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" required>
+                            </div>
+                            <div class="form-text">شماره را بدون صفر ابتدایی هم می توانید وارد کنید. مثال: 9121234567</div>
                         </div>
 
                         <div class="col-12">
@@ -30,12 +37,21 @@
                         <div class="col-md-6">
                             <label class="form-label" for="password">کلمه عبور <span class="text-danger">*</span></label>
                             <input id="password" type="password" name="password" class="form-control" required>
-                            <div class="form-text">حداقل 8 کاراکتر و شامل حداقل یک حرف انگلیسی و یک عدد باشد.</div>
+                            <div class="form-text">راهنما: حداقل 8 کاراکتر، شامل حداقل یک حرف انگلیسی بزرگ/کوچک و یک عدد. مثال: Nilak1234</div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label" for="password_confirmation">تکرار کلمه عبور <span class="text-danger">*</span></label>
                             <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="captcha_answer">کپچای ساده <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text" dir="ltr">{{ $captchaA }} + {{ $captchaB }} = ?</span>
+                                <input id="captcha_answer" type="text" name="captcha_answer" class="form-control js-digit-en" value="{{ old('captcha_answer') }}" inputmode="numeric" dir="ltr" required>
+                            </div>
+                            <div class="form-text">برای ادامه، پاسخ عبارت ریاضی را با اعداد انگلیسی وارد کنید.</div>
                         </div>
 
                         <div class="col-12 d-grid d-md-flex justify-content-md-end gap-2">
@@ -47,4 +63,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const map = {
+            '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
+            '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'
+        };
+
+        function normalizeDigits(value) {
+            return (value || '').replace(/[۰-۹٠-٩]/g, function (ch) { return map[ch] || ch; });
+        }
+
+        document.querySelectorAll('.js-digit-en').forEach(function (el) {
+            el.addEventListener('input', function () {
+                this.value = normalizeDigits(this.value);
+            });
+            el.addEventListener('blur', function () {
+                this.value = normalizeDigits(this.value).replace(/[^0-9+]/g, '');
+            });
+        });
+    });
+    </script>
 @endsection

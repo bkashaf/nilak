@@ -39,6 +39,48 @@
                     <input id="tracking_prefix" name="tracking_prefix" value="{{ old('tracking_prefix', $settings['tracking_prefix']) }}" class="form-control" maxlength="10" required>
                     <div class="form-text">فقط حروف انگلیسی و عدد، مانند NLK</div>
                 </div>
+
+                <div class="col-12 mt-2">
+                    <hr>
+                    <h2 class="h5 mb-1">تنظیمات پنل پیامک</h2>
+                    <p class="text-muted mb-0">برای فاز OTP و اعلان های پیامکی آماده سازی شود.</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sms_provider" class="form-label">ارائه دهنده SMS</label>
+                    <select id="sms_provider" name="sms_provider" class="form-select" required>
+                        <option value="none" @selected(old('sms_provider', $settings['sms_provider']) === 'none')>None (غیرفعال)</option>
+                        <option value="kavenegar" @selected(old('sms_provider', $settings['sms_provider']) === 'kavenegar')>Kavenegar</option>
+                        <option value="melipayamak" @selected(old('sms_provider', $settings['sms_provider']) === 'melipayamak')>MeliPayamak</option>
+                        <option value="custom" @selected(old('sms_provider', $settings['sms_provider']) === 'custom')>Custom</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sms_sender" class="form-label">شماره/لاین ارسال</label>
+                    <input id="sms_sender" name="sms_sender" value="{{ old('sms_sender', $settings['sms_sender']) }}" class="form-control" placeholder="3000xxxx">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sms_api_key" class="form-label">API Key / Token</label>
+                    <input id="sms_api_key" name="sms_api_key" value="{{ old('sms_api_key', $settings['sms_api_key']) }}" class="form-control" dir="ltr">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sms_endpoint" class="form-label">API Endpoint</label>
+                    <input id="sms_endpoint" name="sms_endpoint" value="{{ old('sms_endpoint', $settings['sms_endpoint']) }}" class="form-control" dir="ltr" placeholder="https://api.example.com/send">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sms_username" class="form-label">نام کاربری پنل</label>
+                    <input id="sms_username" name="sms_username" value="{{ old('sms_username', $settings['sms_username']) }}" class="form-control" dir="ltr">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sms_password" class="form-label">رمز پنل</label>
+                    <input id="sms_password" name="sms_password" value="{{ old('sms_password', $settings['sms_password']) }}" class="form-control" dir="ltr">
+                </div>
+
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">ذخیره تنظیمات</button>
                 </div>

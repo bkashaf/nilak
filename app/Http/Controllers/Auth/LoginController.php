@@ -3,27 +3,36 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Support\PhoneNumberNormalizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('Auth.login');
+        return view('Auth.login', [
+            'defaultCountryCode' => app()->getLocale() === 'fa' ? '+98' : '+1',
+        ]);
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $data = $request->validate([
+            'country_code' => ['required', 'in:+98,+1'],
             'mobile'    => ['required', 'string', 'max:20'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $variants = PhoneNumberNormalizer::variants($data['mobile'], $data['country_code']);
+        $user = User::query()->whereIn('mobile', $variants)->first();
+
+        if ($user && Hash::check($data['password'], $user->password)) {
+            Auth::login($user, $request->boolean('remember'));
             $request->session()->regenerate();
 
-            $user = Auth::user();
             if ($user && $user->hasRole('admin')) {
                 return redirect()->intended(route('admin.dashboard'));
             }
@@ -33,7 +42,7 @@ class LoginController extends Controller
 
         return back()->withErrors([
             'mobile' => 'اطلاعات ورود نادرست است.',
-        ])->onlyInput('mobile');
+        ])->onlyInput('mobile', 'country_code');
     }
 
     public function logout(Request $request)

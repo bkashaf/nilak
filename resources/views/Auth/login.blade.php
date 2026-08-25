@@ -19,7 +19,13 @@
 
                         <div class="col-12">
                             <label class="form-label" for="mobile">شماره موبایل</label>
-                            <input id="mobile" type="text" name="mobile" class="form-control form-control-lg" value="{{ old('mobile') }}" required autofocus>
+                            <div class="input-group">
+                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px;" required>
+                                    <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
+                                    <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
+                                </select>
+                                <input id="mobile" type="text" name="mobile" class="form-control form-control-lg js-digit-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" required autofocus>
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -45,4 +51,28 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const map = {
+            '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
+            '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'
+        };
+
+        function normalizeDigits(value) {
+            return (value || '').replace(/[۰-۹٠-٩]/g, function (ch) { return map[ch] || ch; });
+        }
+
+        const mobile = document.querySelector('.js-digit-en');
+        if (!mobile) return;
+
+        mobile.addEventListener('input', function () {
+            this.value = normalizeDigits(this.value);
+        });
+
+        mobile.addEventListener('blur', function () {
+            this.value = normalizeDigits(this.value).replace(/[^0-9+]/g, '');
+        });
+    });
+    </script>
 @endsection
