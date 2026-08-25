@@ -20,7 +20,7 @@ class OrderTrackingController extends Controller
         ]);
 
         $order = Order::query()
-            ->with(['items.product', 'payments.method'])
+            ->with(['items.product', 'payments.method', 'statusHistories', 'payments.statusHistories'])
             ->where('tracking_code', strtoupper(trim($data['tracking_code'])))
             ->first();
 

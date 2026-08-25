@@ -19,7 +19,7 @@
         <div class="table-responsive">
             <table class="table table-striped align-middle mb-0">
                 <thead>
-                    <tr><th>شناسه</th><th>سفارش</th><th>مشتری</th><th>روش پرداخت</th><th>مبلغ</th><th>وضعیت</th><th>رسید</th><th>عملیات</th></tr>
+                    <tr><th>شناسه</th><th>سفارش</th><th>مشتری</th><th>روش پرداخت</th><th>مبلغ</th><th>وضعیت</th><th>تاریخ‌ها</th><th>رسید</th><th>عملیات</th></tr>
                 </thead>
                 <tbody>
                     @forelse($payments as $payment)
@@ -31,6 +31,13 @@
                             <td>{{ $payment->method?->title ?? '—' }}</td>
                             <td>{{ number_format($payment->amount) }} تومان</td>
                             <td>{{ __('messages.payment_statuses.' . $payment->status) }}</td>
+                            <td class="small text-muted">
+                                <div>ثبت: {{ app(\App\Support\DateFormatter::class)->format($payment->created_at) }}</div>
+                                <div>آخرین تغییر: {{ app(\App\Support\DateFormatter::class)->format($payment->updated_at) }}</div>
+                                @if($payment->paid_at)
+                                    <div>پرداخت: {{ app(\App\Support\DateFormatter::class)->format($payment->paid_at) }}</div>
+                                @endif
+                            </td>
                             <td>
                                 @if($receipt)
                                     <a href="{{ asset('storage/' . $receipt->file_path) }}" target="_blank">مشاهده رسید</a>
@@ -60,7 +67,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="text-center py-4">پرداختی ثبت نشده است.</td></tr>
+                        <tr><td colspan="9" class="text-center py-4">پرداختی ثبت نشده است.</td></tr>
                     @endforelse
                 </tbody>
             </table>

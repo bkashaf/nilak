@@ -19,12 +19,12 @@
         <div class="card-header">آخرین سفارش‌ها</div>
         <div class="table-responsive">
             <table class="table table-striped align-middle mb-0">
-                <thead><tr><th>شماره</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>تاریخ</th></tr></thead>
+                <thead><tr><th>شماره</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>تاریخ ثبت</th><th>آخرین به‌روزرسانی</th></tr></thead>
                 <tbody>
                     @forelse($recentOrders as $order)
-                        <tr><td>#{{ $order->id }}</td><td>{{ $order->user->name ?? $order->user->email ?? '—' }}</td><td>{{ number_format($order->total_amount) }} تومان</td><td>{{ $order->status }}</td><td>{{ app(\App\Support\DateFormatter::class)->format($order->created_at) }}</td></tr>
+                        <tr><td>#{{ $order->id }}</td><td>{{ $order->user->name ?? $order->user->email ?? '—' }}</td><td>{{ number_format($order->total_amount) }} تومان</td><td>{{ $order->status }}</td><td>{{ app(\App\Support\DateFormatter::class)->format($order->created_at) }}</td><td>{{ app(\App\Support\DateFormatter::class)->format($order->updated_at) }}</td></tr>
                     @empty
-                        <tr><td colspan="5" class="text-center py-4">هنوز سفارشی ثبت نشده است.</td></tr>
+                        <tr><td colspan="6" class="text-center py-4">هنوز سفارشی ثبت نشده است.</td></tr>
                     @endforelse
                 </tbody>
             </table>

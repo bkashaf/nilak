@@ -15,6 +15,7 @@
     @if($cart->isEmpty())
         <p>سبد خرید شما خالی است.</p>
     @else
+        <p class="text-muted small">آخرین به‌روزرسانی سبد: {{ app(\App\Support\DateFormatter::class)->format(now()) }}</p>
         <ul>
             @foreach($cart as $item)
                 <li>{{ $item['name'] ?? 'محصول' }} - {{ $item['qty'] ?? 1 }}</li>

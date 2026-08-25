@@ -11,7 +11,7 @@
     <style>
         body { background-color: #f8f9fa; font-family: Vazirmatn, sans-serif; text-align: start; }
         .site-header { margin-bottom: 20px; }
-        footer { margin-top: 40px; padding: 20px 0; background: #eee; text-align: center; }
+        footer { margin-top: 40px; padding: 20px 0; background: #f4f4f4; border-top: 1px solid #ddd; }
         .site-header .navbar-nav { align-items: center; }
         .site-tools { display: flex; align-items: center; gap: .5rem; }
         .site-tools .nav-link { white-space: nowrap; }
@@ -24,6 +24,14 @@
         .category-menu .category-column { min-width: 9rem; }
         .category-menu .category-heading { font-weight: 700; color: #212529; }
         .category-menu .category-child { display: block; padding: .25rem 0; color: #6c757d; }
+        .mobile-bottom-nav { position: fixed; bottom: 0; inset-inline: 0; z-index: 1040; background: #fff; border-top: 1px solid #ddd; }
+        .mobile-bottom-nav a { color: #1f2937; text-decoration: none; font-size: .76rem; }
+        .mobile-bottom-nav svg { width: 20px; height: 20px; stroke: #111827; fill: none; stroke-width: 1.8; }
+        .site-footer-title { font-weight: 700; margin-bottom: .5rem; }
+        .site-footer-link { color: #4b5563; text-decoration: none; display: inline-block; margin-bottom: .25rem; }
+        .site-footer-link:hover { color: #111827; }
+        @media (max-width: 767.98px) { body { padding-bottom: 64px; } .site-desktop-footer { display: none; } }
+        @media (min-width: 768px) { .mobile-bottom-nav { display: none !important; } }
         [dir="rtl"] .site-tools { margin-right: auto; }
         [dir="ltr"] .site-tools { margin-left: auto; }
     </style>
@@ -84,8 +92,11 @@
         </nav>
 
         <nav class="navbar navbar-expand-md navbar-light border-top py-1" aria-label="{{ __('messages.main_navigation') }}">
-            <div id="mainMenu" class="w-100">
-                <ul class="navbar-nav flex-row flex-wrap justify-content-start gap-1">
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="mainMenu" class="collapse navbar-collapse w-100">
+                <ul class="navbar-nav flex-column flex-md-row flex-wrap justify-content-start gap-1 w-100">
 
                 {{-- خانه --}}
                 <li class="nav-item">
@@ -162,9 +173,45 @@
     @yield('content')
 </div>
 
-<footer>
-    <p>© {{ date('Y') }} {{ __('messages.footer') }}</p>
+<footer class="site-desktop-footer">
+    <div class="container py-4">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="site-footer-title">{{ __('messages.brand') }}</div>
+                <p class="text-muted mb-2">فروشگاه پوشاک و کفش نیلک با تمرکز بر خرید ساده، پشتیبانی سریع و ارسال مطمئن.</p>
+                <div class="small text-muted">© {{ date('Y') }} {{ __('messages.footer') }}</div>
+            </div>
+            <div class="col-md-4">
+                <div class="site-footer-title">لینک‌های مفید</div>
+                <a class="site-footer-link" href="{{ route('home') }}">{{ __('messages.home') }}</a><br>
+                <a class="site-footer-link" href="{{ route('shop.index') }}">{{ __('messages.shop') }}</a><br>
+                <a class="site-footer-link" href="{{ route('orders.track.form') }}">{{ __('messages.track_order') }}</a><br>
+                <a class="site-footer-link" href="{{ route('checkout.index') }}">{{ __('messages.checkout') }}</a>
+            </div>
+            <div class="col-md-4">
+                <div class="site-footer-title">تماس با ما</div>
+                <div class="text-muted mb-1">آدرس: تهران، خیابان نمونه، پلاک ۱۰</div>
+                <div class="text-muted mb-1">تلفن: ۰۲۱-۱۲۳۴۵۶۷۸</div>
+                <div class="text-muted mb-3">ایمیل: support@nilak.local</div>
+                <div class="d-flex gap-3 align-items-center">
+                    <a href="#" class="site-footer-link" aria-label="ای‌نماد">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg>
+                    </a>
+                    <a href="#" class="site-footer-link" aria-label="اتحادیه کسب و کار مجازی">
+                        <svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M8 10h8M8 14h6"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </footer>
+
+<nav class="mobile-bottom-nav d-flex justify-content-around py-2" aria-label="Mobile quick links">
+    <a class="d-flex flex-column align-items-center" href="{{ route('home') }}"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>خانه</span></a>
+    <a class="d-flex flex-column align-items-center" href="{{ route('shop.index') }}"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H7"/></svg><span>فروشگاه</span></a>
+    <a class="d-flex flex-column align-items-center" href="{{ route('cart.index') }}"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-11z"/><path d="M6 6 5 3H2"/></svg><span>سبد</span></a>
+    <a class="d-flex flex-column align-items-center" href="{{ route('orders.track.form') }}"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg><span>پیگیری</span></a>
+</nav>
 
 </body>
 </html>
