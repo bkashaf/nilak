@@ -1,4 +1,4 @@
-import tinymce from 'tinymce/tinymce';
+import tinymce from 'tinymce';
 import 'tinymce/icons/default';
 import 'tinymce/themes/silver';
 import 'tinymce/models/dom';
@@ -37,8 +37,13 @@ function initPageEditor() {
 
     tinymce.init({
         selector: '.js-page-editor',
+        license_key: 'gpl',
+        promotion: false,
+        branding: false,
+        readonly: false,
         height: 620,
         menubar: 'file edit view insert format table tools help',
+        toolbar_mode: 'sliding',
         plugins: 'anchor autolink charmap code fullscreen help image link lists media preview searchreplace table visualblocks wordcount directionality autoresize',
         toolbar: 'undo redo | blocks fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | ltr rtl | bullist numlist outdent indent | link image media table snippets | removeformat code fullscreen preview',
         content_css: false,
@@ -135,4 +140,8 @@ function initPageEditor() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', initPageEditor);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPageEditor);
+} else {
+    initPageEditor();
+}
