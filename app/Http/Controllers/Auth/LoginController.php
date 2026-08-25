@@ -33,6 +33,10 @@ class LoginController extends Controller
             Auth::login($user, $request->boolean('remember'));
             $request->session()->regenerate();
 
+            if (! $user->isProfileComplete()) {
+                $request->session()->flash('warning', 'برای فعال شدن خرید، لطفا پروفایل را کامل کنید.');
+            }
+
             if ($user && $user->hasRole('admin')) {
                 return redirect()->intended(route('admin.dashboard'));
             }
