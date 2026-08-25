@@ -47,6 +47,8 @@ The project is published on GitHub for public access. Contributions, issue repor
 
 ## Installation
 
+For a full deployment-focused guide, see INSTALLATION.md.
+
 ### Local Development
 
 1. Clone the repository.

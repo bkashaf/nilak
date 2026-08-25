@@ -22,3 +22,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Private university/defense documents (local only)
+/docs-private/
+/docs/UNIVERSITY_PROJECT_OVERVIEW_FA.md
+/docs/RELEASE_NOTES_FA_*.md
+/docs/RC_TO_V1_CHECKLIST_FA.md
