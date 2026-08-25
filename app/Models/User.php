@@ -22,13 +22,23 @@ class User extends Authenticatable
         'postal_code',
         'address',
         'password',
+        'otp_code_hash',
+        'otp_expires_at',
+        'otp_attempts',
+        'otp_last_sent_at',
         'status',
         'preferred_locale',
     ];
 
     protected $hidden = [
         'password',
+        'otp_code_hash',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'otp_expires_at' => 'datetime',
+        'otp_last_sent_at' => 'datetime',
     ];
 
     public function roles()

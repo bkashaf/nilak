@@ -31,6 +31,20 @@ Nilak focuses on the operational core of a deployable commerce system:
 - Admin panel: orders, payments, payment methods, pages, slider management
 - Localization: Persian/English language switching
 - Installer wizard: requirements, DB test, store settings, final one-click install run
+- Mobile-first authentication baseline: register/login by mobile + password, with OTP-ready backend foundation for future SMS login
+
+## Authentication Roadmap
+
+Current mode:
+
+- Mobile + password login is active
+- Email is optional in user profile
+- Checkout requires a completed profile
+
+Prepared for next phase:
+
+- OTP configuration and secure code lifecycle fields are included
+- SMS provider integration remains disabled by default until provider setup is completed
 
 ## Architecture Snapshot
 
