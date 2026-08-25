@@ -30,7 +30,10 @@
         .site-footer-title { font-weight: 700; margin-bottom: .5rem; }
         .site-footer-link { color: #4b5563; text-decoration: none; display: inline-block; margin-bottom: .25rem; }
         .site-footer-link:hover { color: #111827; }
-        @media (max-width: 767.98px) { body { padding-bottom: 64px; } .site-desktop-footer { display: none; } }
+        .mobile-menu-panel { display: none; border-top: 1px solid #e5e7eb; padding: .5rem 0; }
+        .mobile-menu-panel.show { display: block; }
+        .mobile-menu-panel .nav-link { padding: .5rem .25rem; font-weight: 600; }
+        @media (max-width: 767.98px) { body { padding-bottom: 64px; } .site-desktop-footer { display: none; } .desktop-nav { display: none !important; } }
         @media (min-width: 768px) { .mobile-bottom-nav { display: none !important; } }
         [dir="rtl"] .site-tools { margin-right: auto; }
         [dir="ltr"] .site-tools { margin-left: auto; }
@@ -47,6 +50,8 @@
 
             @php
                 $cartItemCount = app(\App\Domain\Cart\CartService::class)->items()->sum('quantity');
+                $menuService = app(\App\Support\MenuService::class);
+                $productCategoryRoot = $menuService->productCategoryRoot();
             @endphp
             <ul class="navbar-nav site-tools flex-row flex-wrap">
                 <li class="nav-item site-date d-none d-lg-flex align-items-center">
@@ -91,35 +96,18 @@
             </ul>
         </nav>
 
-        <nav class="navbar navbar-expand-md navbar-light border-top py-1" aria-label="{{ __('messages.main_navigation') }}">
-            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-light border-top py-1" aria-label="{{ __('messages.main_navigation') }}">
+            <button id="mobileMenuToggle" class="navbar-toggler me-auto d-md-none" type="button" aria-controls="mobileMenuPanel" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div id="mainMenu" class="collapse navbar-collapse w-100">
-                <ul class="navbar-nav flex-column flex-md-row flex-wrap justify-content-start gap-1 w-100">
+            <div class="desktop-nav w-100 d-none d-md-block">
+                <ul class="navbar-nav flex-row flex-wrap justify-content-start gap-1 w-100">
 
-                {{-- خانه --}}
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                        {{ __('messages.home') }}
-                    </a>
-                </li>
-
-                {{-- فروشگاه --}}
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('shop.index') ? 'active' : '' }}" href="{{ route('shop.index') }}">
-                        {{ __('messages.shop') }}
-                    </a>
-                </li>
+                @foreach($menuService->topLinks() as $link)
+                    <li class="nav-item"><a class="nav-link" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
+                @endforeach
 
                 {{-- دسته‌بندی محصولات و زیرشاخه‌های آن از دیتابیس --}}
-                @php
-                    $productCategoryRoot = \App\Models\Category::active()
-                        ->where('slug', 'product-categories')
-                        ->with(['children' => fn ($query) => $query->active()->with('children')])
-                        ->first();
-                @endphp
-
                 @if($productCategoryRoot)
                     <li class="nav-item dropdown category-menu">
                         <a class="nav-link dropdown-toggle" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -161,6 +149,19 @@
                     </a>
                 </li>
 
+                </ul>
+            </div>
+            <div id="mobileMenuPanel" class="mobile-menu-panel w-100 d-md-none">
+                <ul class="navbar-nav flex-column">
+                    @foreach($menuService->topLinks() as $link)
+                        <li class="nav-item"><a class="nav-link" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
+                    @endforeach
+                    @if($productCategoryRoot)
+                        <li class="nav-item"><a class="nav-link" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}">{{ $productCategoryRoot->localized_name }}</a></li>
+                    @endif
+                    <li class="nav-item"><a class="nav-link" href="{{ route('cart.index') }}">{{ __('messages.cart') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('checkout.index') }}">{{ __('messages.checkout') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('orders.track.form') }}">{{ __('messages.track_order') }}</a></li>
                 </ul>
             </div>
         </nav>
@@ -212,6 +213,25 @@
     <a class="d-flex flex-column align-items-center" href="{{ route('cart.index') }}"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-11z"/><path d="M6 6 5 3H2"/></svg><span>سبد</span></a>
     <a class="d-flex flex-column align-items-center" href="{{ route('orders.track.form') }}"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg><span>پیگیری</span></a>
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toggle = document.getElementById('mobileMenuToggle');
+    var panel = document.getElementById('mobileMenuPanel');
+    if (!toggle || !panel) return;
+    toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        panel.classList.toggle('show');
+        toggle.setAttribute('aria-expanded', panel.classList.contains('show') ? 'true' : 'false');
+    });
+    panel.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            panel.classList.remove('show');
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+});
+</script>
 
 </body>
 </html>

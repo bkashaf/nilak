@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Support\SliderService;
 
 class HomeController extends Controller
 {
@@ -25,7 +26,9 @@ $bestSellers = Product::where('is_active', true)
     ->get();
 
 
+        $homeSlider = app(SliderService::class)->byKey('home_hero', 3);
+
         // نمایش صفحه Home
-        return view('themes.default.home', compact('newProducts', 'bestSellers'));
+        return view('themes.default.home', compact('newProducts', 'bestSellers', 'homeSlider'));
     }
 }

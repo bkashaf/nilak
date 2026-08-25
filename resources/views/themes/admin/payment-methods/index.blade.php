@@ -42,6 +42,31 @@
                                 <label for="config-{{ $paymentMethod->id }}" class="form-label">تنظیمات فنی JSON</label>
                                 <textarea id="config-{{ $paymentMethod->id }}" name="config" class="form-control" rows="2" dir="ltr">{{ $paymentMethod->config ? json_encode($paymentMethod->config, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : '' }}</textarea>
                             </div>
+                            @if($paymentMethod->type === 'gateway')
+                                <div class="border rounded p-3 bg-light mb-3">
+                                    <div class="fw-semibold mb-2">تنظیمات بصری درگاه</div>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label">نام درگاه</label>
+                                            <input name="gateway" class="form-control" dir="ltr" value="{{ old('gateway', $paymentMethod->config['gateway'] ?? 'fake') }}" placeholder="fake یا zarinpal">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">مرچنت آیدی</label>
+                                            <input name="merchant_id" class="form-control" dir="ltr" value="{{ old('merchant_id', $paymentMethod->config['merchant_id'] ?? '') }}" placeholder="UUID Sandbox">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Callback URL</label>
+                                            <input name="callback_url" class="form-control" dir="ltr" value="{{ old('callback_url', $paymentMethod->config['callback_url'] ?? '') }}" placeholder="https://example.com/payment/...">
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-check mt-1">
+                                                <input id="sandbox_mode-{{ $paymentMethod->id }}" type="checkbox" name="sandbox_mode" value="1" class="form-check-input" @checked(old('sandbox_mode', $paymentMethod->config['sandbox_mode'] ?? true))>
+                                                <label for="sandbox_mode-{{ $paymentMethod->id }}" class="form-check-label">حالت تست (Sandbox) فعال باشد</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="form-check mb-3">
                                 <input id="active-{{ $paymentMethod->id }}" name="is_active" value="1" type="checkbox" class="form-check-input" @checked($paymentMethod->is_active)>
                                 <label for="active-{{ $paymentMethod->id }}" class="form-check-label">این روش برای مشتری فعال باشد</label>

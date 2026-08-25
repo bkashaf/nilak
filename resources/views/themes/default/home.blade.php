@@ -8,9 +8,15 @@
 
 @php
     $defaultImage = asset('themes/default/images/no-image.svg');
-    $heroImage = file_exists(public_path('images/hero-fashion.jpg'))
-        ? asset('images/hero-fashion.jpg')
-        : $defaultImage;
+    $slides = ($homeSlider ?? collect())->count() ? $homeSlider : collect([
+        (object) [
+            'title' => 'کالکشن جدید پاییز',
+            'subtitle' => 'استایل خودت را بساز',
+            'image_path' => file_exists(public_path('images/hero-fashion.jpg')) ? 'images/hero-fashion.jpg' : null,
+            'link_url' => route('shop.index'),
+            'link_text' => 'مشاهده محصولات',
+        ]
+    ]);
     $categoryImages = [
         'men' => file_exists(public_path('images/cat-men.jpg')) ? asset('images/cat-men.jpg') : $defaultImage,
         'women' => file_exists(public_path('images/cat-women.jpg')) ? asset('images/cat-women.jpg') : $defaultImage,
@@ -20,18 +26,26 @@
 @endphp
 
 {{-- Hero Section --}}
-<div class="position-relative mb-5">
-    <img src="{{ $heroImage }}"
-         alt="کالکشن جدید پاییز"
-         class="w-100 rounded" 
-         style="height:420px; object-fit:cover;">
-    <div class="position-absolute top-50 start-50 translate-middle text-center text-white">
-        <h1 class="fw-bold display-5">کالکشن جدید پاییز</h1>
-        <p class="fs-5">استایل خودت را بساز</p>
-        <a href="{{ route('shop.index') }}" class="btn btn-light btn-lg mt-3">
-            مشاهده محصولات
-        </a>
+<div id="homeHeroSlider" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-inner rounded overflow-hidden">
+        @foreach($slides as $slide)
+            @php
+                $slideImage = $slide->image_path ? asset($slide->image_path) : $defaultImage;
+            @endphp
+            <div class="carousel-item {{ $loop->first ? 'active' : '' }} position-relative">
+                <img src="{{ $slideImage }}" alt="{{ $slide->title ?? 'اسلایدر' }}" class="w-100" style="height:420px; object-fit:cover;">
+                <div class="position-absolute top-50 start-50 translate-middle text-center text-white px-3">
+                    <h1 class="fw-bold display-5">{{ $slide->title ?? 'کالکشن جدید' }}</h1>
+                    <p class="fs-5">{{ $slide->subtitle ?? '' }}</p>
+                    <a href="{{ $slide->link_url ?? route('shop.index') }}" class="btn btn-light btn-lg mt-2">{{ $slide->link_text ?? 'مشاهده محصولات' }}</a>
+                </div>
+            </div>
+        @endforeach
     </div>
+    @if($slides->count() > 1)
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeHeroSlider" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span></button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeHeroSlider" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span></button>
+    @endif
 </div>
 
 {{-- Categories --}}
@@ -121,11 +135,11 @@
 </div>
 
 {{-- Newsletter --}}
-<div class="bg-dark text-white p-5 rounded text-center mb-5">
-    <h3 class="fw-bold mb-3">عضویت در خبرنامه</h3>
-    <p class="mb-4">از جدیدترین محصولات و تخفیف‌ها باخبر شوید</p>
+<div class="bg-dark text-white p-3 rounded text-center mb-5">
+    <h3 class="fw-bold mb-2">عضویت در خبرنامه</h3>
+    <p class="mb-2">از محصولات و تخفیف‌های جدید مطلع شوید</p>
     <form class="d-flex justify-content-center">
-        <input type="email" class="form-control w-50 me-2" placeholder="ایمیل شما">
+        <input type="email" class="form-control w-50 me-2 py-1" placeholder="ایمیل شما">
         <button class="btn btn-light">عضویت</button>
     </form>
 </div>
