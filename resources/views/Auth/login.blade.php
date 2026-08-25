@@ -18,13 +18,13 @@
                         @csrf
 
                         <div class="col-12">
-                            <label class="form-label" for="mobile">شماره موبایل</label>
+                            <label class="form-label" for="mobile">شماره موبایل یا ایمیل ادمین</label>
                             <div class="input-group" dir="ltr">
                                 <select name="country_code" id="country_code" class="form-select" style="max-width: 160px; text-align: left;" required>
                                     <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
                                     <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
                                 </select>
-                                <input id="mobile" type="text" name="mobile" class="form-control form-control-lg js-mobile-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" style="text-align: left;" required autofocus>
+                                <input id="mobile" type="text" name="mobile" class="form-control form-control-lg js-mobile-en" value="{{ old('mobile') }}" dir="ltr" style="text-align: left;" placeholder="0912... یا admin@example.com" required autofocus>
                             </div>
                         </div>
 
@@ -67,10 +67,18 @@
         if (!mobile) return;
 
         mobile.addEventListener('input', function () {
+            if (this.value.indexOf('@') !== -1) {
+                return;
+            }
+
             this.value = normalizeDigits(this.value);
         });
 
         mobile.addEventListener('blur', function () {
+            if (this.value.indexOf('@') !== -1) {
+                return;
+            }
+
             this.value = normalizeDigits(this.value).replace(/[^0-9+]/g, '');
         });
     });

@@ -28,8 +28,14 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        $variants = PhoneNumberNormalizer::variants($data['mobile'], $data['country_code']);
-        $user = User::query()->whereIn('mobile', $variants)->first();
+        $identifier = trim((string) $data['mobile']);
+
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $user = User::query()->where('email', mb_strtolower($identifier))->first();
+        } else {
+            $variants = PhoneNumberNormalizer::variants($identifier, $data['country_code']);
+            $user = User::query()->whereIn('mobile', $variants)->first();
+        }
 
         if ($user && Hash::check($data['password'], $user->password)) {
             Auth::login($user, $request->boolean('remember'));
