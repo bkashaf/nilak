@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Installer')</title>
+    <title>@yield('title', __('installer.meta.title_default'))</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { min-height: 100vh; background: radial-gradient(circle at top right, #dff6ee, #f7fafc 45%, #e9eef5); font-family: Vazirmatn, sans-serif; }
@@ -35,11 +35,11 @@
 <body>
 @php
     $wizardSteps = [
-        ['slug' => 'welcome', 'label' => 'شروع'],
-        ['slug' => 'requirements', 'label' => 'پیش نیازها'],
-        ['slug' => 'database', 'label' => 'دیتابیس'],
-        ['slug' => 'store-settings', 'label' => 'تنظیمات فروشگاه'],
-        ['slug' => 'summary', 'label' => 'نصب نهایی'],
+        ['slug' => 'welcome', 'label' => __('installer.wizard.welcome')],
+        ['slug' => 'requirements', 'label' => __('installer.wizard.requirements')],
+        ['slug' => 'database', 'label' => __('installer.wizard.database')],
+        ['slug' => 'store-settings', 'label' => __('installer.wizard.store_settings')],
+        ['slug' => 'summary', 'label' => __('installer.wizard.summary')],
     ];
     $currentStep = trim((string) View::yieldContent('step_slug', 'welcome'));
     $activeIndex = collect($wizardSteps)->search(fn ($step) => $step['slug'] === $currentStep);
@@ -51,9 +51,13 @@
         <div class="install-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <div class="fw-semibold">Nilak Installer</div>
-                <div class="small opacity-75">نصب مرحله ای فروشگاه روی هاست cPanel + MySQL</div>
+                <div class="small opacity-75">{{ __('installer.meta.header_subtitle') }}</div>
             </div>
-            <div class="step-badge">@yield('step', 'Setup')</div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('language.switch', ['locale' => 'fa']) }}" class="btn btn-sm btn-light">{{ __('installer.locale.fa') }}</a>
+                <a href="{{ route('language.switch', ['locale' => 'en']) }}" class="btn btn-sm btn-light">{{ __('installer.locale.en') }}</a>
+                <div class="step-badge">@yield('step', 'Setup')</div>
+            </div>
         </div>
         <div class="card-body p-4 p-md-5">
             <div class="wizard-steps">
@@ -71,15 +75,15 @@
 
             @if($currentStep !== 'welcome')
                 <div class="resume-box d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                    <div class="small text-muted">اگر ارتباط قطع شد، نصب از آخرین مرحله ثبت شده ادامه پیدا می کند.</div>
-                    <a href="{{ route('install.resume') }}" class="btn btn-sm btn-outline-primary">Resume</a>
+                    <div class="small text-muted">{{ __('installer.wizard.resume_note') }}</div>
+                    <a href="{{ route('install.resume') }}" class="btn btn-sm btn-outline-primary">{{ __('installer.wizard.resume_button') }}</a>
                 </div>
             @endif
 
             @yield('content')
         </div>
     </div>
-    <div class="text-center mt-3 install-footer">اگر سیستم قبلا نصب شده باشد، این مسیر به صورت خودکار محدود می شود.</div>
+    <div class="text-center mt-3 install-footer">{{ __('installer.meta.footer_note') }}</div>
 </div>
 </body>
 </html>

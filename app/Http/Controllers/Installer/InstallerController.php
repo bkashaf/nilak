@@ -35,7 +35,7 @@ class InstallerController extends Controller
 
         $checks = [
             [
-                'label' => 'PHP Version >= 8.2',
+                'label' => __('installer.checks.php_version'),
                 'level' => 'required',
                 'status' => version_compare(PHP_VERSION, '8.2.0', '>='),
                 'detail' => PHP_VERSION,
@@ -44,17 +44,17 @@ class InstallerController extends Controller
 
         foreach ($requiredExtensions as $ext) {
             $checks[] = [
-                'label' => 'Extension: ' . $ext,
+                'label' => __('installer.checks.extension', ['name' => $ext]),
                 'level' => 'required',
                 'status' => extension_loaded($ext),
-                'detail' => extension_loaded($ext) ? 'Loaded' : 'Missing',
+                'detail' => extension_loaded($ext) ? __('installer.common.loaded') : __('installer.common.missing'),
             ];
         }
 
         foreach ($requiredPaths as $path) {
             $absolute = base_path($path);
             $checks[] = [
-                'label' => 'Writable: ' . $path,
+                'label' => __('installer.checks.writable', ['path' => $path]),
                 'level' => 'required',
                 'status' => is_writable($absolute),
                 'detail' => $absolute,
@@ -63,12 +63,12 @@ class InstallerController extends Controller
 
         $sslActive = request()->isSecure() || strtolower((string) request()->header('x-forwarded-proto')) === 'https';
         $checks[] = [
-            'label' => 'SSL (HTTPS) فعال باشد',
+            'label' => __('installer.checks.ssl_required'),
             'level' => 'warning',
             'status' => $sslActive,
             'detail' => $sslActive
-                ? 'HTTPS detected'
-                : 'HTTPS تشخیص داده نشد. برای محیط Production توصیه می شود SSL فعال باشد.',
+                ? __('installer.checks.https_detected')
+                : __('installer.checks.https_missing'),
         ];
 
         $documentRoot = realpath((string) request()->server('DOCUMENT_ROOT')) ?: '';
@@ -77,10 +77,13 @@ class InstallerController extends Controller
             && str_replace('\\', '/', $documentRoot) === str_replace('\\', '/', $publicRoot);
 
         $checks[] = [
-            'label' => 'Document Root روی پوشه public باشد',
+            'label' => __('installer.checks.docroot_public'),
             'level' => 'warning',
             'status' => $docRootOk,
-            'detail' => 'Detected: ' . ($documentRoot ?: 'unknown') . ' | Expected: ' . ($publicRoot ?: 'unknown'),
+            'detail' => __('installer.checks.docroot_detail', [
+                'detected' => $documentRoot ?: __('installer.common.unknown'),
+                'expected' => $publicRoot ?: __('installer.common.unknown'),
+            ]),
         ];
 
         $allOk = collect($checks)
@@ -139,9 +142,9 @@ class InstallerController extends Controller
             $pdo->query('SELECT 1');
 
             $result['ok'] = true;
-            $result['message'] = 'اتصال پایگاه داده با موفقیت برقرار شد.';
+            $result['message'] = __('installer.messages.db_connection_ok');
         } catch (Throwable $e) {
-            $result['message'] = 'خطا در اتصال پایگاه داده: ' . $e->getMessage();
+            $result['message'] = __('installer.messages.db_connection_failed') . ': ' . $e->getMessage();
         }
 
         session(['installer.db' => $data, 'installer.result' => $result]);
@@ -157,7 +160,7 @@ class InstallerController extends Controller
             'store_name' => env('APP_NAME', 'Nilak Store'),
             'default_locale' => env('APP_LOCALE', 'fa'),
             'timezone' => env('APP_TIMEZONE', 'Asia/Tehran'),
-            'currency_label' => 'تومان',
+            'currency_label' => __('installer.defaults.currency_label'),
             'store_logo_path' => null,
         ]);
 
@@ -175,8 +178,8 @@ class InstallerController extends Controller
             'currency_label' => ['required', 'string', 'max:30'],
             'store_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
         ], [
-            'store_logo.image' => 'فایل لوگو معتبر نیست.',
-            'store_logo.max' => 'حجم لوگو نباید بیشتر از 2 مگابایت باشد.',
+            'store_logo.image' => __('installer.validation.logo_invalid'),
+            'store_logo.max' => __('installer.validation.logo_max'),
         ]);
 
         $existingStore = session('installer.store', []);
@@ -236,7 +239,7 @@ class InstallerController extends Controller
         $request->validate([
             'confirm_apply' => ['required', 'accepted'],
         ], [
-            'confirm_apply.accepted' => 'برای ادامه نصب، تایید نهایی را فعال کنید.',
+            'confirm_apply.accepted' => __('installer.validation.confirm_apply_required'),
         ]);
 
         $db = session('installer.db');
@@ -244,12 +247,12 @@ class InstallerController extends Controller
         $store = session('installer.store');
 
         if (! is_array($db) || ! is_array($store) || ! (($result['ok'] ?? false) === true)) {
-            return redirect()->route('install.database')->with('error', 'ابتدا تست اتصال پایگاه داده را با موفقیت انجام دهید.');
+            return redirect()->route('install.database')->with('error', __('installer.messages.db_test_required'));
         }
 
         $lockFile = storage_path('app/installed.lock');
         if (file_exists($lockFile)) {
-            return redirect()->route('home')->with('warning', 'سیستم قبلا نصب شده است.');
+            return redirect()->route('home')->with('warning', __('installer.messages.already_installed'));
         }
 
         $report = [];
@@ -302,17 +305,17 @@ class InstallerController extends Controller
 
         if (! File::exists($envPath)) {
             if (! File::exists($envExamplePath)) {
-                throw new \RuntimeException('فایل .env.example یافت نشد.');
+                throw new \RuntimeException(__('installer.messages.env_example_missing'));
             }
 
             File::copy($envExamplePath, $envPath);
-            $report[] = ['step' => 'env-create', 'ok' => true, 'message' => 'فایل .env از روی .env.example ایجاد شد.'];
+            $report[] = ['step' => 'env-create', 'ok' => true, 'message' => __('installer.messages.env_created')];
             return null;
         }
 
         $backupPath = base_path('.env.backup.' . now()->format('Ymd_His'));
         File::copy($envPath, $backupPath);
-        $report[] = ['step' => 'env-backup', 'ok' => true, 'message' => 'از فایل .env نسخه پشتیبان تهیه شد: ' . basename($backupPath)];
+        $report[] = ['step' => 'env-backup', 'ok' => true, 'message' => __('installer.messages.env_backup_created', ['file' => basename($backupPath)])];
 
         return $backupPath;
     }
@@ -350,7 +353,7 @@ class InstallerController extends Controller
         }
 
         File::put($envPath, $content);
-        $report[] = ['step' => 'env-write', 'ok' => true, 'message' => 'تنظیمات اصلی در .env اعمال شد.'];
+        $report[] = ['step' => 'env-write', 'ok' => true, 'message' => __('installer.messages.env_written')];
     }
 
     private function applyStoreSettings(array $store, array &$report): void
@@ -359,7 +362,7 @@ class InstallerController extends Controller
             $report[] = [
                 'step' => 'store-settings',
                 'ok' => false,
-                'message' => 'جدول settings موجود نیست؛ ذخیره تنظیمات فروشگاه انجام نشد.',
+                'message' => __('installer.messages.settings_table_missing'),
             ];
 
             return;
@@ -377,7 +380,7 @@ class InstallerController extends Controller
         $report[] = [
             'step' => 'store-settings',
             'ok' => true,
-            'message' => 'تنظیمات فروشگاه ذخیره شد.',
+            'message' => __('installer.messages.store_settings_saved'),
         ];
     }
 
@@ -412,12 +415,12 @@ class InstallerController extends Controller
         $report[] = [
             'step' => 'artisan:' . $command,
             'ok' => $ok,
-            'message' => $ok ? 'اجرا شد.' : 'ناموفق.',
+            'message' => $ok ? __('installer.messages.executed') : __('installer.messages.failed'),
             'output' => $output,
         ];
 
         if (! $ok) {
-            throw new \RuntimeException('خطا در اجرای دستور: ' . $command . PHP_EOL . $output);
+            throw new \RuntimeException(__('installer.messages.artisan_error', ['command' => $command]) . PHP_EOL . $output);
         }
     }
 
@@ -425,7 +428,7 @@ class InstallerController extends Controller
     {
         $adminRole = Role::query()->firstOrCreate(
             ['name' => 'admin'],
-            ['label' => 'مدیر کل']
+            ['label' => __('installer.messages.admin_role_label')]
         );
 
         $admin = User::query()->updateOrCreate(
@@ -443,7 +446,7 @@ class InstallerController extends Controller
         $report[] = [
             'step' => 'admin-create',
             'ok' => true,
-            'message' => 'کاربر مدیر با ایمیل ' . $db['admin_email'] . ' ایجاد/به روز شد.',
+            'message' => __('installer.messages.admin_user_upserted', ['email' => $db['admin_email']]),
         ];
     }
 
@@ -457,7 +460,7 @@ class InstallerController extends Controller
         $report[] = [
             'step' => 'env-rollback',
             'ok' => true,
-            'message' => 'به دلیل خطا، فایل .env از نسخه پشتیبان بازیابی شد.',
+            'message' => __('installer.messages.env_rollback_done'),
         ];
     }
 }

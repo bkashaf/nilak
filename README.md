@@ -1,8 +1,8 @@
 # Nilak Commerce Platform
 
-Nilak is an open-source Laravel-based commerce platform focused on modular architecture, Persian/English localization, and a practical path from local development to real production hosting.
+Nilak is an open-source Laravel commerce platform designed for production-oriented deployments. It emphasizes modular architecture, Persian/English localization, and a reliable path from local development to real hosting environments.
 
-The project is published on GitHub for public access. Contributions, issue reports, and improvement ideas are very welcome.
+This repository is intended for public use, evaluation, and contribution. Bug reports, improvement proposals, and pull requests are welcome.
 
 ## Why Nilak
 
@@ -47,7 +47,7 @@ The project is published on GitHub for public access. Contributions, issue repor
 
 ## Installation
 
-For a full deployment-focused guide, see INSTALLATION.md.
+For complete installation instructions, including cPanel + MySQL production deployment, see INSTALLATION.md.
 
 ### Local Development
 
