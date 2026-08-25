@@ -19,14 +19,14 @@
 
                         <div class="col-12">
                             <label class="form-label" for="mobile">شماره موبایل <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px;" required>
+                            <div class="input-group" dir="ltr">
+                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px; text-align: left;" required>
                                     <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
                                     <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
                                 </select>
-                                <input id="mobile" type="text" name="mobile" class="form-control js-digit-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" required>
+                                <input id="mobile" type="text" name="mobile" class="form-control js-mobile-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" style="text-align: left;" placeholder="9121234567 یا 09121234567" required>
                             </div>
-                            <div class="form-text">شماره را بدون صفر ابتدایی هم می توانید وارد کنید. مثال: 9121234567</div>
+                            <div class="form-text">شماره را می توانید به صورت کامل (مثل 0912...) یا بدون صفر ابتدایی وارد کنید. صفر ابتدایی بعد از کد کشور نادیده گرفته می شود.</div>
                         </div>
 
                         <div class="col-12">
@@ -37,7 +37,11 @@
                         <div class="col-md-6">
                             <label class="form-label" for="password">کلمه عبور <span class="text-danger">*</span></label>
                             <input id="password" type="password" name="password" class="form-control" required>
-                            <div class="form-text">راهنما: حداقل 8 کاراکتر، شامل حداقل یک حرف انگلیسی بزرگ/کوچک و یک عدد. مثال: Nilak1234</div>
+                            <div class="alert alert-info mt-2 mb-0 py-2 px-3 small" role="alert">
+                                فرمت معتبر کلمه عبور:
+                                حداقل 8 کاراکتر، حداقل یک حرف بزرگ انگلیسی (A-Z)، حداقل یک حرف کوچک انگلیسی (a-z)، و حداقل یک عدد (0-9).
+                                مثال: Nilak1234
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -47,9 +51,9 @@
 
                         <div class="col-12">
                             <label class="form-label" for="captcha_answer">کپچای ساده <span class="text-danger">*</span></label>
-                            <div class="input-group">
+                            <div class="input-group" dir="ltr">
                                 <span class="input-group-text" dir="ltr">{{ $captchaA }} + {{ $captchaB }} = ?</span>
-                                <input id="captcha_answer" type="text" name="captcha_answer" class="form-control js-digit-en" value="{{ old('captcha_answer') }}" inputmode="numeric" dir="ltr" required>
+                                <input id="captcha_answer" type="text" name="captcha_answer" class="form-control js-number-en" value="{{ old('captcha_answer') }}" inputmode="numeric" dir="ltr" style="text-align: left;" required>
                             </div>
                             <div class="form-text">برای ادامه، پاسخ عبارت ریاضی را با اعداد انگلیسی وارد کنید.</div>
                         </div>
@@ -75,12 +79,21 @@
             return (value || '').replace(/[۰-۹٠-٩]/g, function (ch) { return map[ch] || ch; });
         }
 
-        document.querySelectorAll('.js-digit-en').forEach(function (el) {
+        document.querySelectorAll('.js-mobile-en').forEach(function (el) {
             el.addEventListener('input', function () {
                 this.value = normalizeDigits(this.value);
             });
             el.addEventListener('blur', function () {
                 this.value = normalizeDigits(this.value).replace(/[^0-9+]/g, '');
+            });
+        });
+
+        document.querySelectorAll('.js-number-en').forEach(function (el) {
+            el.addEventListener('input', function () {
+                this.value = normalizeDigits(this.value);
+            });
+            el.addEventListener('blur', function () {
+                this.value = normalizeDigits(this.value).replace(/[^0-9]/g, '');
             });
         });
     });

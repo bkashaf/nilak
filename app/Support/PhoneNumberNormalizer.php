@@ -18,7 +18,8 @@ class PhoneNumberNormalizer
 
     public static function toE164(string $countryCode, ?string $mobile): string
     {
-        $countryCode = '+' . ltrim(self::digitsOnly($countryCode), '+');
+        $countryCode = '+' . self::digitsOnly($countryCode);
+        $ccDigits = ltrim($countryCode, '+');
         $mobile = self::normalizeDigits($mobile);
 
         $raw = preg_replace('/[^0-9+]/', '', $mobile) ?? '';
@@ -26,28 +27,19 @@ class PhoneNumberNormalizer
             return $countryCode;
         }
 
-        if (str_starts_with($raw, '+')) {
-            return '+' . self::digitsOnly($raw);
-        }
-
         $digits = self::digitsOnly($raw);
-        $ccDigits = ltrim($countryCode, '+');
+        $national = $digits;
 
         if (str_starts_with($digits, '00' . $ccDigits)) {
-            $national = substr($digits, 2 + strlen($ccDigits));
-            return $countryCode . $national;
-        }
-
-        if (str_starts_with($digits, $ccDigits)) {
+            $national = substr($digits, strlen($ccDigits) + 2);
+        } elseif (str_starts_with($digits, $ccDigits)) {
             $national = substr($digits, strlen($ccDigits));
-            return $countryCode . $national;
         }
 
-        if (str_starts_with($digits, '0')) {
-            $digits = ltrim($digits, '0');
-        }
+        // National trunk prefix (leading zero) is ignored when country code is provided.
+        $national = ltrim($national, '0');
 
-        return $countryCode . $digits;
+        return $national === '' ? $countryCode : $countryCode . $national;
     }
 
     public static function variants(?string $mobile, string $defaultCountryCode = '+98'): array

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
+    private const DEFAULT_COUNTRY_CODE = '+98';
+
     public function showRegistrationForm()
     {
         $captchaA = random_int(2, 9);
@@ -23,7 +25,7 @@ class RegisterController extends Controller
         ]);
 
         return view('Auth.register', [
-            'defaultCountryCode' => app()->getLocale() === 'fa' ? '+98' : '+1',
+            'defaultCountryCode' => self::DEFAULT_COUNTRY_CODE,
             'captchaA' => $captchaA,
             'captchaB' => $captchaB,
         ]);
@@ -31,7 +33,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $defaultCountryCode = app()->getLocale() === 'fa' ? '+98' : '+1';
+        $defaultCountryCode = self::DEFAULT_COUNTRY_CODE;
 
         $normalizedMobile = PhoneNumberNormalizer::toE164(
             (string) $request->input('country_code', $defaultCountryCode),
@@ -54,14 +56,14 @@ class RegisterController extends Controller
                 'string',
                 'min:8',
                 'confirmed',
-                'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
             ],
             'captcha_answer' => ['required', 'digits_between:1,3'],
         ], [
             'mobile.regex' => 'فرمت شماره موبایل صحیح نیست.',
             'password.confirmed' => 'تکرار کلمه عبور با کلمه عبور یکسان نیست.',
             'password.min' => 'کلمه عبور باید حداقل 8 کاراکتر باشد.',
-            'password.regex' => 'فرمت کلمه عبور درست نیست. کلمه عبور باید شامل حداقل یک حرف انگلیسی و یک عدد باشد.',
+            'password.regex' => 'کلمه عبور باید شامل حداقل یک حرف انگلیسی بزرگ، یک حرف انگلیسی کوچک و یک عدد باشد.',
             'captcha_answer.required' => 'پاسخ کپچا الزامی است.',
             'captcha_answer.digits_between' => 'پاسخ کپچا معتبر نیست.',
         ]);

@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
+    private const DEFAULT_COUNTRY_CODE = '+98';
+
     public function showLoginForm()
     {
         return view('Auth.login', [
-            'defaultCountryCode' => app()->getLocale() === 'fa' ? '+98' : '+1',
+            'defaultCountryCode' => self::DEFAULT_COUNTRY_CODE,
         ]);
     }
 

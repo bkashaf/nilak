@@ -19,12 +19,12 @@
 
                         <div class="col-12">
                             <label class="form-label" for="mobile">شماره موبایل</label>
-                            <div class="input-group">
-                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px;" required>
+                            <div class="input-group" dir="ltr">
+                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px; text-align: left;" required>
                                     <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
                                     <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
                                 </select>
-                                <input id="mobile" type="text" name="mobile" class="form-control form-control-lg js-digit-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" required autofocus>
+                                <input id="mobile" type="text" name="mobile" class="form-control form-control-lg js-mobile-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" style="text-align: left;" required autofocus>
                             </div>
                         </div>
 
@@ -63,7 +63,7 @@
             return (value || '').replace(/[۰-۹٠-٩]/g, function (ch) { return map[ch] || ch; });
         }
 
-        const mobile = document.querySelector('.js-digit-en');
+        const mobile = document.querySelector('.js-mobile-en');
         if (!mobile) return;
 
         mobile.addEventListener('input', function () {
