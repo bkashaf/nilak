@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'پنل مدیریت نیلک')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite('resources/js/admin-page-editor.js')
     <style>
         body { font-family: Vazirmatn, sans-serif; background-color: #f8f9fa; }
         header { background: #343a40; color: #fff; padding: 10px 20px; }

@@ -32,8 +32,13 @@ function initPageEditor() {
 
     const uploadUrl = editorEl.dataset.uploadUrl;
     const csrfToken = editorEl.dataset.csrfToken;
+    const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
 
-    tinymce.remove('.js-page-editor');
+    try {
+        tinymce.remove();
+    } catch {
+        // Keep textarea usable if removing prior editors fails.
+    }
 
     tinymce.init({
         selector: '.js-page-editor',
@@ -49,6 +54,7 @@ function initPageEditor() {
         content_css: false,
         content_style: `
             body{font-family:Vazirmatn,sans-serif;padding:16px;line-height:1.9;color:#1f2937}
+            body{direction:${isRtl ? 'rtl' : 'ltr'};text-align:${isRtl ? 'right' : 'left'}}
             .lead{font-size:1.2rem;color:#374151}
             .content-wrap{max-width:1200px;margin-inline:auto}
             .full-bleed{margin-inline:calc(50% - 50vw);width:100vw}
@@ -69,6 +75,16 @@ function initPageEditor() {
                 const body = editor.getBody();
                 if (body && !body.classList.contains('content-wrap')) {
                     body.classList.add('content-wrap');
+                }
+
+                if (body) {
+                    body.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+                }
+
+                if (isRtl) {
+                    editor.execCommand('mceDirectionRTL');
+                } else {
+                    editor.execCommand('mceDirectionLTR');
                 }
             });
 
@@ -137,6 +153,9 @@ function initPageEditor() {
             xhr.send(formData);
         }),
         templates: []
+    }).catch(() => {
+        editorEl.removeAttribute('readonly');
+        editorEl.disabled = false;
     });
 }
 
