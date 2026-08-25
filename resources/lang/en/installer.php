@@ -64,6 +64,7 @@ return [
     'welcome' => [
         'title' => 'Start Store Installation',
         'desc' => 'This wizard guides you through a simple and reliable cPanel deployment.',
+        'language_hint' => 'Use the language buttons in the header to switch the installer to Persian or English at any time.',
         'before_title' => 'Before you begin',
         'before_1' => 'Create a MySQL database and user in cPanel and grant Full Privileges.',
         'before_2' => 'Prepare DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD values.',

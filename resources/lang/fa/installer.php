@@ -64,6 +64,7 @@ return [
     'welcome' => [
         'title' => 'شروع نصب فروشگاه',
         'desc' => 'این راهنما شما را برای نصب سیستم روی cPanel به شکل ساده و روان همراهی می کند.',
+        'language_hint' => 'برای تغییر زبان نصب، از دکمه های زبان در بالای صفحه استفاده کنید و در هر مرحله بین فارسی و انگلیسی جابه جا شوید.',
         'before_title' => 'قبل از شروع',
         'before_1' => 'در cPanel یک دیتابیس MySQL و کاربر بسازید و Full Privileges بدهید.',
         'before_2' => 'اطلاعات DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD را آماده کنید.',

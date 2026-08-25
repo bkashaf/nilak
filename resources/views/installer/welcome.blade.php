@@ -8,6 +8,10 @@
     <h1 class="h3 mb-3">{{ __('installer.welcome.title') }}</h1>
     <p class="text-muted mb-4">{{ __('installer.welcome.desc') }}</p>
 
+    <div class="alert alert-info border-0 mb-4" role="alert">
+        {{ __('installer.welcome.language_hint') }}
+    </div>
+
     <div class="help-box mb-4">
         <div class="fw-semibold mb-2">{{ __('installer.welcome.before_title') }}:</div>
         <ul class="mb-0">
