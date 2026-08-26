@@ -217,6 +217,68 @@
                 grid-template-columns: 1fr;
             }
         }
+        .page-content .nl-featured-product {
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    background: #fff;
+    margin-bottom: 1rem;
+}
+
+.page-content .nl-featured-product img {
+    border-radius: 12px;
+    width: 100%;
+    height: auto;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+}
+
+.page-content .nl-featured-product .price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: .5rem 0 1rem;
+}
+
+.page-content .nl-category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.page-content .nl-category-grid .nl-cat-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    min-height: 170px;
+    background: #0f172a;
+    color: #fff;
+    text-decoration: none;
+    display: block;
+}
+
+.page-content .nl-category-grid .nl-cat-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .7;
+}
+
+.page-content .nl-category-grid .nl-cat-card span {
+    position: absolute;
+    inset-inline: 12px;
+    bottom: 12px;
+    z-index: 2;
+    font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+    .page-content .nl-category-grid {
+        grid-template-columns: 1fr;
+    }
+}
     </style>
 
     <article class="card shadow-sm border-0">
