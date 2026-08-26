@@ -26,6 +26,96 @@
         .page-content .image-shadow {
             box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
         }
+        .page-content .nl-block {
+            box-sizing: border-box;
+            color: inherit;
+            font-family: inherit;
+            margin-bottom: 1rem;
+        }
+        .page-content .nl-block * {
+            box-sizing: border-box;
+        }
+        .page-content .nl-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+        .page-content .nl-two-col .nl-box {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .page-content .nl-banner {
+            border-radius: 14px;
+            padding: 24px 20px;
+            background: linear-gradient(120deg, #0f172a, #1d4ed8);
+            color: #fff;
+        }
+        .page-content .nl-banner .nl-banner-kicker {
+            opacity: .9;
+            font-size: .9rem;
+            margin-bottom: .35rem;
+        }
+        .page-content .nl-banner .nl-banner-title {
+            font-size: 1.5rem;
+            line-height: 1.4;
+            margin: 0 0 .5rem;
+        }
+        .page-content .nl-btn {
+            display: inline-block;
+            padding: .65rem 1rem;
+            border-radius: 10px;
+            background: #fff;
+            color: #0f172a;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .page-content .nl-btn-outline {
+            display: inline-block;
+            padding: .65rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            color: inherit;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .page-content .nl-trust-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .75rem;
+        }
+        .page-content .nl-trust-item {
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            text-align: center;
+            background: #fff;
+        }
+        .page-content .nl-testimonials {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .75rem;
+        }
+        .page-content .nl-quote {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fff;
+            margin: 0;
+        }
+        .page-content .nl-faq details {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            margin-bottom: .5rem;
+        }
+        .page-content .nl-faq summary {
+            cursor: pointer;
+            font-weight: 700;
+        }
         .page-content .two-col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -56,6 +146,11 @@
             height: auto;
         }
         @media (max-width: 767.98px) {
+            .page-content .nl-two-col,
+            .page-content .nl-trust-grid,
+            .page-content .nl-testimonials {
+                grid-template-columns: 1fr;
+            }
             .page-content .two-col {
                 grid-template-columns: 1fr;
             }

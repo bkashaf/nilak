@@ -20,11 +20,11 @@
                         <div class="col-12">
                             <label class="form-label" for="mobile">شماره موبایل <span class="text-danger">*</span></label>
                             <div class="input-group" dir="ltr">
-                                <select name="country_code" id="country_code" class="form-select" style="max-width: 160px; text-align: left;" required>
+                                <select name="country_code" id="country_code" class="form-select" style="max-width: 94px; text-align: left;" required>
                                     <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
                                     <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
                                 </select>
-                                <input id="mobile" type="text" name="mobile" class="form-control js-mobile-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" style="text-align: left;" placeholder="9121234567 یا 09121234567" required>
+                                <input id="mobile" type="text" name="mobile" class="form-control js-mobile-en" value="{{ old('mobile') }}" inputmode="numeric" dir="ltr" style="text-align: left;" placeholder="09121234567" required>
                             </div>
                             <div class="form-text">شماره را می توانید به صورت کامل (مثل 0912...) یا بدون صفر ابتدایی وارد کنید. صفر ابتدایی بعد از کد کشور نادیده گرفته می شود.</div>
                         </div>

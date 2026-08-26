@@ -70,12 +70,13 @@ Prepared for next phase:
 
 ## Installation
 
-For complete installation instructions, including cPanel + MySQL production deployment, see INSTALLATION.md.
+For complete installation instructions, see INSTALLATION.md.
+The installation guide is Linux-first and cross-platform (Linux, macOS, Windows).
 
-### Local Development
+### Local Development (Linux / macOS / Windows)
 
 1. Clone the repository.
-2. Install dependencies.
+2. Install dependencies with Composer.
 3. Configure environment.
 4. Run migrations and seeders.
 5. Build frontend assets.
@@ -83,6 +84,8 @@ For complete installation instructions, including cPanel + MySQL production depl
 Example commands:
 
 ```bash
+git clone https://github.com/bkashaf/nilak.git
+cd nilak
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -91,6 +94,23 @@ php artisan db:seed --force
 npm install
 npm run build
 php artisan serve
+```
+
+Windows PowerShell copy alternative:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### Shared Hosting and Composer
+
+1. If your host supports Composer/SSH, run Composer on server.
+2. If Composer is unavailable on host, install dependencies locally and upload the `vendor` directory with the project.
+
+`artisan` is Laravel's CLI entry point. Use it through PHP CLI:
+
+```bash
+php artisan <command>
 ```
 
 ### cPanel + MySQL (Production Domain)

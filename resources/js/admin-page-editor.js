@@ -62,7 +62,23 @@ function initPageEditor() {
             .image-shadow{box-shadow:0 8px 20px rgba(0,0,0,.12)}
             .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start}
             .two-col .box{padding:12px;border:1px solid #e5e7eb;border-radius:10px}
+            .nl-block{box-sizing:border-box;color:inherit;font-family:inherit;margin:0 0 1rem}
+            .nl-block *{box-sizing:border-box}
+            .nl-two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+            .nl-two-col .nl-box{padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
+            .nl-banner{border-radius:14px;padding:24px 20px;background:linear-gradient(120deg,#0f172a,#1d4ed8);color:#fff}
+            .nl-banner .nl-banner-kicker{opacity:.9;font-size:.9rem;margin-bottom:.35rem}
+            .nl-banner .nl-banner-title{font-size:1.5rem;line-height:1.4;margin:0 0 .5rem}
+            .nl-btn{display:inline-block;padding:.65rem 1rem;border-radius:10px;background:#fff;color:#0f172a;text-decoration:none;font-weight:700}
+            .nl-btn-outline{display:inline-block;padding:.65rem 1rem;border-radius:10px;border:1px solid #cbd5e1;color:inherit;text-decoration:none;font-weight:700}
+            .nl-trust-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+            .nl-trust-item{padding:10px;border:1px solid #e5e7eb;border-radius:10px;text-align:center;background:#fff}
+            .nl-testimonials{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+            .nl-quote{border:1px solid #e5e7eb;border-radius:12px;padding:14px;background:#fff}
+            .nl-faq details{border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;background:#fff;margin-bottom:.5rem}
+            .nl-faq summary{cursor:pointer;font-weight:700}
             @media(max-width:760px){.two-col{grid-template-columns:1fr}}
+            @media(max-width:760px){.nl-two-col,.nl-trust-grid,.nl-testimonials{grid-template-columns:1fr}}
             table{border-collapse:collapse;width:100%}
             table td,table th{border:1px solid #e5e7eb;padding:8px}
         `,
@@ -96,21 +112,49 @@ function initPageEditor() {
                             type: 'menuitem',
                             text: 'بخش دو ستونه (متن + تصویر/جدول)',
                             onAction: function () {
-                                editor.insertContent('<section class="two-col"><div class="box"><h3>ستون اول</h3><p>متن ستون اول...</p></div><div class="box"><h3>ستون دوم</h3><p>متن/تصویر/جدول ستون دوم...</p></div></section><p></p>');
+                                editor.insertContent('<section class="nl-block nl-two-col"><div class="nl-box"><h3>ستون اول</h3><p>متن ستون اول...</p></div><div class="nl-box"><h3>ستون دوم</h3><p>متن/تصویر/جدول ستون دوم...</p></div></section><p></p>');
                             }
                         },
                         {
                             type: 'menuitem',
                             text: 'تصویر تمام عرض',
                             onAction: function () {
-                                editor.insertContent('<figure class="full-bleed image-shadow"><img src="https://placehold.co/1920x720" alt="hero" style="width:100%;height:auto;display:block;"></figure><p></p>');
+                                editor.insertContent('<figure class="nl-block full-bleed image-shadow"><img src="https://placehold.co/1920x720" alt="hero" style="width:100%;height:auto;display:block;"></figure><p></p>');
                             }
                         },
                         {
                             type: 'menuitem',
                             text: 'تصویر با کادر و سایه نرم',
                             onAction: function () {
-                                editor.insertContent('<figure class="image-frame image-shadow"><img src="https://placehold.co/1200x700" alt="content" style="width:100%;height:auto;display:block;border-radius:8px;"><figcaption style="margin-top:8px;color:#6b7280">توضیح تصویر</figcaption></figure><p></p>');
+                                editor.insertContent('<figure class="nl-block image-frame image-shadow"><img src="https://placehold.co/1200x700" alt="content" style="width:100%;height:auto;display:block;border-radius:8px;"><figcaption style="margin-top:8px;color:#6b7280">توضیح تصویر</figcaption></figure><p></p>');
+                            }
+                        },
+                        {
+                            type: 'menuitem',
+                            text: 'بنر تبلیغاتی + دکمه CTA',
+                            onAction: function () {
+                                editor.insertContent('<section class="nl-block nl-banner"><div class="nl-banner-kicker">پیشنهاد ویژه</div><h2 class="nl-banner-title">عنوان کمپین یا تخفیف</h2><p>توضیح کوتاه برای جلب توجه کاربر و افزایش نرخ تبدیل.</p><p><a href="#" class="nl-btn">مشاهده محصولات</a></p></section><p></p>');
+                            }
+                        },
+                        {
+                            type: 'menuitem',
+                            text: 'اعتمادسازی (آیکن/مزیت‌ها)',
+                            onAction: function () {
+                                editor.insertContent('<section class="nl-block"><h3>چرا از ما خرید کنید؟</h3><div class="nl-trust-grid"><div class="nl-trust-item"><strong>ارسال سریع</strong><p>تحویل در کوتاه ترین زمان</p></div><div class="nl-trust-item"><strong>پرداخت امن</strong><p>درگاه معتبر و رسید بانکی</p></div><div class="nl-trust-item"><strong>ضمانت اصالت</strong><p>کالاهای اصلی و باکیفیت</p></div><div class="nl-trust-item"><strong>پشتیبانی پاسخگو</strong><p>قبل و بعد از خرید</p></div></div></section><p></p>');
+                            }
+                        },
+                        {
+                            type: 'menuitem',
+                            text: 'نظرات مشتریان',
+                            onAction: function () {
+                                editor.insertContent('<section class="nl-block"><h3>نظر مشتریان</h3><div class="nl-testimonials"><blockquote class="nl-quote"><p>کیفیت و بسته بندی عالی بود.</p><cite>مشتری ۱</cite></blockquote><blockquote class="nl-quote"><p>ارسال سریع و پشتیبانی خوب.</p><cite>مشتری ۲</cite></blockquote><blockquote class="nl-quote"><p>حتما دوباره خرید می کنم.</p><cite>مشتری ۳</cite></blockquote></div></section><p></p>');
+                            }
+                        },
+                        {
+                            type: 'menuitem',
+                            text: 'سوالات متداول (FAQ)',
+                            onAction: function () {
+                                editor.insertContent('<section class="nl-block nl-faq"><h3>سوالات متداول</h3><details><summary>زمان ارسال سفارش چقدر است؟</summary><p>معمولا 1 تا 3 روز کاری.</p></details><details><summary>امکان مرجوعی وجود دارد؟</summary><p>بله، طبق قوانین بازگشت کالا.</p></details><details><summary>روش های پرداخت چیست؟</summary><p>پرداخت آنلاین، پرداخت در محل، یا رسید بانکی.</p></details></section><p></p>');
                             }
                         }
                     ]);

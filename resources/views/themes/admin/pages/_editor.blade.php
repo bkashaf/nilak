@@ -9,5 +9,5 @@
         data-upload-url="{{ route('admin.pages.upload-image') }}"
         data-csrf-token="{{ csrf_token() }}"
     >{{ $contentValue ?? '' }}</textarea>
-    <div class="form-text">امکانات حرفه ای: RTL/LTR، Justify، تصویر تمام عرض، چیدمان دو ستونه، جدول، کادر و سایه تصویر.</div>
+    <div class="form-text">امکانات حرفه ای: RTL/LTR، بلوک های آماده (دو ستونه، بنر CTA، اعتمادسازی، نظرات، FAQ)، تصویر تمام عرض، جدول، کادر و سایه تصویر.</div>
 </div>
