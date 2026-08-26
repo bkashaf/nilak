@@ -42,6 +42,37 @@
 
                 <div class="col-12 mt-2">
                     <hr>
+                    <h2 class="h5 mb-1">صفحه پیش فرض سایت</h2>
+                    <p class="text-muted mb-0">مشخص کنید بازدیدکننده در آدرس اصلی سایت (/) کدام صفحه را ببیند.</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="default_landing_target" class="form-label">نمایش پیش فرض صفحه اصلی</label>
+                    <select id="default_landing_target" name="default_landing_target" class="form-select" required>
+                        <option value="home" @selected(old('default_landing_target', $settings['default_landing_target']) === 'home')>خانه فروشگاه (Home)</option>
+                        <option value="shop" @selected(old('default_landing_target', $settings['default_landing_target']) === 'shop')>فروشگاه (Shop)</option>
+                        <option value="page" @selected(old('default_landing_target', $settings['default_landing_target']) === 'page')>یک صفحه سفارشی</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="default_landing_page_id" class="form-label">Page ID (در حالت صفحه سفارشی)</label>
+                    <input id="default_landing_page_id" name="default_landing_page_id" type="number" min="1" value="{{ old('default_landing_page_id', $settings['default_landing_page_id']) }}" class="form-control" placeholder="مثال: 12">
+                    <div class="form-text">اگر حالت «یک صفحه سفارشی» را انتخاب کنید، این شناسه باید معتبر باشد.</div>
+                </div>
+
+                <div class="col-12">
+                    <label for="landing_page_picker" class="form-label">انتخاب سریع از صفحات موجود</label>
+                    <select id="landing_page_picker" class="form-select">
+                        <option value="">-- انتخاب صفحه برای پرکردن خودکار Page ID --</option>
+                        @foreach($pages as $page)
+                            <option value="{{ $page->id }}">#{{ $page->id }} - {{ $page->title }} ({{ $page->slug }}) {{ $page->is_published ? '' : '[Draft]' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <hr>
                     <h2 class="h5 mb-1">تنظیمات پنل پیامک</h2>
                     <p class="text-muted mb-0">برای فاز OTP و اعلان های پیامکی آماده سازی شود.</p>
                 </div>
@@ -87,4 +118,37 @@
             </form>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const target = document.getElementById('default_landing_target');
+        const pageIdInput = document.getElementById('default_landing_page_id');
+        const picker = document.getElementById('landing_page_picker');
+
+        function syncPageIdState() {
+            const enabled = target && target.value === 'page';
+            if (!pageIdInput) return;
+
+            pageIdInput.disabled = !enabled;
+            pageIdInput.classList.toggle('bg-light', !enabled);
+        }
+
+        if (target) {
+            target.addEventListener('change', syncPageIdState);
+            syncPageIdState();
+        }
+
+        if (picker && pageIdInput) {
+            picker.addEventListener('change', function () {
+                if (!this.value) return;
+
+                pageIdInput.value = this.value;
+                if (target) {
+                    target.value = 'page';
+                    syncPageIdState();
+                }
+            });
+        }
+    });
+    </script>
 @endsection

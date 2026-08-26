@@ -116,6 +116,61 @@
             cursor: pointer;
             font-weight: 700;
         }
+        .page-content .nl-product-feature {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+            gap: 1rem;
+            align-items: stretch;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .page-content .nl-product-feature .nl-media img {
+            width: 100%;
+            height: 100%;
+            min-height: 260px;
+            object-fit: cover;
+            display: block;
+        }
+        .page-content .nl-product-feature .nl-body {
+            padding: 18px;
+        }
+        .page-content .nl-product-feature .nl-price {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: .35rem 0 1rem;
+        }
+        .page-content .nl-categories {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .75rem;
+        }
+        .page-content .nl-cat-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            min-height: 170px;
+            background: #0f172a;
+            color: #fff;
+            text-decoration: none;
+            display: block;
+        }
+        .page-content .nl-cat-card img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: .7;
+        }
+        .page-content .nl-cat-card span {
+            position: absolute;
+            inset-inline: 12px;
+            bottom: 12px;
+            z-index: 2;
+            font-weight: 700;
+        }
         .page-content .two-col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -148,7 +203,9 @@
         @media (max-width: 767.98px) {
             .page-content .nl-two-col,
             .page-content .nl-trust-grid,
-            .page-content .nl-testimonials {
+            .page-content .nl-testimonials,
+            .page-content .nl-categories,
+            .page-content .nl-product-feature {
                 grid-template-columns: 1fr;
             }
             .page-content .two-col {

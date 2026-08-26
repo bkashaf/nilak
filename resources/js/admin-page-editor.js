@@ -77,8 +77,16 @@ function initPageEditor() {
             .nl-quote{border:1px solid #e5e7eb;border-radius:12px;padding:14px;background:#fff}
             .nl-faq details{border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;background:#fff;margin-bottom:.5rem}
             .nl-faq summary{cursor:pointer;font-weight:700}
+            .nl-product-feature{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:1rem;align-items:stretch;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff}
+            .nl-product-feature .nl-media img{width:100%;height:100%;min-height:260px;object-fit:cover;display:block}
+            .nl-product-feature .nl-body{padding:18px}
+            .nl-product-feature .nl-price{font-size:1.25rem;font-weight:800;margin:.35rem 0 1rem}
+            .nl-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+            .nl-cat-card{position:relative;overflow:hidden;border-radius:12px;min-height:170px;background:#0f172a;color:#fff;text-decoration:none;display:block}
+            .nl-cat-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.7}
+            .nl-cat-card span{position:absolute;inset-inline:12px;bottom:12px;z-index:2;font-weight:700}
             @media(max-width:760px){.two-col{grid-template-columns:1fr}}
-            @media(max-width:760px){.nl-two-col,.nl-trust-grid,.nl-testimonials{grid-template-columns:1fr}}
+            @media(max-width:760px){.nl-two-col,.nl-trust-grid,.nl-testimonials,.nl-categories,.nl-product-feature{grid-template-columns:1fr}}
             table{border-collapse:collapse;width:100%}
             table td,table th{border:1px solid #e5e7eb;padding:8px}
         `,
@@ -155,6 +163,20 @@ function initPageEditor() {
                             text: 'سوالات متداول (FAQ)',
                             onAction: function () {
                                 editor.insertContent('<section class="nl-block nl-faq"><h3>سوالات متداول</h3><details><summary>زمان ارسال سفارش چقدر است؟</summary><p>معمولا 1 تا 3 روز کاری.</p></details><details><summary>امکان مرجوعی وجود دارد؟</summary><p>بله، طبق قوانین بازگشت کالا.</p></details><details><summary>روش های پرداخت چیست؟</summary><p>پرداخت آنلاین، پرداخت در محل، یا رسید بانکی.</p></details></section><p></p>');
+                            }
+                        },
+                        {
+                            type: 'menuitem',
+                            text: 'محصول ویژه (Landing)',
+                            onAction: function () {
+                                editor.insertContent('<section class="nl-block nl-product-feature"><div class="nl-media"><img src="https://placehold.co/900x700" alt="featured product"></div><div class="nl-body"><div class="nl-banner-kicker">پیشنهاد ویژه</div><h3>نام محصول ویژه</h3><p>توضیح کوتاه و متقاعدکننده برای معرفی ویژگی یا مزیت محصول.</p><div class="nl-price">۲,۴۹۰,۰۰۰ تومان</div><p><a href="#" class="nl-btn">خرید محصول</a> <a href="#" class="nl-btn-outline">جزئیات بیشتر</a></p></div></section><p></p>');
+                            }
+                        },
+                        {
+                            type: 'menuitem',
+                            text: 'دسته بندی تصویری (Landing)',
+                            onAction: function () {
+                                editor.insertContent('<section class="nl-block"><h3>خرید بر اساس دسته بندی</h3><div class="nl-categories"><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۱"><span>زنانه</span></a><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۲"><span>مردانه</span></a><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۳"><span>اکسسوری</span></a></div></section><p></p>');
                             }
                         }
                     ]);

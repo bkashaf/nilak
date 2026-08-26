@@ -31,6 +31,7 @@ Nilak focuses on the operational core of a deployable commerce system:
 - Payments: COD, receipt-based, gateway-ready architecture
 - Admin panel: orders, payments, payment methods, pages, slider management
 - Page builder: TinyMCE-based editor with ready-to-use content blocks, namespaced styling, and responsive rendering
+- Settings productivity: choose default site landing target from Home, Shop, or a custom published page by ID
 - Localization: Persian/English language switching
 - Installer wizard: requirements, DB test, store settings, final one-click install run
 - Mobile-first authentication baseline: register/login by mobile + password, with OTP-ready backend foundation for future SMS login
