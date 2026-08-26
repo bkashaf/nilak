@@ -1,138 +1,183 @@
 # Nilak Installation Guide
 
-This document provides a full, production-focused installation guide for deploying Nilak on real shared hosting with cPanel and MySQL.
+This guide is Linux-first and cross-platform. It covers local development (Linux, macOS, Windows) and production deployment (shared hosting/cPanel/Linux server).
 
-## 1) Deployment Overview
+## 1) What Is `artisan`?
 
-Nilak is a Laravel application and requires:
+`artisan` is Laravel's command-line entry point (CLI script) at project root.
+
+Common commands:
+
+```bash
+php artisan migrate
+php artisan db:seed
+php artisan serve
+php artisan schedule:run
+```
+
+You do not execute `artisan` directly in most hosts. Use it via PHP CLI:
+
+```bash
+php artisan <command>
+```
+
+## 2) Platform Notes (Linux / macOS / Windows)
+
+Core installation flow is the same on all platforms. Main differences are shell tools, package managers, and permissions.
+
+1. Path separator: Linux/macOS use `/`, Windows uses `\`.
+2. Permissions: Linux/macOS typically need `chmod/chown`; Windows usually handles this via filesystem ACLs.
+3. Node install: Linux often uses apt/dnf/nvm, macOS often uses Homebrew/nvm, Windows uses installer or nvm-windows.
+4. Laravel commands are the same everywhere: `php artisan ...`.
+
+## 3) Prerequisites
+
+Nilak requires:
 
 1. PHP 8.2+
-2. MySQL or MariaDB
-3. Writable permissions for storage and bootstrap/cache
-4. A domain or subdomain with Document Root pointing to public
-5. SSL enabled for the real domain
+2. Composer 2+
+3. MySQL 8+ or MariaDB 10.6+
+4. Node.js 18+ and npm
+5. Required PHP extensions for Laravel
 
-The web installer entry point is:
+## 4) Local Development (Linux / macOS / Windows)
+
+### 4.1 Clone and Install
+
+```bash
+git clone https://github.com/bkashaf/nilak.git
+cd nilak
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Windows PowerShell copy alternative:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 4.2 Database Setup
+
+Set DB values in `.env`, then run:
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+```
+
+### 4.3 Build Frontend Assets
+
+```bash
+npm install
+npm run build
+```
+
+For active development:
+
+```bash
+npm run dev
+```
+
+### 4.4 Run App Locally
+
+```bash
+php artisan serve
+```
+
+Default URL is usually:
+
+1. http://127.0.0.1:8000
+
+## 5) Production Deployment Overview
+
+For real hosting, target state is:
+
+1. Document Root points to `public`
+2. HTTPS enabled
+3. `storage` and `bootstrap/cache` writable
+4. Scheduler cron configured
+5. Installer completed at `/install`
+
+Installer URL:
 
 1. https://your-domain.com/install
 
-## 2) Required cPanel Sections
+## 6) Shared Hosting and Composer: Do You Need It on Server?
 
-Before starting, make sure you can access these cPanel tools:
+Not always.
 
-1. Domains or Addon Domains or Subdomains
-2. MySQL Databases or MySQL Database Wizard
+1. If host supports Composer/SSH: run `composer install --no-dev --optimize-autoloader` on server.
+2. If host does not support Composer: install dependencies locally, then upload project with `vendor` included.
+
+Recommended note for open-source users:
+
+1. If Composer is unavailable on host, build locally and upload the `vendor` directory with project files.
+
+## 7) cPanel Deployment Steps
+
+### 7.1 Required cPanel Sections
+
+1. Domains / Addon Domains / Subdomains
+2. MySQL Databases or Database Wizard
 3. File Manager
-4. SSL/TLS Status or Let's Encrypt
+4. SSL/TLS Status
 5. Cron Jobs
 6. MultiPHP Manager
 
-Quick prerequisites:
+### 7.2 Create Database and User
 
-1. Set PHP to 8.2 or newer.
-2. Ensure Laravel-required PHP extensions are enabled.
-3. Make sure your account has enough disk space for vendor, build artifacts, cache, and logs.
+1. Create database
+2. Create user
+3. Attach user to database
+4. Grant ALL PRIVILEGES
 
-## 3) Create Database and User in cPanel
+Save:
 
-### Recommended: MySQL Database Wizard
+1. `DB_HOST` (usually `localhost`)
+2. `DB_PORT` (usually `3306`)
+3. `DB_DATABASE`
+4. `DB_USERNAME`
+5. `DB_PASSWORD`
 
-1. Open MySQL Database Wizard.
-2. Create a new database.
-3. Create a database user.
-4. Attach the user to the database.
-5. Grant ALL PRIVILEGES.
+### 7.3 Upload Files
 
-### Alternative: MySQL Databases
+Option A: File Manager upload/extract archive.
 
-1. Create the database.
-2. Create the user.
-3. Use Add User To Database.
-4. Grant ALL PRIVILEGES.
+Option B: Git clone in cPanel (if enabled).
 
-Save these values for installer step:
+Confirm key paths exist:
 
-1. DB_HOST (usually localhost)
-2. DB_PORT (usually 3306)
-3. DB_DATABASE
-4. DB_USERNAME
-5. DB_PASSWORD
+1. `public`
+2. `storage`
+3. `bootstrap/cache`
+4. `artisan`
 
-## 4) Upload Project Files
-
-### Option A: File Manager
-
-1. Open File Manager.
-2. Go to your account home directory, for example /home/username.
-3. Upload your project zip file.
-4. Extract the archive.
-5. Verify project structure exists completely.
-
-### Option B: Git Version Control (if available)
-
-1. Open Git Version Control in cPanel.
-2. Clone the repository.
-3. Checkout the target branch, usually main.
-
-Confirm these paths exist:
-
-1. public
-2. storage
-3. bootstrap/cache
-4. artisan
-
-## 5) Set Domain Document Root to public
-
-This is the most important security and routing step.
-
-1. Open Domains.
-2. Select your domain or subdomain.
-3. Click Manage or Edit.
-4. Set Document Root to your project public folder.
+### 7.4 Set Document Root to `public`
 
 Example:
 
-1. Project path: /home/username/nilak
-2. Document Root: /home/username/nilak/public
+1. Project path: `/home/username/nilak`
+2. Document Root: `/home/username/nilak/public`
 
-If Document Root is wrong:
+### 7.5 Enable SSL
 
-1. Site may fail to boot correctly.
-2. Internal project paths may become web-accessible.
+1. Issue certificate (AutoSSL/Let's Encrypt)
+2. Confirm HTTPS is active
+3. Set `APP_URL` to HTTPS domain
 
-## 6) Enable SSL on Real Domain
+### 7.6 Writable Permissions
 
-1. Open SSL/TLS Status.
-2. Select your domain.
-3. Run AutoSSL or Issue certificate.
-4. Confirm site opens with https.
+Linux baseline:
 
-If cPanel provides a Force HTTPS option, enable it.
+```bash
+find storage -type d -exec chmod 775 {} \;
+find storage -type f -exec chmod 664 {} \;
+chmod -R 775 bootstrap/cache
+```
 
-Target state:
-
-1. Public site URL is HTTPS.
-2. Installer URL is HTTPS.
-3. APP_URL uses HTTPS.
-
-## 7) Set Writable Permissions
-
-In File Manager, use Change Permissions.
-
-Recommended baseline:
-
-1. Directories: 755
-2. Files: 644
-
-Critical writable paths:
-
-1. storage
-2. bootstrap/cache
-
-If permission errors occur:
-
-1. Temporarily test with 775 on required directories.
-2. Avoid 777 except very short troubleshooting windows.
+If owner/group mismatch exists, adjust with host-compatible `chown` (if allowed).
 
 ## 8) Run Web Installer
 
@@ -140,7 +185,7 @@ Open:
 
 1. https://your-domain.com/install
 
-Installer sequence:
+Steps:
 
 1. Requirements
 2. Database
@@ -148,125 +193,78 @@ Installer sequence:
 4. Summary
 5. Final Run
 
-Database step requires the values from section 3.
+Final run performs environment write, app key generation, migrations/seeding, cache clear, and installer lock.
 
-Store Settings step requires:
+## 9) Scheduler (Cron)
 
-1. Store name
-2. Default locale
-3. Timezone
-4. Currency label
-5. Optional logo
-
-Final Run performs:
-
-1. Environment writing
-2. Application key generation
-3. Migrations
-4. Seeders
-5. Initial admin creation
-6. Cache clear
-7. Installer lock
-
-## 9) Configure Laravel Scheduler Cron Job
-
-In cPanel:
-
-1. Open Cron Jobs.
-2. Choose Once Per Minute.
-3. Add command below.
-
-Command example:
+Add cron job (once per minute):
 
 ```bash
 /usr/local/bin/php /home/USERNAME/PROJECT_PATH/artisan schedule:run >> /dev/null 2>&1
 ```
 
-Replace USERNAME and PROJECT_PATH with real values.
+If PHP path differs, ask hosting support for exact CLI binary path.
 
-If PHP binary differs on your host, ask support for the exact path.
+## 10) APP_URL and Cache
 
-## 10) Keep APP_URL on Real HTTPS Domain
-
-Use this pattern:
+Set:
 
 ```env
 APP_URL=https://your-domain.com
 ```
 
-After changes, clear caches:
+Then clear cache:
 
 ```bash
 php artisan optimize:clear
 ```
 
-Wrong APP_URL can cause:
+## 11) Post-Install Validation
 
-1. Bad redirects
-2. Wrong generated links
-3. Callback/form URL mismatches
-
-## 11) Post-Install Validation Checklist
-
-Test these routes and flows:
-
-1. Home /
-2. Shop /shop
-3. Cart /cart
-4. Checkout /checkout
+1. `/`
+2. `/shop`
+3. `/cart`
+4. `/checkout`
 5. Admin login and dashboard
-6. Pages management and page builder
-7. Image upload from page builder
+6. Page builder and image upload
 
-## 12) Troubleshooting FAQ
+## 12) Troubleshooting
 
-### 500 Internal Server Error
+### 500 Error
 
-1. Verify storage and bootstrap/cache permissions.
-2. Check logs in storage/logs.
-3. Run optimize clear.
+1. Check permissions for `storage` and `bootstrap/cache`
+2. Check logs in `storage/logs`
+3. Run `php artisan optimize:clear`
 
-```bash
-php artisan optimize:clear
-```
+### Database Connection Error in Installer
 
-### Installer Database Connection Fails
+1. Recheck DB host/port/user/pass
+2. Confirm DB privileges
+3. cPanel may prefix db/user names
 
-1. Recheck DB host and port.
-2. Confirm user has ALL PRIVILEGES.
-3. Remember cPanel prefixes database and username in many hosts.
+### Assets Not Loading
 
-### CSS/JS Assets Not Loading
+1. Ensure `public/build` exists
+2. Verify Document Root is `public`
+3. Hard refresh browser
 
-1. Confirm public/build exists.
-2. Recheck Document Root points to public.
-3. Hard refresh browser with Ctrl+F5.
+### `/install` Not Accessible After Install
 
-### HTTP/HTTPS Redirect Issues
+1. Usually expected (installer lock is active)
+2. Reinstall only after controlled reset of lock and database
 
-1. Ensure APP_URL is HTTPS.
-2. Ensure SSL certificate is active and valid.
+## 13) Updating Existing Production
 
-### /install Not Accessible After Install
+1. Backup files and DB
+2. Deploy updated code
+3. Run migrations
+4. Clear caches
+5. Smoke-test checkout and admin
 
-1. This is expected when installer lock is active.
-2. For reinstall, reset lock and database carefully.
+## 14) Open-Source Documentation Policy
 
-## 13) Updating an Existing Production Installation
+To keep docs non-platform-specific:
 
-1. Backup files and database.
-2. Deploy updated code.
-3. Run required migrations.
-4. Clear caches.
-5. Smoke-test critical pages and checkout flow.
-
-## 14) Final Delivery Checklist
-
-Before handing over to customer or evaluator:
-
-1. Full install tested on real domain.
-2. SSL enabled.
-3. Scheduler cron active.
-4. APP_URL correct.
-5. Admin and checkout validated.
-6. No unresolved critical errors in logs.
+1. Keep Linux/macOS/Windows local flow in one shared section
+2. Keep production section generic for cPanel and Linux servers
+3. Add platform-specific notes only where behavior differs (permissions, paths, package managers)
