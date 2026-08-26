@@ -20,7 +20,7 @@
                         <div class="col-12">
                             <label class="form-label" for="mobile">شماره موبایل <span class="text-danger">*</span></label>
                             <div class="input-group" dir="ltr">
-                                <select name="country_code" id="country_code" class="form-select" style="max-width: 94px; text-align: left;" required>
+                                <select name="country_code" id="country_code" class="form-select" style="width: 116px; flex: 0 0 116px; text-align: left;" required>
                                     <option value="+98" @selected(old('country_code', $defaultCountryCode) === '+98')>🇮🇷 +98</option>
                                     <option value="+1" @selected(old('country_code', $defaultCountryCode) === '+1')>🇺🇸 +1</option>
                                 </select>

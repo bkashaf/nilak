@@ -20,6 +20,7 @@ Nilak focuses on the operational core of a deployable commerce system:
 - Inventory reservation and commit/release consistency
 - Localized user experience for RTL and LTR storefronts
 - Admin tooling for products, categories, pages, payments, and sliders
+- Lightweight page builder with pre-defined responsive blocks (two-column, banner CTA, trust, testimonials, FAQ) designed to avoid theme-style conflicts
 - Guided installer flow for cPanel + MySQL environments
 
 ## Current Features
@@ -29,6 +30,7 @@ Nilak focuses on the operational core of a deployable commerce system:
 - Checkout: profile/new address source, receipt-bank JSON instructions
 - Payments: COD, receipt-based, gateway-ready architecture
 - Admin panel: orders, payments, payment methods, pages, slider management
+- Page builder: TinyMCE-based editor with ready-to-use content blocks, namespaced styling, and responsive rendering
 - Localization: Persian/English language switching
 - Installer wizard: requirements, DB test, store settings, final one-click install run
 - Mobile-first authentication baseline: register/login by mobile + password, with OTP-ready backend foundation for future SMS login
