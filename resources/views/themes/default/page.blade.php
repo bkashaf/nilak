@@ -14,9 +14,10 @@
             color: #374151;
         }
         .page-content .full-bleed {
-            margin-inline: calc(50% - 50vw);
-            width: 100vw;
+            width: 100%;
+        margin-inline: 0;
         }
+
         .page-content .image-frame {
             border: 1px solid #e5e7eb;
             border-radius: 12px;
@@ -132,6 +133,8 @@
             min-height: 260px;
             object-fit: cover;
             display: block;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
         }
         .page-content .nl-product-feature .nl-body {
             padding: 18px;
@@ -199,6 +202,8 @@
         .page-content img {
             max-width: 100%;
             height: auto;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
         }
         @media (max-width: 767.98px) {
             .page-content .nl-two-col,
