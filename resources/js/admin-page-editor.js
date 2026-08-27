@@ -113,75 +113,84 @@ function initPageEditor() {
             });
 
             editor.ui.registry.addMenuButton('snippets', {
-                text: 'بلوک آماده',
-                fetch: function (callback) {
-                    callback([
-                        {
-                            type: 'menuitem',
-                            text: 'بخش دو ستونه (متن + تصویر/جدول)',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block nl-two-col"><div class="nl-box"><h3>ستون اول</h3><p>متن ستون اول...</p></div><div class="nl-box"><h3>ستون دوم</h3><p>متن/تصویر/جدول ستون دوم...</p></div></section><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'تصویر تمام عرض',
-                            onAction: function () {
-                                editor.insertContent('<figure class="nl-block full-bleed image-shadow"><img src="https://placehold.co/1920x720" alt="hero" style="width:100%;height:auto;display:block;"></figure><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'تصویر با کادر و سایه نرم',
-                            onAction: function () {
-                                editor.insertContent('<figure class="nl-block image-frame image-shadow"><img src="https://placehold.co/1200x700" alt="content" style="width:100%;height:auto;display:block;border-radius:8px;"><figcaption style="margin-top:8px;color:#6b7280">توضیح تصویر</figcaption></figure><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'بنر تبلیغاتی + دکمه CTA',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block nl-banner"><div class="nl-banner-kicker">پیشنهاد ویژه</div><h2 class="nl-banner-title">عنوان کمپین یا تخفیف</h2><p>توضیح کوتاه برای جلب توجه کاربر و افزایش نرخ تبدیل.</p><p><a href="#" class="nl-btn">مشاهده محصولات</a></p></section><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'اعتمادسازی (آیکن/مزیت‌ها)',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block"><h3>چرا از ما خرید کنید؟</h3><div class="nl-trust-grid"><div class="nl-trust-item"><strong>ارسال سریع</strong><p>تحویل در کوتاه ترین زمان</p></div><div class="nl-trust-item"><strong>پرداخت امن</strong><p>درگاه معتبر و رسید بانکی</p></div><div class="nl-trust-item"><strong>ضمانت اصالت</strong><p>کالاهای اصلی و باکیفیت</p></div><div class="nl-trust-item"><strong>پشتیبانی پاسخگو</strong><p>قبل و بعد از خرید</p></div></div></section><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'نظرات مشتریان',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block"><h3>نظر مشتریان</h3><div class="nl-testimonials"><blockquote class="nl-quote"><p>کیفیت و بسته بندی عالی بود.</p><cite>مشتری ۱</cite></blockquote><blockquote class="nl-quote"><p>ارسال سریع و پشتیبانی خوب.</p><cite>مشتری ۲</cite></blockquote><blockquote class="nl-quote"><p>حتما دوباره خرید می کنم.</p><cite>مشتری ۳</cite></blockquote></div></section><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'سوالات متداول (FAQ)',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block nl-faq"><h3>سوالات متداول</h3><details><summary>زمان ارسال سفارش چقدر است؟</summary><p>معمولا 1 تا 3 روز کاری.</p></details><details><summary>امکان مرجوعی وجود دارد؟</summary><p>بله، طبق قوانین بازگشت کالا.</p></details><details><summary>روش های پرداخت چیست؟</summary><p>پرداخت آنلاین، پرداخت در محل، یا رسید بانکی.</p></details></section><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'محصول ویژه (Landing)',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block nl-product-feature"><div class="nl-media"><img src="https://placehold.co/900x700" alt="featured product"></div><div class="nl-body"><div class="nl-banner-kicker">پیشنهاد ویژه</div><h3>نام محصول ویژه</h3><p>توضیح کوتاه و متقاعدکننده برای معرفی ویژگی یا مزیت محصول.</p><div class="nl-price">۲,۴۹۰,۰۰۰ تومان</div><p><a href="#" class="nl-btn">خرید محصول</a> <a href="#" class="nl-btn-outline">جزئیات بیشتر</a></p></div></section><p></p>');
-                            }
-                        },
-                        {
-                            type: 'menuitem',
-                            text: 'دسته بندی تصویری (Landing)',
-                            onAction: function () {
-                                editor.insertContent('<section class="nl-block"><h3>خرید بر اساس دسته بندی</h3><div class="nl-categories"><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۱"><span>زنانه</span></a><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۲"><span>مردانه</span></a><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۳"><span>اکسسوری</span></a></div></section><p></p>');
-                            }
-                        }
-                    ]);
+    text: 'بلوک آماده',
+    fetch: function (callback) {
+        callback([
+            {
+                type: 'menuitem',
+                text: 'بخش دو ستونه (متن + تصویر/جدول)',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block nl-two-col"><div class="nl-box"><h3>ستون اول</h3><p>متن ستون اول...</p></div><div class="nl-box"><h3>ستون دوم</h3><p>متن/تصویر/جدول ستون دوم...</p></div></section><p></p>');
                 }
-            });
+            },
+            {
+                type: 'menuitem',
+                text: 'تصویر تمام عرض',
+                onAction: function () {
+                    editor.insertContent('<figure class="nl-block full-bleed image-shadow"><img src="https://placehold.co/1920x720" alt="hero" style="width:100%;height:auto;display:block;"></figure><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'تصویر با کادر و سایه نرم',
+                onAction: function () {
+                    editor.insertContent('<figure class="nl-block image-frame image-shadow"><img src="https://placehold.co/1200x700" alt="content" style="width:100%;height:auto;display:block;border-radius:8px;"><figcaption style="margin-top:8px;color:#6b7280">توضیح تصویر</figcaption></figure><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'بنر تبلیغاتی + دکمه CTA',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block nl-banner"><div class="nl-banner-kicker">پیشنهاد ویژه</div><h2 class="nl-banner-title">عنوان کمپین یا تخفیف</h2><p>توضیح کوتاه برای جلب توجه کاربر و افزایش نرخ تبدیل.</p><p><a href="#" class="nl-btn">مشاهده محصولات</a></p></section><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'اعتمادسازی (آیکن/مزیت‌ها)',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block"><h3>چرا از ما خرید کنید؟</h3><div class="nl-trust-grid"><div class="nl-trust-item"><strong>ارسال سریع</strong><p>تحویل در کوتاه ترین زمان</p></div><div class="nl-trust-item"><strong>پرداخت امن</strong><p>درگاه معتبر و رسید بانکی</p></div><div class="nl-trust-item"><strong>ضمانت اصالت</strong><p>کالاهای اصلی و باکیفیت</p></div><div class="nl-trust-item"><strong>پشتیبانی پاسخگو</strong><p>قبل و بعد از خرید</p></div></div></section><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'نظرات مشتریان',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block"><h3>نظر مشتریان</h3><div class="nl-testimonials"><blockquote class="nl-quote"><p>کیفیت و بسته بندی عالی بود.</p><cite>مشتری ۱</cite></blockquote><blockquote class="nl-quote"><p>ارسال سریع و پشتیبانی خوب.</p><cite>مشتری ۲</cite></blockquote><blockquote class="nl-quote"><p>حتما دوباره خرید می کنم.</p><cite>مشتری ۳</cite></blockquote></div></section><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'سوالات متداول (FAQ)',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block nl-faq"><h3>سوالات متداول</h3><details><summary>زمان ارسال سفارش چقدر است؟</summary><p>معمولا 1 تا 3 روز کاری.</p></details><details><summary>امکان مرجوعی وجود دارد؟</summary><p>بله، طبق قوانین بازگشت کالا.</p></details><details><summary>روش های پرداخت چیست؟</summary><p>پرداخت آنلاین، پرداخت در محل، یا رسید بانکی.</p></details></section><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'محصول ویژه (Landing)',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block nl-product-feature"><div class="nl-media"><img src="https://placehold.co/900x700" alt="featured product"></div><div class="nl-body"><div class="nl-banner-kicker">پیشنهاد ویژه</div><h3>نام محصول ویژه</h3><p>توضیح کوتاه و متقاعدکننده برای معرفی ویژگی یا مزیت محصول.</p><div class="nl-price">۲,۴۹۰,۰۰۰ تومان</div><p><a href="#" class="nl-btn">خرید محصول</a> <a href="#" class="nl-btn-outline">جزئیات بیشتر</a></p></div></section><p></p>');
+                }
+            },
+            {
+                type: 'menuitem',
+                text: 'دسته بندی تصویری (Landing)',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block"><h3>خرید بر اساس دسته بندی</h3><div class="nl-categories"><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۱"><span>زنانه</span></a><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۲"><span>مردانه</span></a><a class="nl-cat-card" href="#"><img src="https://placehold.co/640x420" alt="دسته ۳"><span>اکسسوری</span></a></div></section><p></p>');
+                }
+            },
+            // 🔹 بلوک جدید برای صفحه‌ساز نیلک
+            {
+                type: 'menuitem',
+                text: 'محصولات ویژه (Grid)',
+                onAction: function () {
+                    editor.insertContent('<section class="nl-block"><h3>محصولات ویژه</h3><div class="product-grid"><div class="product-item"><img src="https://placehold.co/400x400" alt="محصول ۱"><h4>محصول ۱</h4><p class="price">۲۵۰,۰۰۰ تومان</p></div><div class="product-item"><img src="https://placehold.co/400x400" alt="محصول ۲"><h4>محصول ۲</h4><p class="price">۳۲۰,۰۰۰ تومان</p></div><div class="product-item"><img src="https://placehold.co/400x400" alt="محصول ۳"><h4>محصول ۳</h4><p class="price">۴۱۰,۰۰۰ تومان</p></div></div></section><p></p>');
+                }
+            }
+        ]);
+    }
+});
+
         },
         images_upload_handler: (blobInfo) => new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();

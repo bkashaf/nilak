@@ -9,11 +9,16 @@ class PageController extends Controller
 {
     public function show(string $slug)
     {
-        $page = Page::query()
-            ->published()
+        // یافتن صفحه منتشرشده با اسلاگ + بارگذاری بلوک‌ها
+        $page = Page::published()
             ->where('slug', $slug)
+            ->with('blocks')   // بارگذاری بلوک‌ها برای صفحه‌ساز
             ->firstOrFail();
 
-        return view('themes.default.page', compact('page'));
+        // ارسال صفحه و بلوک‌ها به ویو
+        return view('themes.default.pages.show', [
+            'page'   => $page,
+            'blocks' => $page->blocks,
+        ]);
     }
 }

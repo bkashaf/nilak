@@ -16,6 +16,7 @@ return [
     'track_order' => 'پیگیری سفارش',
     'order_status' => 'وضعیت سفارش',
     'payment_status' => 'وضعیت پرداخت',
+    'ok' => 'باشه',
     'order_statuses' => [
         'pending' => 'در انتظار',
         'paid' => 'پرداخت‌شده',

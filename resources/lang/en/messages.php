@@ -16,6 +16,10 @@ return [
     'track_order' => 'Track order',
     'order_status' => 'Order status',
     'payment_status' => 'Payment status',
+
+     'ok' => 'OK',
+
+
     'order_statuses' => [
         'pending' => 'Pending',
         'paid' => 'Paid',
@@ -34,3 +38,5 @@ return [
     ],
     'footer' => 'Nilak Store',
 ];
+
+

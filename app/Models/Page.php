@@ -21,8 +21,19 @@ class Page extends Model
         'menu_order' => 'integer',
     ];
 
+    /**
+     * فقط صفحات منتشرشده
+     */
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
+    }
+
+    /**
+     * ارتباط با بلوک‌های صفحه‌ساز
+     */
+    public function blocks()
+    {
+        return $this->hasMany(PageBlock::class)->orderBy('position');
     }
 }
