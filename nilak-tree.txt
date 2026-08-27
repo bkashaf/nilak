@@ -1,124 +1,288 @@
 ===============================
-PATH: app\Http\Controllers\Admin
+PATH: app\Http\Controllers
 ===============================
-AttributeController.php
-CategoryController.php
-DashboardController.php
-OrderController.php
-PageController.php
-PaymentController.php
-PaymentMethodController.php
-ProductController.php
-ReportsController.php
-SettingsController.php
-SliderController.php
-UserController.php
+|-- Admin
+|-- Api
+|-- Auth
+|-- Front
+|-- Installer
+|-- Controller.php
+  |-- AttributeController.php
+  |-- CategoryController.php
+  |-- DashboardController.php
+  |-- OrderController.php
+  |-- PageController.php
+  |-- PaymentController.php
+  |-- PaymentMethodController.php
+  |-- ProductController.php
+  |-- ReportsController.php
+  |-- SettingsController.php
+  |-- SliderController.php
+  |-- UserController.php
+  |-- AttributeController.php
+  |-- AuthController.php
+  |-- BankReceiptController.php
+  |-- CartController.php
+  |-- CategoryController.php
+  |-- OrderController.php
+  |-- PaymentController.php
+  |-- ProductController.php
+  |-- LoginController.php
+  |-- RegisterController.php
+  |-- CartController.php
+  |-- HomeController.php
+  |-- OrderTrackingController.php
+  |-- PageController.php
+  |-- PaymentCallbackController.php
+  |-- ProfileController.php
+  |-- ShopController.php
+  |-- InstallerController.php
 
 ===============================
 PATH: app\Models
 ===============================
-Attribute.php
-AttributeValue.php
-BankReceipt.php
-Category.php
-CategoryTranslation.php
-Order.php
-OrderItem.php
-OrderStatusHistory.php
-Page.php
-Payment.php
-PaymentMethod.php
-PaymentStatusHistory.php
-Permission.php
-Product.php
-ProductAttributeValue.php
-ProductImage.php
-ProductTranslation.php
-Refund.php
-Role.php
-Setting.php
-Slider.php
-User.php
+|-- Attribute.php
+|-- AttributeValue.php
+|-- BankReceipt.php
+|-- Category.php
+|-- CategoryTranslation.php
+|-- Order.php
+|-- OrderItem.php
+|-- OrderStatusHistory.php
+|-- Page.php
+|-- PageBlock.php
+|-- Payment.php
+|-- PaymentMethod.php
+|-- PaymentStatusHistory.php
+|-- Permission.php
+|-- Product.php
+|-- ProductAttributeValue.php
+|-- ProductImage.php
+|-- ProductTranslation.php
+|-- Refund.php
+|-- Role.php
+|-- Setting.php
+|-- Slider.php
+|-- User.php
 
 ===============================
-PATH: resources\views\themes\default
+PATH: routes
 ===============================
-account
-blog
-cart
-checkout
-home
-layouts
-pages
-partials
-product
-cart.blade.php
-checkout.blade.php
-home.blade.php
-order-tracking.blade.php
-page.blade.php
-product.blade.php
-shop.blade.php
-  profile.blade.php
-  home.blade.php
-  shop.blade.php
-  hero-slider.blade.php
+|-- admin.php
+|-- api.php
+|-- console.php
+|-- web.php
 
 ===============================
-PATH: public\js
+PATH: config
 ===============================
-PATH NOT FOUND
+|-- app.php
+|-- auth.php
+|-- cache.php
+|-- database.php
+|-- filesystems.php
+|-- installer.php
+|-- localization.php
+|-- logging.php
+|-- mail.php
+|-- otp.php
+|-- payment.php
+|-- queue.php
+|-- services.php
+|-- session.php
+|-- shop.php
+|-- theme.php
+
+===============================
+PATH: resources\views
+===============================
+|-- admin
+|-- Auth
+|-- components
+|-- installer
+|-- themes
+|-- welcome.blade.php
+  |-- categories
+  |-- products
+  |-- reports
+  |-- settings
+    |-- create.blade.php
+    |-- edit.blade.php
+    |-- index.blade.php
+    |-- create.blade.php
+    |-- edit.blade.php
+    |-- index.blade.php
+    |-- index.blade.php
+    |-- index.blade.php
+  |-- login.blade.php
+  |-- register.blade.php
+  |-- completed.blade.php
+  |-- database.blade.php
+  |-- layout.blade.php
+  |-- requirements.blade.php
+  |-- store-settings.blade.php
+  |-- summary.blade.php
+  |-- welcome.blade.php
+  |-- admin
+  |-- default
+  |-- cart.blade.php
+  |-- cart.blade.php.bak_20260520_004151
+  |-- checkout.blade.php
+  |-- checkout.blade.php.bak_20260520_004151
+    |-- attributes
+    |-- content
+    |-- dashboard
+    |-- layouts
+    |-- orders
+    |-- pages
+    |-- payment-methods
+    |-- payments
+    |-- products
+    |-- reports
+    |-- settings
+    |-- sliders
+    |-- users
+      |-- index.blade.php
+      |-- index.blade.php
+      |-- master.blade.php
+      |-- edit.blade.php
+      |-- index.blade.php
+      |-- create.blade.php
+      |-- edit.blade.php
+      |-- index.blade.php
+      |-- _editor.blade.php
+      |-- index.blade.php
+      |-- index.blade.php
+      |-- index.blade.php
+      |-- index.blade.php
+      |-- index.blade.php
+      |-- index.blade.php
+      |-- create.blade.php
+      |-- edit.blade.php
+      |-- index.blade.php
+    |-- account
+    |-- blocks
+    |-- blog
+    |-- cart
+    |-- checkout
+    |-- home
+    |-- layouts
+    |-- pages
+    |-- partials
+    |-- product
+    |-- cart.blade.php
+    |-- checkout.blade.php
+    |-- home.blade.php
+    |-- order-tracking.blade.php
+    |-- page.blade.php
+    |-- product.blade.php
+    |-- shop.blade.php
+      |-- profile.blade.php
+      |-- featured-products.blade.php
+      |-- home.blade.php
+      |-- shop.blade.php
+      |-- show.blade.php
+      |-- hero-slider.blade.php
+
+===============================
+PATH: resources\js
+===============================
+|-- admin-page-editor.js
+|-- app.js
+|-- bootstrap.js
+
+===============================
+PATH: resources\css
+===============================
+|-- app.css
+
+===============================
+PATH: resources\lang
+===============================
+|-- en
+|-- fa
+  |-- installer.php
+  |-- messages.php
+  |-- installer.php
+  |-- messages.php
+
+===============================
+PATH: public
+===============================
+|-- build
+|-- storage
+|-- themes
+|-- .htaccess
+|-- favicon.ico
+|-- hot
+|-- index.php
+|-- robots.txt
+  |-- assets
+  |-- manifest.json
+    |-- admin-page-editor-Bm-koNr5.js
+    |-- admin-page-editor-SU4xhhHj.css
+    |-- app-F5pwxNLz.js
+    |-- app-Ylj2B7Pq.css
+  |-- default
+  |-- testtest.txt
+    |-- css
+    |-- images
+    |-- js
+      |-- style.css
+      |-- no-image.svg
+      |-- script.js
 
 ===============================
 PATH: database
 ===============================
-factories
-migrations
-seeders
-.gitignore
-database.sqlite
-  UserFactory.php
-  0001_01_01_000000_create_users_table.php
-  0001_01_01_000001_create_cache_table.php
-  0001_01_01_000002_create_jobs_table.php
-  2026_04_19_182451_create_roles_table.php
-  2026_04_19_182500_create_permissions_table.php
-  2026_04_19_182505_create_role_user_table.php
-  2026_04_19_182512_create_permission_role_table.php
-  2026_05_06_000001_create_categories_table.php
-  2026_05_06_000002_create_products_table.php
-  2026_05_06_000003_create_product_images_table.php
-  2026_05_06_000004_create_attributes_table.php
-  2026_05_06_000005_create_attribute_values_table.php
-  2026_05_06_000006_create_product_attribute_values_table.php
-  2026_05_07_195448_create_payment_methods_table.php
-  2026_05_07_200048_create_orders_table.php
-  2026_05_07_200157_create_order_items_table.php
-  2026_05_07_200251_create_payments_table.php
-  2026_05_08_123350_add_type_to_payment_methods_table.php
-  2026_05_08_130009_make_gateway_fields_nullable_in_payments_table.php
-  2026_05_08_131434_remove_payment_method_id_from_orders_table.php
-  2026_05_08_163525_remove_payment_method_id_from_orders_table.php
-  2026_08_23_000001_add_unique_tracking_code_to_orders_table.php
-  2026_08_23_000002_create_settings_table.php
-  2026_08_23_000003_group_product_categories.php
-  2026_08_23_000004_create_category_translations_table.php
-  2026_08_23_000005_create_product_translations_table.php
-  2026_08_23_000006_normalize_payment_methods.php
-  2026_08_23_000007_create_personal_access_tokens_table.php
-  2026_08_23_000008_harden_payment_lifecycle.php
-  2026_08_23_000009_add_reserved_stock_to_products_table.php
-  2026_08_23_000010_add_inventory_status_to_orders_table.php
-  2026_08_23_000011_create_bank_receipts_table.php
-  2026_08_23_000012_create_refunds_and_order_status_histories.php
-  2026_08_25_000013_create_sliders_and_menu_settings.php
-  2026_08_25_000014_add_customer_profile_and_delivery_fields.php
-  2026_08_25_000015_create_pages_table.php
-  2026_08_25_000016_enhance_sliders_for_locale_and_images.php
-  2026_08_25_120000_make_users_email_nullable.php
-  2026_08_25_140000_add_otp_fields_to_users_table.php
-  AdminUserSeeder.php
-  DatabaseSeeder.php
-  InitialDataSeeder.php
-  RolePermissionSeeder.php
+|-- factories
+|-- migrations
+|-- seeders
+|-- .gitignore
+|-- database.sqlite
+  |-- UserFactory.php
+  |-- 0001_01_01_000000_create_users_table.php
+  |-- 0001_01_01_000001_create_cache_table.php
+  |-- 0001_01_01_000002_create_jobs_table.php
+  |-- 2026_04_19_182451_create_roles_table.php
+  |-- 2026_04_19_182500_create_permissions_table.php
+  |-- 2026_04_19_182505_create_role_user_table.php
+  |-- 2026_04_19_182512_create_permission_role_table.php
+  |-- 2026_05_06_000001_create_categories_table.php
+  |-- 2026_05_06_000002_create_products_table.php
+  |-- 2026_05_06_000003_create_product_images_table.php
+  |-- 2026_05_06_000004_create_attributes_table.php
+  |-- 2026_05_06_000005_create_attribute_values_table.php
+  |-- 2026_05_06_000006_create_product_attribute_values_table.php
+  |-- 2026_05_07_195448_create_payment_methods_table.php
+  |-- 2026_05_07_200048_create_orders_table.php
+  |-- 2026_05_07_200157_create_order_items_table.php
+  |-- 2026_05_07_200251_create_payments_table.php
+  |-- 2026_05_08_123350_add_type_to_payment_methods_table.php
+  |-- 2026_05_08_130009_make_gateway_fields_nullable_in_payments_table.php
+  |-- 2026_05_08_131434_remove_payment_method_id_from_orders_table.php
+  |-- 2026_05_08_163525_remove_payment_method_id_from_orders_table.php
+  |-- 2026_08_23_000001_add_unique_tracking_code_to_orders_table.php
+  |-- 2026_08_23_000002_create_settings_table.php
+  |-- 2026_08_23_000003_group_product_categories.php
+  |-- 2026_08_23_000004_create_category_translations_table.php
+  |-- 2026_08_23_000005_create_product_translations_table.php
+  |-- 2026_08_23_000006_normalize_payment_methods.php
+  |-- 2026_08_23_000007_create_personal_access_tokens_table.php
+  |-- 2026_08_23_000008_harden_payment_lifecycle.php
+  |-- 2026_08_23_000009_add_reserved_stock_to_products_table.php
+  |-- 2026_08_23_000010_add_inventory_status_to_orders_table.php
+  |-- 2026_08_23_000011_create_bank_receipts_table.php
+  |-- 2026_08_23_000012_create_refunds_and_order_status_histories.php
+  |-- 2026_08_25_000013_create_sliders_and_menu_settings.php
+  |-- 2026_08_25_000014_add_customer_profile_and_delivery_fields.php
+  |-- 2026_08_25_000015_create_pages_table.php
+  |-- 2026_08_25_000016_enhance_sliders_for_locale_and_images.php
+  |-- 2026_08_25_120000_make_users_email_nullable.php
+  |-- 2026_08_25_140000_add_otp_fields_to_users_table.php
+  |-- 2026_08_26_224943_create_page_blocks_table.php
+  |-- AdminUserSeeder.php
+  |-- DatabaseSeeder.php
+  |-- InitialDataSeeder.php
+  |-- RolePermissionSeeder.php
 

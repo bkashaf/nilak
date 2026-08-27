@@ -1,3 +1,5 @@
+@vite(['resources/js/admin-page-editor.js'])
+
 <div class="col-12">
     <label class="form-label" for="content">محتوا</label>
     <textarea
@@ -9,12 +11,12 @@
         data-upload-url="{{ route('admin.pages.upload-image') }}"
         data-csrf-token="{{ csrf_token() }}"
     >{{ $contentValue ?? '' }}</textarea>
-    <div class="form-text">امکانات حرفه ای: RTL/LTR، بلوک های آماده (دو ستونه، بنر CTA، اعتمادسازی، نظرات، FAQ، محصول ویژه، دسته بندی تصویری)، تصویر تمام عرض، جدول، کادر و سایه تصویر.</div>
 
-    <div class="alert alert-light border mt-3 mb-0 py-2 px-3 small" role="alert">
+        <div class="alert alert-light border mt-3 mb-0 py-2 px-3 small" role="alert">
         <strong>راهنمای سریع بلوک های آماده:</strong>
         از نوار ابزار، گزینه «بلوک آماده» را بزنید و بلوک موردنظر را درج کنید.
         بلوک ها به صورت واکنش گرا هستند؛ در موبایل ستون ها تک ستونه می شوند.
         فقط بلوک «تصویر تمام عرض» تا لبه صفحه باز می شود و بقیه بلوک ها داخل عرض محتوای صفحه نمایش داده می شوند.
-    </div>
+    </div>  
 </div>
+

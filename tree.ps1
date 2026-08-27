@@ -3,10 +3,15 @@ Set-Location "C:\xampp\htdocs\nilak"
 
 # Important paths
 $paths = @(
-    "app\Http\Controllers\Admin",
+    "app\Http\Controllers",
     "app\Models",
-    "resources\views\themes\default",
-    "public\js",
+    "routes",
+    "config",
+    "resources\views",
+    "resources\js",
+    "resources\css",
+    "resources\lang",
+    "public",
     "database"
 )
 
@@ -16,17 +21,24 @@ $outFile = "nilak-tree.txt"
 # Remove old file if exists
 if (Test-Path $outFile) { Remove-Item $outFile }
 
+# Simple ASCII tree drawer
+function Draw-Tree($basePath) {
+    Get-ChildItem $basePath -Recurse | ForEach-Object {
+        $relative = $_.FullName.Substring($basePath.Length).TrimStart('\')
+        $parts = $relative.Split([IO.Path]::DirectorySeparatorChar)
+        $indent = $parts.Count - 1
+        $prefix = (" " * ($indent * 2)) + "|-- "
+        $prefix + $_.Name
+    }
+}
+
 foreach ($p in $paths) {
     $full = Join-Path (Get-Location) $p
     Add-Content $outFile "==============================="
     Add-Content $outFile "PATH: $p"
     Add-Content $outFile "==============================="
     if (Test-Path $full) {
-        Get-ChildItem $full -Recurse | ForEach-Object {
-            $relative = $_.FullName.Substring($full.Length).TrimStart('\')
-            $indent = $relative.Split([IO.Path]::DirectorySeparatorChar).Count - 1
-            (" " * ($indent * 2)) + $_.Name
-        } | Add-Content $outFile
+        Draw-Tree $full | Add-Content $outFile
     } else {
         Add-Content $outFile "PATH NOT FOUND"
     }
