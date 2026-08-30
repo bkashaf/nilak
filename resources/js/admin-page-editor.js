@@ -186,7 +186,39 @@ function initPageEditor() {
                 onAction: function () {
                     editor.insertContent('<section class="nl-block"><h3>محصولات ویژه</h3><div class="product-grid"><div class="product-item"><img src="https://placehold.co/400x400" alt="محصول ۱"><h4>محصول ۱</h4><p class="price">۲۵۰,۰۰۰ تومان</p></div><div class="product-item"><img src="https://placehold.co/400x400" alt="محصول ۲"><h4>محصول ۲</h4><p class="price">۳۲۰,۰۰۰ تومان</p></div><div class="product-item"><img src="https://placehold.co/400x400" alt="محصول ۳"><h4>محصول ۳</h4><p class="price">۴۱۰,۰۰۰ تومان</p></div></div></section><p></p>');
                 }
-            }
+            },
+
+            {
+    type: 'menuitem',
+    text: 'فرم تماس (Contact Form)',
+    onAction: function () {
+        const csrf = document.querySelector('.js-page-editor')?.dataset.csrfToken || '';
+        editor.insertContent(`
+            <section class="nl-block nl-contact-form">
+                <h3>تماس با ما</h3>
+                <form action="/contact/submit" method="POST" class="nl-form">
+                    <input type="hidden" name="_token" value="${csrf}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" name="name" class="form-control" placeholder="نام شما">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="email" name="email" class="form-control" placeholder="ایمیل شما">
+                        </div>
+                        <div class="col-12">
+                            <textarea name="message" class="form-control" rows="5" placeholder="پیام شما" required></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">ارسال پیام</button>
+                        </div>
+                    </div>
+                </form>
+            </section><p></p>
+        `);
+    }
+}
+
+
         ]);
     }
 });
@@ -238,3 +270,4 @@ if (document.readyState === 'loading') {
 } else {
     initPageEditor();
 }
+console.log('✅ نسخه جدید admin-page-editor.js فعال شد');

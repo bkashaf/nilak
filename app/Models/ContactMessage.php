@@ -10,9 +10,11 @@ class ContactMessage extends Model
     protected $table = 'contact_messages';
 
     protected $fillable = [
-        'user_id',
-        'subject',
-        'message',
+        'user_id',   // برای فرم ادمین
+        'subject',   // برای فرم ادمین
+        'name',      // برای فرم فرانت
+        'email',     // برای فرم فرانت
+        'message',   // مشترک
     ];
 
     public function user(): BelongsTo

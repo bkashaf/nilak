@@ -10,9 +10,18 @@ return new class extends Migration
     {
         Schema::create('contact_messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('subject');
+
+            // فرم تماس ادمین (قبلی)
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('subject')->nullable();
+
+            // فرم تماس فرانت (جدید)
+            $table->string('name')->nullable();
+            $table->string('email')->nullable();
+
+            // مشترک
             $table->text('message');
+
             $table->timestamps();
         });
     }
