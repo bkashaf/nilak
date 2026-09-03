@@ -71,6 +71,14 @@ class Product extends Model
         return $this->hasMany(ProductAttributeValue::class, 'product_id');
     }
 
+    /**
+     * اقلام سفارش مرتبط با این محصول (برای محاسبه پرفروش‌ترین‌ها)
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class, 'product_id');
+    }
+
     public function translations(): HasMany
     {
         return $this->hasMany(ProductTranslation::class);
