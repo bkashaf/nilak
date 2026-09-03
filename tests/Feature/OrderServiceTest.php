@@ -81,7 +81,7 @@ class OrderServiceTest extends TestCase
             'address' => 'تهران، خیابان نمونه، پلاک ۱',
         ]);
 
-        $response = $this->post(route('orders.track'), [
+        $response = $this->post(route('order.tracking.submit'), [
             'tracking_code' => 'nlk-20260823-abc123',
         ]);
 
