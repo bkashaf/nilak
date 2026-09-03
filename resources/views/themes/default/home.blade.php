@@ -55,19 +55,7 @@
 <div class="row mb-5">
     @foreach($newProducts as $product)
         <div class="col-6 col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
-                 <img src="{{ $product->image_url }}"
-                     alt="{{ $product->localized_name }}"
-                     class="card-img-top"
-                     style="height:220px; object-fit:contain; background:#f0f0f0;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ $product->localized_name }}</h5>
-                    <p class="fw-bold">{{ number_format($product->price) }} تومان</p>
-                    <a href="{{ route('shop.product', $product->slug) }}" class="btn btn-primary w-100">
-                        مشاهده محصول
-                    </a>
-                </div>
-            </div>
+            <x-product-card :product="$product" cta-class="btn-primary" />
         </div>
     @endforeach
 </div>
@@ -77,19 +65,7 @@
 <div class="row mb-5">
     @foreach($bestSellers as $product)
         <div class="col-6 col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
-                 <img src="{{ $product->image_url }}"
-                     alt="{{ $product->localized_name }}"
-                     class="card-img-top"
-                     style="height:220px; object-fit:contain; background:#f0f0f0;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ $product->localized_name }}</h5>
-                    <p class="fw-bold">{{ number_format($product->price) }} تومان</p>
-                    <a href="{{ route('shop.product', $product->slug) }}" class="btn btn-outline-dark w-100">
-                        مشاهده محصول
-                    </a>
-                </div>
-            </div>
+            <x-product-card :product="$product" cta-class="btn-outline-dark" />
         </div>
     @endforeach
 </div>
