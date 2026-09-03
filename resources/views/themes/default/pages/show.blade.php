@@ -1,5 +1,4 @@
-@extends('themes.default.layouts.master')
-
+@extends('themes.default.layouts.shop')
 @section('content')
 
     {{-- پیام‌های فرم تماس --}}
