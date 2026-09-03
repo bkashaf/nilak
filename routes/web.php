@@ -60,13 +60,7 @@ Route::get('/checkout', function () {
         ->orderBy('id')
         ->get();
 
-    if (view()->exists('themes.default.checkout')) {
-        return view('themes.default.checkout', compact('cart', 'paymentMethods'));
-    }
-    if (view()->exists('themes.checkout')) {
-        return view('themes.checkout', compact('cart', 'paymentMethods'));
-    }
-    abort(404);
+    return view('themes.default.checkout', compact('cart', 'paymentMethods'));
 })->middleware(['auth', 'profile.complete'])->name('checkout.index');
 
 Route::post('/checkout/process', [CartController::class, 'checkout'])

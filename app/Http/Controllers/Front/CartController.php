@@ -33,7 +33,7 @@ class CartController extends Controller
     $total = $cart->total();
 
         // سبد عملیاتی: نمایش جزئیات، جمع و مسیر تسویه
-        return view('themes.cart', compact('cart', 'items', 'total'));
+        return view('themes.default.cart', compact('cart', 'items', 'total'));
 }
 
     /**
