@@ -23,12 +23,6 @@
             'mobile_focal_y' => 50,
         ]
     ]);
-    $categoryImages = [
-        'men' => file_exists(public_path('images/cat-men.jpg')) ? asset('images/cat-men.jpg') : $defaultImage,
-        'women' => file_exists(public_path('images/cat-women.jpg')) ? asset('images/cat-women.jpg') : $defaultImage,
-        'shoes' => file_exists(public_path('images/cat-shoes.jpg')) ? asset('images/cat-shoes.jpg') : $defaultImage,
-        'accessories' => file_exists(public_path('images/cat-accessories.jpg')) ? asset('images/cat-accessories.jpg') : $defaultImage,
-    ];
 @endphp
 
 {{-- Hero Section --}}
@@ -36,51 +30,31 @@
 
 {{-- Categories --}}
 <h2 class="mb-4 fw-bold">دسته‌بندی‌ها</h2>
-<div class="row text-center mb-5">
-
-    <div class="col-md-3 mb-3">
-        <a href="{{ route('shop.index') }}" class="text-decoration-none text-dark">
-            <div class="card shadow-sm">
-                <img src="{{ $categoryImages['men'] }}" alt="مردانه" class="card-img-top" style="height:180px; object-fit:contain; background:#f0f0f0;">
-                <div class="card-body fw-bold">مردانه</div>
-            </div>
-        </a>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <a href="{{ route('shop.index') }}" class="text-decoration-none text-dark">
-            <div class="card shadow-sm">
-                <img src="{{ $categoryImages['women'] }}" alt="زنانه" class="card-img-top" style="height:180px; object-fit:contain; background:#f0f0f0;">
-                <div class="card-body fw-bold">زنانه</div>
-            </div>
-        </a>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <a href="{{ route('shop.index') }}" class="text-decoration-none text-dark">
-            <div class="card shadow-sm">
-                <img src="{{ $categoryImages['shoes'] }}" alt="کفش" class="card-img-top" style="height:180px; object-fit:contain; background:#f0f0f0;">
-                <div class="card-body fw-bold">کفش</div>
-            </div>
-        </a>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <a href="{{ route('shop.index') }}" class="text-decoration-none text-dark">
-            <div class="card shadow-sm">
-                <img src="{{ $categoryImages['accessories'] }}" alt="اکسسوری" class="card-img-top" style="height:180px; object-fit:contain; background:#f0f0f0;">
-                <div class="card-body fw-bold">اکسسوری</div>
-            </div>
-        </a>
-    </div>
-
+<div class="row text-center mb-3">
+    @forelse($featuredCategories as $category)
+        <div class="col-6 col-md-3 mb-3">
+            <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="text-decoration-none text-dark">
+                <div class="card h-100">
+                    <img src="{{ $category->image_url }}" alt="{{ $category->localized_name }}" class="card-img-top" style="height:120px; object-fit:contain; background:var(--color-surface-alt);">
+                    <div class="card-body py-2">
+                        <span class="fw-bold">{{ $category->localized_name }}</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    @empty
+        <div class="col-12 text-muted">هنوز دسته‌بندی‌ای برای نمایش تعریف نشده است.</div>
+    @endforelse
+</div>
+<div class="text-center mb-5">
+    <a href="{{ route('shop.index') }}" class="btn btn-outline-dark btn-sm">مشاهده همه محصولات</a>
 </div>
 
 {{-- New Arrivals --}}
 <h2 class="mb-4 fw-bold">جدیدترین محصولات</h2>
 <div class="row mb-5">
     @foreach($newProducts as $product)
-        <div class="col-md-3 mb-4">
+        <div class="col-6 col-md-3 mb-4">
             <div class="card h-100 shadow-sm">
                  <img src="{{ $product->image_url }}"
                      alt="{{ $product->localized_name }}"
@@ -102,7 +76,7 @@
 <h2 class="mb-4 fw-bold">پرفروش‌ترین‌ها</h2>
 <div class="row mb-5">
     @foreach($bestSellers as $product)
-        <div class="col-md-3 mb-4">
+        <div class="col-6 col-md-3 mb-4">
             <div class="card h-100 shadow-sm">
                  <img src="{{ $product->image_url }}"
                      alt="{{ $product->localized_name }}"
