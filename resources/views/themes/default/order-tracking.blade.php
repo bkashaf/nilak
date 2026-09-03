@@ -10,7 +10,7 @@
                     <h1 class="h3 mb-3">پیگیری سفارش</h1>
                     <p class="text-muted">شماره پیگیری سفارش خود را وارد کنید.</p>
 
-                    <form method="POST" action="{{ route('orders.track') }}" class="row g-2 mb-4">
+                    <form method="POST" action="{{ route('order.tracking.submit') }}" class="row g-2 mb-4">
                         @csrf
                         <div class="col-md-9">
                             <label for="tracking_code" class="visually-hidden">شماره پیگیری</label>
