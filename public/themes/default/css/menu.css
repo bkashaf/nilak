@@ -1,0 +1,252 @@
+/* ----------------------------------------------------
+   نیلَک — Navigation System (Final Clean Version)
+   سازگار با RTL / Bootstrap / موبایل / دسکتاپ
+---------------------------------------------------- */
+
+/* ============================
+   متغیرهای پایه
+   ============================ */
+:root {
+  --md-primary: #009688;
+  --md-primary-dark: #00695C;
+  --md-surface: #ffffff;
+  --md-on-surface: #374151;
+  --md-hover: rgba(0,150,136,0.08);
+  --md-active: rgba(0,150,136,0.12);
+  --md-shadow: rgba(0,0,0,0.12);
+  --menu-max-width: 320px;
+  --mobile-menu-top-offset: 60px;
+  --panel-gap-right: 8px;
+}
+
+/* جلوگیری از اسکرول پس‌زمینه هنگام باز بودن منوی موبایل */
+html.no-scroll--menu-open {
+  overflow: hidden;
+}
+
+/* ============================
+   ایمنی عمومی
+   ============================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ============================
+   1) لینک‌های منوی دسکتاپ
+   ============================ */
+.primary-nav {
+  display: flex;
+  gap: .35rem;
+  align-items: center;
+}
+
+.primary-nav .nav-link {
+  color: var(--md-on-surface);
+  font-weight: 600;
+  padding: .55rem 1rem;
+  border-radius: 8px;
+  transition: background .22s ease, color .22s ease;
+  white-space: nowrap;
+}
+
+.primary-nav .nav-link:hover {
+  background: var(--md-hover);
+  color: var(--md-primary-dark);
+}
+
+.primary-nav .nav-link.active {
+  background: var(--md-active);
+  color: var(--md-primary);
+  font-weight: 700;
+}
+
+/* ============================
+   2) مگامنو دسکتاپ
+   ============================ */
+.category-menu {
+  position: relative;
+}
+
+.category-menu > .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 20rem;
+  padding: 1.25rem;
+  background: var(--md-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px var(--md-shadow);
+  display: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+@media (min-width: 768px) {
+  .category-menu:hover > .dropdown-menu,
+  .category-menu:focus-within > .dropdown-menu {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-menu .category-heading {
+  font-weight: 700;
+  color: var(--md-primary);
+  margin-bottom: .5rem;
+}
+
+.category-menu .category-child {
+  display: block;
+  padding: .25rem 0;
+  color: #546e7a;
+}
+
+/* ============================
+   3) پنل موبایل (همبرگری)
+   ============================ */
+.mobile-menu-panel {
+  position: fixed;
+  top: var(--mobile-menu-top-offset);
+  right: var(--panel-gap-right);
+  z-index: 1060;
+  background: var(--md-surface);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(15,23,42,0.18);
+  padding: 8px 0;
+  width: var(--menu-max-width);
+  max-width: calc(100vw - 16px);
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.mobile-menu-panel.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.mobile-menu-panel .navbar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 8px;
+}
+
+/* لینک‌های موبایل — راست‌چین (RTL) به‌صورت صریح */
+.mobile-menu-panel .nav-link {
+  display: block;
+  width: 100%;
+  text-align: right;
+  padding: 8px 16px;
+  color: var(--md-on-surface);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* هماهنگی فونت پنل موبایل با فونت سایت و منوی پروفایل کاربری */
+.mobile-menu-panel .nav-link,
+.site-tools .dropdown-menu .dropdown-item {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.mobile-menu-panel .nav-link:hover {
+  background: var(--md-hover);
+  color: var(--md-primary);
+}
+
+/* ============================
+   4) زیرمنوهای موبایل
+   ============================ */
+.mobile-menu-panel .category-child {
+  display: none;
+  padding-inline-start: 12px;
+}
+
+.mobile-menu-panel .nav-item.category-open > .category-child {
+  display: block !important;
+}
+
+/* ============================
+   5) منوی پروفایل — تراز صحیح
+   ============================ */
+.site-tools {
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .site-tools .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px var(--md-shadow);
+    background: var(--md-surface);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .site-tools .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 8px !important;
+    right: auto !important;
+    max-width: calc(100vw - 16px);
+    border-radius: 10px;
+  }
+}
+
+/* ============================
+   6) افکت‌ها
+   ============================ */
+.primary-nav .nav-link,
+.mobile-menu-panel .nav-link,
+.site-tools .dropdown-item {
+  position: relative;
+}
+
+.primary-nav .nav-link::after,
+.mobile-menu-panel .nav-link::after,
+.site-tools .dropdown-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--md-active);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+.primary-nav .nav-link:hover::after,
+.mobile-menu-panel .nav-link:hover::after,
+.site-tools .dropdown-item:hover::after {
+  opacity: .08;
+}
+
+/* ============================
+   7) حالت تاریک
+   ============================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-surface: #263238;
+    --md-on-surface: #ECEFF1;
+  }
+}
+
+/* ============================
+   8) Overrides نهایی
+   ============================ */
+.site-tools .dropdown-menu[style] {
+  left: 8px !important;
+  right: auto !important;
+}
