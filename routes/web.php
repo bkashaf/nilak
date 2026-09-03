@@ -11,40 +11,40 @@ use App\Http\Controllers\Front\PaymentCallbackController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\PageController;
 use App\Http\Controllers\Installer\InstallerController;
-use App\Http\Controllers\ContactController;   // ← اضافه شد
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Front\OrderController; // ✅ اصلاح شد
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-| Frontend routes: home, shop.index, shop.product, cart.index, checkout.index
+| Web Routes (Frontend)
 |--------------------------------------------------------------------------
 */
 
 // صفحه اصلی
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// صفحه فروشگاه
+// فروشگاه
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
-
-// صفحه محصول
 Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.product');
 
 // پیگیری سفارش
-Route::get('/order-tracking', [OrderTrackingController::class, 'index'])->name('orders.track.form');
-Route::post('/order-tracking', [OrderTrackingController::class, 'show'])->name('orders.track');
+Route::get('/order-tracking', [OrderTrackingController::class, 'index'])
+    ->name('order.tracking');
 
-// صفحات داینامیک
-Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
-
-// فرم تماس با ما ← جدید
-Route::post('/contact/submit', [ContactController::class, 'submit'])
-    ->middleware('auth')
-    ->name('contact.submit');
+Route::post('/order-tracking', [OrderTrackingController::class, 'show'])
+    ->name('order.tracking.submit');
 
 // کال‌بک زرین‌پال
 Route::get('/payment/zarinpal/callback/{payment}', [PaymentCallbackController::class, 'zarinpal'])
     ->name('payment.zarinpal.callback');
+
+// صفحات داینامیک
+Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+
+// تماس با ما
+Route::post('/contact/submit', [ContactController::class, 'submit'])
+    ->middleware('auth')
+    ->name('contact.submit');
 
 // سبد خرید
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -86,6 +86,19 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/profile', [ProfileController::class, 'update'])->name('account.profile.update');
 });
 
+// سفارش‌های کاربر
+Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+
+    // لیست سفارش‌ها
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+
+    // جزئیات سفارش
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    // ارسال رسید بانکی
+    Route::post('/receipt/{payment}', [OrderController::class, 'uploadReceipt'])->name('receipt.upload');
+});
+
 // تغییر زبان
 Route::get('/language/{locale}', function (string $locale) {
     abort_unless(in_array($locale, ['fa', 'en'], true), 404);
@@ -95,15 +108,7 @@ Route::get('/language/{locale}', function (string $locale) {
 
 // نصب سیستم
 Route::prefix('install')->name('install.')->middleware('installer.access')->group(function () {
-    Route::get('/', [InstallerController::class, 'welcome'])->name('welcome');
-    Route::get('/resume', [InstallerController::class, 'resume'])->name('resume');
-    Route::get('/requirements', [InstallerController::class, 'requirements'])->name('requirements');
-    Route::get('/database', [InstallerController::class, 'database'])->name('database');
-    Route::post('/database-test', [InstallerController::class, 'databaseTest'])->name('database.test');
-    Route::get('/store-settings', [InstallerController::class, 'storeSettings'])->name('store-settings');
-    Route::post('/store-settings', [InstallerController::class, 'storeSettingsSave'])->name('store-settings.save');
-    Route::get('/summary', [InstallerController::class, 'summary'])->name('summary');
-    Route::post('/run', [InstallerController::class, 'run'])->name('run');
+    require __DIR__.'/install.php';
 });
 
 // پنل مدیریت
