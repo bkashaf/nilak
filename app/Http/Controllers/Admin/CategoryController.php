@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -45,6 +46,7 @@ class CategoryController extends Controller
             'description_fa' => ['nullable','string'],
             'description_en' => ['nullable','string'],
             'slug'        => ['nullable','string','max:255','unique:categories,slug'],
+            'image'       => ['nullable','image','max:2048'],
             'parent_id'   => ['nullable','exists:categories,id'],
             'status'      => ['sometimes','boolean'],
             'position'    => ['nullable','integer','min:0'],
@@ -59,6 +61,11 @@ class CategoryController extends Controller
 
         $data['name'] = $data['name_fa'];
         $data['description'] = $data['description_fa'] ?? null;
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        }
+
         $category = Category::create($data);
         $this->saveTranslations($category, $data);
 
@@ -85,6 +92,8 @@ class CategoryController extends Controller
             'description_fa' => ['nullable','string'],
             'description_en' => ['nullable','string'],
             'slug'        => ['nullable','string','max:255', Rule::unique('categories','slug')->ignore($category->id)],
+            'image'       => ['nullable','image','max:2048'],
+            'remove_image' => ['sometimes','boolean'],
             'parent_id'   => ['nullable','exists:categories,id'],
             'status'      => ['sometimes','boolean'],
             'position'    => ['nullable','integer','min:0'],
@@ -99,6 +108,19 @@ class CategoryController extends Controller
 
         $data['name'] = $data['name_fa'];
         $data['description'] = $data['description_fa'] ?? null;
+
+        if ($request->hasFile('image')) {
+            if ($category->image && Storage::disk('public')->exists($category->image)) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        } elseif ($request->boolean('remove_image')) {
+            if ($category->image && Storage::disk('public')->exists($category->image)) {
+                Storage::disk('public')->delete($category->image);
+            }
+            $data['image'] = null;
+        }
+
         $category->update($data);
         $this->saveTranslations($category, $data);
 

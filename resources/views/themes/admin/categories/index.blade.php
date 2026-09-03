@@ -19,6 +19,7 @@
     <thead>
         <tr>
             <th style="width: 60px">شناسه</th>
+            <th style="width: 70px">تصویر</th>
             <th>نام</th>
             <th>والد</th>
             <th>وضعیت</th>
@@ -31,6 +32,10 @@
         @forelse($categories as $cat)
             <tr>
                 <td>{{ $cat->id }}</td>
+
+                <td>
+                    <img src="{{ $cat->image_url }}" alt="" style="width:44px;height:44px;object-fit:contain;background:#f0f0f0;border-radius:6px;">
+                </td>
 
                 <td>{{ $cat->localized_name }}</td>
 

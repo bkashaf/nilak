@@ -19,7 +19,7 @@
     </div>
 @endif
 
-<form action="{{ route('admin.categories.store') }}" method="POST">
+<form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
 
     <div class="card mb-4">
@@ -51,6 +51,11 @@
             <div class="mb-3">
                 <label class="form-label">توضیحات انگلیسی</label>
                 <textarea name="description_en" class="form-control" rows="3" dir="ltr">{{ old('description_en') }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">تصویر دسته (برای کارت صفحه اصلی)</label>
+                <input type="file" name="image" class="form-control" accept="image/*">
             </div>
 
         </div>
