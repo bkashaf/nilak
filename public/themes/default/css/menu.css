@@ -4,13 +4,13 @@
 ---------------------------------------------------- */
 
 /* ============================
-   متغیرهای پایه
+   متغیرهای پایه — نگاشت‌شده به توکن‌های مشترک سایت (style.css)
    ============================ */
 :root {
-  --md-primary: #009688;
-  --md-primary-dark: #00695C;
-  --md-surface: #ffffff;
-  --md-on-surface: #374151;
+  --md-primary: var(--color-primary, #009688);
+  --md-primary-dark: var(--color-primary-dark, #00695C);
+  --md-surface: var(--color-surface, #ffffff);
+  --md-on-surface: var(--color-text, #374151);
   --md-hover: rgba(0,150,136,0.08);
   --md-active: rgba(0,150,136,0.12);
   --md-shadow: rgba(0,0,0,0.12);
@@ -234,17 +234,7 @@ html.no-scroll--menu-open {
 }
 
 /* ============================
-   7) حالت تاریک
-   ============================ */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --md-surface: #263238;
-    --md-on-surface: #ECEFF1;
-  }
-}
-
-/* ============================
-   8) Overrides نهایی
+   7) Overrides نهایی
    ============================ */
 .site-tools .dropdown-menu[style] {
   left: 8px !important;
