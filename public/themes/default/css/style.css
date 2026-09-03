@@ -1,4 +1,4 @@
-/* === نیلَک Theme Base Styles === */
+/* === نیلَک Theme Base Styles — نسخه اصلاح‌شده === */
 
 /* فونت و رنگ عمومی */
 body {
@@ -6,6 +6,8 @@ body {
     font-family: Vazirmatn, sans-serif;
     color: #333;
     line-height: 1.7;
+    margin: 0;
+    padding: 0;
 }
 
 /* ناوبار */
@@ -46,20 +48,101 @@ body {
     background-color: #00796b;
     border-color: #00796b;
 }
-
 a.btn-primary, .btn-primary {
     color: #fff !important;
 }
 
-
-
-/* فوتر */
-footer {
+/* فوتر دسکتاپ */
+footer.site-desktop-footer {
     background: #f0f0f0;
     color: #666;
-    padding: 20px 0;
+    padding: 40px 0 20px;
     text-align: center;
     font-size: 14px;
+    border-top: 1px solid #ddd;
+}
+[dir="rtl"] footer.site-desktop-footer { text-align: right; }
+[dir="ltr"] footer.site-desktop-footer { text-align: left; }
+.site-footer-title {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: .5rem;
+}
+.site-footer-link {
+    color: #4b5563;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: .25rem;
+}
+.site-footer-link:hover {
+    color: #009688;
+}
+footer.site-desktop-footer svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: #444;
+    stroke-width: 1.6;
+    transition: stroke 0.2s ease;
+}
+footer.site-desktop-footer svg:hover {
+    stroke: #009688;
+}
+
+/* حذف لکه‌های سیاه در فوتر دسکتاپ */
+footer.site-desktop-footer svg rect,
+footer.site-desktop-footer svg path {
+    fill: none !important;
+}
+
+/* فوتر موبایل */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 0;
+}
+.mobile-bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    color: #009688;
+    text-decoration: none;
+}
+.mobile-bottom-nav a svg {
+    width: 24px;
+    height: 24px;
+    stroke: #009688;
+    fill: none;
+    stroke-width: 1.8;
+    margin-bottom: 2px;
+    transition: stroke 0.2s ease;
+}
+.mobile-bottom-nav a:hover svg {
+    stroke: #00796b;
+}
+
+/* مخفی کردن فوتر موبایل در دسکتاپ */
+@media (min-width: 768px) {
+    .mobile-bottom-nav {
+        display: none !important;
+    }
+}
+
+/* مخفی کردن فوتر دسکتاپ در موبایل */
+@media (max-width: 767.98px) {
+    footer.site-desktop-footer {
+        display: none !important;
+    }
 }
 
 /* تصویر پیش‌فرض محصولات */
