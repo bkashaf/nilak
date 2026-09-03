@@ -14,12 +14,12 @@ class PaymentCallbackController extends Controller
         try {
             $result = $paymentService->verify($payment, $request->all());
 
-            return redirect()->route('orders.track.form')->with(
+            return redirect()->route('order.tracking')->with(
                 $result['status'] === 'paid' ? 'success' : 'error',
                 $result['status'] === 'paid' ? 'پرداخت با موفقیت تأیید شد.' : 'تأیید پرداخت ناموفق بود.'
             );
         } catch (\Throwable $exception) {
-            return redirect()->route('orders.track.form')->with('error', 'خطا در تأیید پرداخت.');
+            return redirect()->route('order.tracking')->with('error', 'خطا در تأیید پرداخت.');
         }
     }
 }
