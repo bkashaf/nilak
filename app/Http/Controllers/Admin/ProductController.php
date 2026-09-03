@@ -27,14 +27,14 @@ class ProductController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(20);
 
-        return view('admin.products.index', compact('products'));
+        return view('themes.admin.products.index', compact('products'));
     }
 
     public function create()
     {
         $categories = Category::where('status', 1)->orderBy('name')->get();
         $attributes = Attribute::with('values')->orderBy('position')->get();
-        return view('admin.products.create', compact('categories', 'attributes'));
+        return view('themes.admin.products.create', compact('categories', 'attributes'));
     }
 
     public function store(Request $request)
@@ -101,7 +101,7 @@ class ProductController extends Controller
         $product->load('images');
         $attributes = Attribute::with('values')->orderBy('position')->get();
         $selectedAttributeValues = $product->attributeValues()->pluck('attribute_value_id')->all();
-        return view('admin.products.edit', compact('product', 'categories', 'attributes', 'selectedAttributeValues'));
+        return view('themes.admin.products.edit', compact('product', 'categories', 'attributes', 'selectedAttributeValues'));
     }
 
     public function update(Request $request, Product $product)

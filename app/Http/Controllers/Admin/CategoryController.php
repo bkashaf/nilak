@@ -24,7 +24,7 @@ class CategoryController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(20);
 
-        return view('admin.categories.index', compact('categories'));
+        return view('themes.admin.categories.index', compact('categories'));
     }
 
     public function create()
@@ -34,7 +34,7 @@ class CategoryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('admin.categories.create', compact('parents'));
+        return view('themes.admin.categories.create', compact('parents'));
     }
 
     public function store(Request $request)
@@ -74,7 +74,7 @@ class CategoryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('admin.categories.edit', compact('category', 'parents'));
+        return view('themes.admin.categories.edit', compact('category', 'parents'));
     }
 
     public function update(Request $request, Category $category)
