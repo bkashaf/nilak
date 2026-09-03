@@ -66,42 +66,8 @@
 <div class="row">
 
     @foreach($products as $product)
-        <div class="col-md-3 mb-4">
-
-            <div class="card h-100 shadow-sm">
-
-                 {{-- تصویر محصول --}}
-                 <img src="{{ $product->image_url }}"
-                     alt="{{ $product->localized_name }}"
-                     class="card-img-top"
-                     style="height:200px; object-fit:contain; background:#f0f0f0;">
-
-                <div class="card-body">
-
-                    {{-- نام محصول --}}
-                    <h5 class="card-title">{{ $product->localized_name }}</h5>
-
-                    {{-- قیمت --}}
-                    <p class="card-text">
-                        <strong>{{ number_format($product->price) }} تومان</strong>
-
-                        @if($product->compare_price)
-                            <span class="text-decoration-line-through text-muted ms-2">
-                                {{ number_format($product->compare_price) }}
-                            </span>
-                        @endif
-                    </p>
-
-                    {{-- لینک صفحه محصول --}}
-                    <a href="{{ route('shop.product', $product->slug) }}"
-                       class="btn btn-primary w-100 text-white fw-bold">
-                        مشاهده محصول
-                    </a>
-
-                </div>
-
-            </div>
-
+        <div class="col-6 col-md-3 mb-4">
+            <x-product-card :product="$product" cta-class="btn-primary" />
         </div>
     @endforeach
 
