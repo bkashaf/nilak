@@ -17,6 +17,9 @@
     .site-header .navbar-nav { align-items: center; }
     .site-header .top-nav { position: relative; }
 
+    /* در ستون (منوی موبایل) align-items روی محور inline اثر می‌گذارد و خودش با تغییر زبان/جهت هماهنگ می‌شود */
+    .site-header .mobile-menu-panel .navbar-nav { align-items: stretch; }
+
     .site-tools { display: flex; align-items: center; gap: .35rem; flex-wrap: nowrap; position: relative; }
     .site-tools .nav-link { white-space: nowrap; }
 
