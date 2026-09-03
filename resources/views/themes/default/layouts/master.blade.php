@@ -74,6 +74,10 @@
     </style>
 </head>
 <body>
+@php
+    $menuService = app(\App\Support\MenuService::class);
+    $fullMenu = $menuService->fullMenu();
+@endphp
 
 <header class="site-header bg-white shadow-sm">
     <div class="container">
@@ -88,8 +92,6 @@
 
             @php
                 $cartItemCount = app(\App\Domain\Cart\CartService::class)->items()->sum('quantity');
-                $menuService = app(\App\Support\MenuService::class);
-                $productCategoryRoot = $menuService->productCategoryRoot();
             @endphp
 
             <ul class="navbar-nav site-tools flex-row flex-wrap">
@@ -140,12 +142,24 @@
 
             <div id="mobileMenuPanel" class="mobile-menu-panel w-100 d-md-none">
                 <ul class="navbar-nav flex-column">
-                    @foreach($menuService->topLinks() as $link)
-                        <li class="nav-item"><a class="nav-link {{ $link['active'] ? 'active' : '' }}" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
+                    @foreach($fullMenu as $item)
+                        @if($item['type'] === 'category')
+                            <li class="nav-item">
+                                <a class="nav-link {{ $item['active'] ? 'active' : '' }}" href="{{ $item['url'] }}">{{ $item['label'] }}</a>
+                                @if(!empty($item['children']))
+                                    <ul class="category-child">
+                                        @foreach($item['children'] as $child)
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->localized_name }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @else
+                            <li class="nav-item"><a class="nav-link {{ $item['active'] ? 'active' : '' }}" href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
+                        @endif
                     @endforeach
-                    @if($productCategoryRoot)
-                        <li class="nav-item"><a class="nav-link" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}">{{ $productCategoryRoot->localized_name }}</a></li>
-                    @endif
                 </ul>
             </div>
         </nav>
@@ -154,29 +168,29 @@
             <div class="desktop-nav w-100 d-none d-md-block">
                 <ul class="navbar-nav primary-nav flex-row flex-wrap justify-content-start gap-1 w-100">
 
-                    @foreach($menuService->topLinks() as $link)
-                        <li class="nav-item"><a class="nav-link {{ $link['active'] ? 'active' : '' }}" href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
-                    @endforeach
-
-                    @if($productCategoryRoot)
-                        <li class="nav-item dropdown category-menu">
-                            <a class="nav-link dropdown-toggle" href="{{ route('shop.index', ['category' => $productCategoryRoot->slug]) }}" data-bs-toggle="dropdown">
-                                {{ $productCategoryRoot->localized_name }}
-                            </a>
-                            <div class="dropdown-menu">
-                                <div class="row g-3">
-                                    @foreach($productCategoryRoot->children as $category)
-                                        <div class="col category-column">
-                                            <a class="category-heading" href="{{ route('shop.index', ['category' => $category->slug]) }}">{{ $category->localized_name }}</a>
-                                            @foreach($category->children as $child)
-                                                <a class="category-child" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->localized_name }}</a>
-                                            @endforeach
-                                        </div>
-                                    @endforeach
+                    @foreach($fullMenu as $item)
+                        @if($item['type'] === 'category')
+                            <li class="nav-item dropdown category-menu">
+                                <a class="nav-link dropdown-toggle" href="{{ $item['url'] }}" data-bs-toggle="dropdown">
+                                    {{ $item['label'] }}
+                                </a>
+                                <div class="dropdown-menu">
+                                    <div class="row g-3">
+                                        @foreach($item['children'] as $child)
+                                            <div class="col category-column">
+                                                <a class="category-heading" href="{{ route('shop.index', ['category' => $child->slug]) }}">{{ $child->localized_name }}</a>
+                                                @foreach($child->children as $sub)
+                                                    <a class="category-child" href="{{ route('shop.index', ['category' => $sub->slug]) }}">{{ $sub->localized_name }}</a>
+                                                @endforeach
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    @endif
+                            </li>
+                        @else
+                            <li class="nav-item"><a class="nav-link {{ $item['active'] ? 'active' : '' }}" href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
+                        @endif
+                    @endforeach
 
                 </ul>
             </div>
@@ -210,7 +224,7 @@
                 <div class="site-footer-title">لینک‌های مفید</div>
                 <a class="site-footer-link" href="{{ route('home') }}">{{ __('messages.home') }}</a><br>
                 <a class="site-footer-link" href="{{ route('shop.index') }}">{{ __('messages.shop') }}</a><br>
-                <a class="site-footer-link" href="{{ route('orders.track.form') }}">{{ __('messages.track_order') }}</a><br>
+                    <br>
                 <a class="site-footer-link" href="{{ route('checkout.index') }}">{{ __('messages.checkout') }}</a>
             </div>
             <div class="col-md-4">
@@ -244,7 +258,7 @@
         <svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-11z"/><path d="M6 6 5 3H2"/></svg>
         <span>سبد</span>
     </a>
-    <a class="d-flex flex-column align-items-center" href="{{ route('orders.track.form') }}">
+    <a class="d-flex flex-column align-items-center" href="{{ route('order.tracking') }}">
         <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
         <span>پیگیری</span>
     </a>
