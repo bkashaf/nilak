@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
@@ -15,6 +16,7 @@ class Category extends Model
         'name',
         'slug',
         'description',
+        'image',
         'parent_id',
         'status',
         'position',
@@ -74,6 +76,18 @@ class Category extends Model
     public function getLocalizedDescriptionAttribute(): ?string
     {
         return $this->translation()?->description ?? $this->description;
+    }
+
+    /**
+     * URL تصویر دسته‌بندی با fallback برای مواردی که تصویر آپلود نشده
+     */
+    public function getImageUrlAttribute(): string
+    {
+        if ($this->image && Storage::disk('public')->exists($this->image)) {
+            return asset('storage/' . ltrim($this->image, '/'));
+        }
+
+        return asset('themes/default/images/no-image.svg');
     }
 
     /**
