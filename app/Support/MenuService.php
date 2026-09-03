@@ -8,39 +8,69 @@ use App\Models\Setting;
 
 class MenuService
 {
-    public function topLinks(): array
-    {
-        $links = [
-            ['label' => __('messages.home'), 'url' => route('home')],
-            ['label' => __('messages.shop'), 'url' => route('shop.index')],
-            ['label' => __('messages.cart'), 'url' => route('cart.index')],
-            ['label' => __('messages.checkout'), 'url' => route('checkout.index')],
-            ['label' => __('messages.track_order'), 'url' => route('orders.track.form')],
+    public function fullMenu(): array
+{
+    $current = url()->current();
+    $menu = [];
+
+    // خانه
+    $menu[] = [
+        'label' => __('messages.home'),
+        'url'   => route('home'),
+        'type'  => 'static',
+        'active' => rtrim($current, '/') === rtrim(route('home'), '/')
+    ];
+
+    // فروشگاه
+    $menu[] = [
+        'label' => __('messages.shop'),
+        'url'   => route('shop.index'),
+        'type'  => 'static',
+        'active' => rtrim($current, '/') === rtrim(route('shop.index'), '/')
+    ];
+
+    // دسته‌بندی محصولات
+    $root = $this->productCategoryRoot();
+    if ($root) {
+        $menu[] = [
+            'label' => $root->localized_name,
+            'url'   => route('shop.index', ['category' => $root->slug]),
+            'type'  => 'category',
+            'children' => $root->children,
+            'active' => str_contains($current, $root->slug)
         ];
-
-        $pages = Page::query()
-            ->published()
-            ->where('show_in_menu', true)
-            ->orderBy('menu_order')
-            ->orderBy('id')
-            ->get(['title', 'slug']);
-
-        foreach ($pages as $page) {
-            $links[] = [
-                'label' => $page->title,
-                'url' => route('pages.show', $page->slug),
-            ];
-        }
-
-        $current = url()->current();
-
-        return collect($links)->map(function (array $link) use ($current) {
-            $normalized = rtrim($link['url'], '/');
-            $isActive = $normalized !== '' && (rtrim($current, '/') === $normalized);
-
-            return $link + ['active' => $isActive];
-        })->all();
     }
+
+    // پیگیری سفارش
+    $menu[] = [
+        'label' => __('messages.track_order'),
+        'url'   => route('order.tracking'),
+        'type'  => 'static',
+        'active' => rtrim($current, '/') === rtrim(route('order.tracking'), '/')
+    ];
+
+    // صفحات داینامیک
+    $pages = Page::query()
+        ->published()
+        ->where('show_in_menu', true)
+        ->orderBy('menu_order')
+        ->orderBy('id')
+        ->get(['title', 'slug']);
+
+    foreach ($pages as $page) {
+        $url = route('pages.show', $page->slug);
+
+        $menu[] = [
+            'label' => $page->title,
+            'url'   => $url,
+            'type'  => 'page',
+            'active' => rtrim($current, '/') === rtrim($url, '/')
+        ];
+    }
+
+    return $menu;
+}
+
 
     public function productCategoryRoot(): ?Category
     {
