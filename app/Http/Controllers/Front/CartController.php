@@ -151,23 +151,23 @@ class CartController extends Controller
                 }
 
                 return redirect()
-                    ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+                    ->route('order.tracking', ['tracking_code' => $order->tracking_code])
                     ->with('warning', 'سفارش ثبت شد، اما لینک انتقال به درگاه در دسترس نیست.');
             } catch (\Throwable $exception) {
                 return redirect()
-                    ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+                    ->route('order.tracking', ['tracking_code' => $order->tracking_code])
                     ->with('error', 'سفارش ثبت شد، اما شروع پرداخت آنلاین ناموفق بود: ' . $exception->getMessage());
             }
         }
 
         if ($methodType === 'receipt') {
             return redirect()
-                ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+                ->route('order.tracking', ['tracking_code' => $order->tracking_code])
                 ->with('success', 'سفارش ثبت شد. لطفا رسید بانکی را از بخش پیگیری سفارش ارسال کنید.');
         }
 
         return redirect()
-            ->route('orders.track.form', ['tracking_code' => $order->tracking_code])
+            ->route('order.tracking', ['tracking_code' => $order->tracking_code])
             ->with('success', 'سفارش شماره ' . $order->tracking_code . ' با موفقیت ثبت شد.');
     }
 }
