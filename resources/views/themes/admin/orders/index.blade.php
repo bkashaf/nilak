@@ -38,8 +38,11 @@
                 @forelse($orders as $order)
                     @php($payment = $order->payments->sortByDesc('id')->first())
                     @php($latestReceipt = $payment?->latestBankReceipt)
-                    @php($isReceiptPayment = $payment && in_array($payment->method?->type, ['receipt'], true))
-                    @php($isReceiptPayment = $isReceiptPayment || ($payment && $payment->method?->name === 'bank_receipt'))
+                    @php($isReceiptPayment = $payment?->isReceiptPayment() ?? false)
+                    @php($isAwaitingReceipt = $payment?->isAwaitingReceipt() ?? false)
+                    @php($isUnderReview = $payment?->isUnderReceiptReview() ?? false)
+                    @php($hasUploadedReceipt = $payment?->hasUploadedReceipt() ?? false)
+                    @php($canReviewReceipt = $isReceiptPayment && $isUnderReview && $latestReceipt && $latestReceipt->status === 'pending_review')
 
                     <tr>
                         <td>#{{ $order->id }}</td>
@@ -50,13 +53,28 @@
                         <td>{{ $payment ? __('messages.payment_statuses.' . $payment->status) : '—' }}</td>
                         <td>
                             @if($isReceiptPayment)
-                                @if($latestReceipt)
-                                    <div class="small">
-                                        <div><strong>وضعیت:</strong> {{ $latestReceipt->status }}</div>
-                                        <div><strong>پیگیری:</strong> {{ $latestReceipt->tracking_number ?: '—' }}</div>
-                                    </div>
-                                @elseif(in_array($payment?->status, ['pending', 'initiated'], true))
+                                @if($isAwaitingReceipt)
                                     <span class="badge bg-warning text-dark">در انتظار ارسال رسید</span>
+                                @elseif($isUnderReview && $latestReceipt)
+                                    <div class="small">
+                                        <div><span class="badge bg-info text-dark">در انتظار بررسی مدیر</span></div>
+                                        <div class="mt-1"><strong>پیگیری:</strong> {{ $latestReceipt->tracking_number ?: '—' }}</div>
+                                    </div>
+                                @elseif($payment?->status === 'paid' && $hasUploadedReceipt)
+                                    <div class="small">
+                                        <div><span class="badge bg-success">تأیید شده</span></div>
+                                        <div class="mt-1"><strong>پیگیری:</strong> {{ $latestReceipt?->tracking_number ?: '—' }}</div>
+                                    </div>
+                                @elseif($payment?->status === 'rejected' && $hasUploadedReceipt)
+                                    <div class="small">
+                                        <div><span class="badge bg-danger">رد شده</span></div>
+                                        <div class="mt-1"><strong>پیگیری:</strong> {{ $latestReceipt?->tracking_number ?: '—' }}</div>
+                                    </div>
+                                @elseif($hasUploadedReceipt)
+                                    <div class="small">
+                                        <div><strong>وضعیت:</strong> {{ $latestReceipt?->status ?? 'ثبت شده' }}</div>
+                                        <div><strong>پیگیری:</strong> {{ $latestReceipt?->tracking_number ?: '—' }}</div>
+                                    </div>
                                 @else
                                     <span class="text-muted">هنوز رسیدی ثبت نشده</span>
                                 @endif
@@ -73,8 +91,8 @@
                                 </a>
 
                                 @if($isReceiptPayment && $latestReceipt)
-                                    <a href="{{ route('admin.bank-receipts.show', $latestReceipt) }}" class="btn btn-sm btn-outline-danger">
-                                        بررسی رسید
+                                    <a href="{{ route('admin.bank-receipts.show', $latestReceipt) }}" class="btn btn-sm {{ $canReviewReceipt ? 'btn-outline-danger' : 'btn-outline-secondary' }}">
+                                        {{ $canReviewReceipt ? 'بررسی رسید' : 'مشاهده رسید' }}
                                     </a>
                                 @elseif($isReceiptPayment)
                                     <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-sm btn-outline-secondary">
