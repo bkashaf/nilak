@@ -19,10 +19,9 @@
     @endif
 
     @php($payment = $order->payments->sortByDesc('id')->first())
-    @php($latestReceipt = $payment?->bankReceipts->sortByDesc('id')->first())
-    @php($isReceiptPayment = $payment && in_array($payment->method?->type, ['receipt'], true))
-    @php($isReceiptPayment = $isReceiptPayment || ($payment && $payment->method?->name === 'bank_receipt'))
-    @php($canUploadReceipt = $payment && in_array($payment->status, ['pending', 'initiated', 'rejected'], true))
+    @php($latestReceipt = $payment?->latestBankReceipt)
+    @php($isReceiptPayment = $payment?->isReceiptPayment() ?? false)
+    @php($canUploadReceipt = $payment?->canUploadReceipt() ?? false)
 
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
@@ -39,11 +38,11 @@
         </div>
     </div>
 
-    @if($isReceiptPayment)
+    @if($isReceiptPayment && $payment)
         <div class="card mb-4 shadow-sm">
             <div class="card-header">پرداخت با رسید بانکی</div>
             <div class="card-body">
-                @if($payment->status === 'pending_review')
+                @if($payment->isUnderReceiptReview())
                     <div class="alert alert-info mb-3">
                         رسید شما ثبت شده و در انتظار بررسی مدیر است.
                     </div>
@@ -146,7 +145,7 @@
                             </button>
                         </form>
                     </div>
-                @elseif($payment->status !== 'pending_review' && $payment->status !== 'paid')
+                @elseif(! $payment->isUnderReceiptReview() && $payment->status !== 'paid')
                     <div class="alert alert-warning mb-0">
                         این پرداخت فعلاً در وضعیتی نیست که امکان ثبت رسید برای آن نمایش داده شود.
                     </div>
