@@ -36,9 +36,11 @@
                         @if($order)
                             @php($payment = $order->payments->sortByDesc('id')->first())
                             @php($latestReceipt = $payment?->latestBankReceipt)
-                            @php($isReceiptPayment = $payment && in_array($payment->method?->type, ['receipt'], true))
-                            @php($isReceiptPayment = $isReceiptPayment || ($payment && $payment->method?->name === 'bank_receipt'))
-                            @php($canUploadReceipt = $payment && in_array($payment->status, ['pending', 'initiated', 'rejected'], true))
+                            @php($isReceiptPayment = $payment?->isReceiptPayment() ?? false)
+                            @php($canUploadReceipt = $payment?->canUploadReceipt() ?? false)
+                            @php($isAwaitingReceipt = $payment?->isAwaitingReceipt() ?? false)
+                            @php($isUnderReceiptReview = $payment?->isUnderReceiptReview() ?? false)
+                            @php($hasUploadedReceipt = $payment?->hasUploadedReceipt() ?? false)
 
                             <div class="border rounded p-3">
                                 <h2 class="h5">سفارش {{ $order->tracking_code }}</h2>
@@ -48,15 +50,17 @@
                                 <p>مبلغ: <strong>{{ number_format($order->total_amount) }} تومان</strong></p>
                                 <p>تاریخ ثبت سفارش: <strong>{{ app(\App\Support\DateFormatter::class)->format($order->created_at) }}</strong></p>
 
-                                @if($isReceiptPayment)
+                                @if($isReceiptPayment && $payment)
                                     <div class="alert alert-info mt-3">
                                         این سفارش با روش پرداخت رسید بانکی ثبت شده است.
-                                        @if($canUploadReceipt)
+                                        @if($isAwaitingReceipt)
                                             لطفاً برای تکمیل فرایند پرداخت، رسید بانکی خود را بارگذاری کنید.
-                                        @elseif($payment->status === 'pending_review')
+                                        @elseif($isUnderReceiptReview)
                                             رسید بانکی ثبت شده و در انتظار بررسی مدیر است.
                                         @elseif($payment->status === 'paid')
                                             رسید بانکی توسط مدیر تأیید شده است.
+                                        @elseif($payment->status === 'rejected' && $hasUploadedReceipt)
+                                            رسید قبلی رد شده است و می‌توانید مجدداً رسید جدید ارسال کنید.
                                         @endif
                                     </div>
 
@@ -86,7 +90,13 @@
                                         @if(auth()->id() === $order->user_id)
                                             <div class="d-flex gap-2 flex-wrap mt-3">
                                                 <a href="{{ route('account.orders.show', $order) }}" class="btn btn-danger">
-                                                    {{ $canUploadReceipt ? 'مشاهده سفارش و ارسال رسید' : 'مشاهده جزئیات سفارش' }}
+                                                    @if($canUploadReceipt)
+                                                        {{ $payment->status === 'rejected' ? 'مشاهده سفارش و ارسال مجدد رسید' : 'مشاهده سفارش و ارسال رسید' }}
+                                                    @elseif($hasUploadedReceipt)
+                                                        مشاهده سفارش و وضعیت رسید
+                                                    @else
+                                                        مشاهده جزئیات سفارش
+                                                    @endif
                                                 </a>
                                             </div>
                                         @endif
