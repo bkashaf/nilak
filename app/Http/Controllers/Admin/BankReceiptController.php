@@ -19,6 +19,7 @@ class BankReceiptController extends Controller
         $bankReceipt->load([
             'payment.order.user',
             'payment.method',
+            'payment.latestBankReceipt',
             'uploader',
             'reviewer',
         ]);
@@ -28,10 +29,28 @@ class BankReceiptController extends Controller
 
     public function approve(Request $request, BankReceipt $bankReceipt)
     {
-        $payment = $bankReceipt->payment()->with('method', 'order')->firstOrFail();
+        $bankReceipt->loadMissing([
+            'payment.order',
+            'payment.method',
+            'payment.latestBankReceipt',
+        ]);
 
-        if ($payment->method?->type !== 'receipt') {
+        $payment = $bankReceipt->payment;
+
+        if (! $payment || ! $payment->isReceiptPayment()) {
             return back()->with('error', 'این پرداخت از نوع رسید بانکی نیست.');
+        }
+
+        if (! $payment->isUnderReceiptReview()) {
+            return back()->with('error', 'این پرداخت در وضعیت قابل بررسی نیست.');
+        }
+
+        if (! $payment->latestBankReceipt || $payment->latestBankReceipt->id !== $bankReceipt->id) {
+            return back()->with('error', 'فقط آخرین رسید ثبت‌شده قابل بررسی است.');
+        }
+
+        if ($bankReceipt->status !== 'pending_review') {
+            return back()->with('error', 'این رسید قبلاً بررسی شده است.');
         }
 
         app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
@@ -54,20 +73,37 @@ class BankReceiptController extends Controller
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        $payment = $bankReceipt->payment()->with('method')->firstOrFail();
+        $bankReceipt->loadMissing([
+            'payment.order',
+            'payment.method',
+            'payment.latestBankReceipt',
+        ]);
 
-        if ($payment->method?->type !== 'receipt') {
+        $payment = $bankReceipt->payment;
+
+        if (! $payment || ! $payment->isReceiptPayment()) {
             return back()->with('error', 'این پرداخت از نوع رسید بانکی نیست.');
         }
 
-        
+        if (! $payment->isUnderReceiptReview()) {
+            return back()->with('error', 'این پرداخت در وضعیت قابل بررسی نیست.');
+        }
+
+        if (! $payment->latestBankReceipt || $payment->latestBankReceipt->id !== $bankReceipt->id) {
+            return back()->with('error', 'فقط آخرین رسید ثبت‌شده قابل بررسی است.');
+        }
+
+        if ($bankReceipt->status !== 'pending_review') {
+            return back()->with('error', 'این رسید قبلاً بررسی شده است.');
+        }
+
         app(PaymentStatusService::class)->markFailed(
             $payment,
             'rejected',
-            [
+            array_merge($payment->callback_data ?? [], [
                 'rejection_reason' => $data['rejection_reason'],
                 'review_source' => 'admin.bank-receipts.reject',
-            ],
+            ]),
             auth()->id()
         );
 
