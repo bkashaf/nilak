@@ -1,4 +1,3 @@
-<?php
 @extends('themes.admin.layouts.master')
 
 @section('title', 'مدیریت پرداخت‌ها')
@@ -35,8 +34,11 @@
                 <tbody>
                     @forelse($payments as $payment)
                         @php($receipt = $payment->latestBankReceipt)
-                        @php($isReceiptPayment = in_array($payment->method?->type, ['receipt'], true))
-                        @php($isReceiptPayment = $isReceiptPayment || ($payment->method?->name === 'bank_receipt'))
+                        @php($isReceiptPayment = $payment->isReceiptPayment())
+                        @php($isAwaitingReceipt = $payment->isAwaitingReceipt())
+                        @php($isUnderReview = $payment->isUnderReceiptReview())
+                        @php($hasUploadedReceipt = $payment->hasUploadedReceipt())
+                        @php($canReviewReceipt = $isReceiptPayment && $isUnderReview && $receipt && $receipt->status === 'pending_review')
 
                         <tr>
                             <td>#{{ $payment->id }}</td>
@@ -57,28 +59,34 @@
                             <td>{{ __('messages.payment_statuses.' . $payment->status) }}</td>
                             <td>
                                 @if($isReceiptPayment)
-                                    @if($receipt)
+                                    @if($isAwaitingReceipt)
+                                        <span class="badge bg-warning text-dark">در انتظار ارسال رسید توسط مشتری</span>
+                                    @elseif($isUnderReview && $receipt)
+                                        <div class="small">
+                                            <div><span class="badge bg-info text-dark">در انتظار بررسی مدیر</span></div>
+                                            <div class="mt-1"><strong>شماره پیگیری:</strong> {{ $receipt->tracking_number ?: '—' }}</div>
+                                            <div><strong>تاریخ ثبت:</strong> {{ app(\App\Support\DateFormatter::class)->format($receipt->created_at) }}</div>
+                                        </div>
+                                    @elseif($payment->status === 'paid' && $hasUploadedReceipt)
+                                        <div class="small">
+                                            <div><span class="badge bg-success">تأیید شده</span></div>
+                                            <div class="mt-1"><strong>شماره پیگیری:</strong> {{ $receipt?->tracking_number ?: '—' }}</div>
+                                            <div><strong>تاریخ ثبت:</strong> {{ $receipt ? app(\App\Support\DateFormatter::class)->format($receipt->created_at) : '—' }}</div>
+                                        </div>
+                                    @elseif($payment->status === 'rejected' && $hasUploadedReceipt)
+                                        <div class="small">
+                                            <div><span class="badge bg-danger">رد شده</span></div>
+                                            <div class="mt-1"><strong>شماره پیگیری:</strong> {{ $receipt?->tracking_number ?: '—' }}</div>
+                                            @if($receipt?->rejection_reason)
+                                                <div class="text-danger mt-1">{{ $receipt->rejection_reason }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif($hasUploadedReceipt && $receipt)
                                         <div class="small">
                                             <div><strong>وضعیت رسید:</strong> {{ $receipt->status }}</div>
                                             <div><strong>شماره پیگیری:</strong> {{ $receipt->tracking_number ?: '—' }}</div>
                                             <div><strong>تاریخ ثبت:</strong> {{ app(\App\Support\DateFormatter::class)->format($receipt->created_at) }}</div>
                                         </div>
-
-                                        <div class="mt-2 d-flex gap-2 flex-wrap">
-                                            <a href="{{ route('admin.bank-receipts.show', $receipt) }}" class="btn btn-sm btn-outline-primary">
-                                                بررسی رسید
-                                            </a>
-
-                                            @if($receipt->file_url)
-                                                <a href="{{ $receipt->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                    فایل رسید
-                                                </a>
-                                            @endif
-                                        </div>
-                                    @elseif(in_array($payment->status, ['pending', 'initiated'], true))
-                                        <span class="badge bg-warning text-dark">در انتظار ارسال رسید توسط مشتری</span>
-                                    @elseif($payment->status === 'pending_review')
-                                        <span class="badge bg-info text-dark">در انتظار بررسی مدیر</span>
                                     @else
                                         <span class="text-muted">هنوز رسیدی ثبت نشده است</span>
                                     @endif
@@ -108,9 +116,15 @@
                                     @endif
 
                                     @if($isReceiptPayment && $receipt)
-                                        <a href="{{ route('admin.bank-receipts.show', $receipt) }}" class="btn btn-sm btn-outline-danger">
-                                            تایید یا رد رسید
+                                        <a href="{{ route('admin.bank-receipts.show', $receipt) }}" class="btn btn-sm {{ $canReviewReceipt ? 'btn-outline-danger' : 'btn-outline-secondary' }}">
+                                            {{ $canReviewReceipt ? 'بررسی رسید' : 'مشاهده رسید' }}
                                         </a>
+
+                                        @if($receipt->file_url)
+                                            <a href="{{ $receipt->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                فایل رسید
+                                            </a>
+                                        @endif
                                     @endif
 
                                     @if($payment->status === 'paid')
