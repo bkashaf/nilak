@@ -33,10 +33,41 @@ class PaymentController extends Controller
             'status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected,expired'],
         ]);
 
+        $payment->loadMissing([
+            'order',
+            'method',
+            'latestBankReceipt',
+            'bankReceipts',
+        ]);
+
         if ($data['status'] === 'paid') {
+            if ($payment->isReceiptPayment() && ! $payment->hasUploadedReceipt()) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'برای ثبت پرداخت‌شده در پرداخت رسیدی، ابتدا باید یک رسید بانکی ثبت شده باشد.');
+            }
+
             app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
+        } elseif ($data['status'] === 'pending_review') {
+            if ($payment->isReceiptPayment() && ! $payment->hasUploadedReceipt()) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'بدون رسید ثبت‌شده نمی‌توان پرداخت رسیدی را در وضعیت در انتظار بررسی قرار داد.');
+            }
+
+            $payment->update([
+                'status' => 'pending_review',
+                'paid_at' => null,
+            ]);
         } elseif (in_array($data['status'], ['failed', 'rejected'], true)) {
-            app(PaymentStatusService::class)->markFailed($payment, $data['status'], null, auth()->id());
+            app(PaymentStatusService::class)->markFailed(
+                $payment,
+                $data['status'],
+                array_merge($payment->callback_data ?? [], [
+                    'review_source' => 'admin.payments.update',
+                ]),
+                auth()->id()
+            );
         } else {
             $payment->update([
                 'status' => $data['status'],
