@@ -26,7 +26,7 @@ return [
     ],
     'payment_statuses' => [
         'pending' => 'در انتظار پرداخت',
-        'initiated' => 'آغازشده',
+        'initiated' => 'در انتظار ارسال رسید',
         'pending_review' => 'در انتظار بررسی',
         'paid' => 'پرداخت‌شده',
         'failed' => 'ناموفق',
