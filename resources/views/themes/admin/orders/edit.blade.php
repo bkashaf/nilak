@@ -3,8 +3,11 @@
 @section('title', 'ویرایش سفارش')
 
 @section('content')
-    @php($isReceiptPayment = $payment && in_array($payment->method?->type, ['receipt'], true))
-    @php($isReceiptPayment = $isReceiptPayment || ($payment && $payment->method?->name === 'bank_receipt'))
+    @php($isReceiptPayment = $payment?->isReceiptPayment() ?? false)
+    @php($isAwaitingReceipt = $payment?->isAwaitingReceipt() ?? false)
+    @php($isUnderReview = $payment?->isUnderReceiptReview() ?? false)
+    @php($hasUploadedReceipt = $payment?->hasUploadedReceipt() ?? false)
+    @php($canReviewReceipt = $isReceiptPayment && $isUnderReview && $latestReceipt && $latestReceipt->status === 'pending_review')
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -88,9 +91,17 @@
                     </div>
                 </div>
 
-                @if($isReceiptPayment && in_array($payment->status, ['pending', 'initiated'], true) && ! $latestReceipt)
+                @if($isReceiptPayment && $isAwaitingReceipt)
                     <div class="alert alert-warning mt-3 mb-0">
                         این سفارش با روش رسید بانکی ثبت شده اما هنوز کاربر رسیدی بارگذاری نکرده است.
+                    </div>
+                @elseif($isReceiptPayment && $isUnderReview)
+                    <div class="alert alert-info mt-3 mb-0">
+                        رسید بانکی ثبت شده و این پرداخت در انتظار بررسی مدیر است.
+                    </div>
+                @elseif($isReceiptPayment && $payment->status === 'rejected' && $hasUploadedReceipt)
+                    <div class="alert alert-danger mt-3 mb-0">
+                        رسید قبلی رد شده است و مشتری باید رسید جدید بارگذاری کند.
                     </div>
                 @endif
             </div>
@@ -154,15 +165,15 @@
                                         <a href="{{ $latestReceipt->file_url }}" target="_blank" class="btn btn-outline-secondary">
                                             مشاهده فایل
                                         </a>
-                                        <a href="{{ route('admin.bank-receipts.show', $latestReceipt) }}" class="btn btn-outline-primary">
-                                            بررسی کامل رسید
+                                        <a href="{{ route('admin.bank-receipts.show', $latestReceipt) }}" class="btn {{ $canReviewReceipt ? 'btn-outline-danger' : 'btn-outline-primary' }}">
+                                            {{ $canReviewReceipt ? 'بررسی رسید' : 'مشاهده رسید' }}
                                         </a>
                                     </div>
                                 @else
                                     <div class="alert alert-warning mb-3">فایلی برای این رسید بارگذاری نشده است.</div>
 
-                                    <a href="{{ route('admin.bank-receipts.show', $latestReceipt) }}" class="btn btn-outline-primary">
-                                        بررسی کامل رسید
+                                    <a href="{{ route('admin.bank-receipts.show', $latestReceipt) }}" class="btn {{ $canReviewReceipt ? 'btn-outline-danger' : 'btn-outline-primary' }}">
+                                        {{ $canReviewReceipt ? 'بررسی رسید' : 'مشاهده رسید' }}
                                     </a>
                                 @endif
                             </div>
