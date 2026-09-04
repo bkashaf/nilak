@@ -43,13 +43,18 @@ class OrderController extends Controller
 
     public function uploadReceipt(Request $request, Payment $payment)
     {
-        $payment->loadMissing(['order', 'method', 'bankReceipts']);
+        $payment->loadMissing([
+            'order',
+            'method',
+            'latestBankReceipt',
+            'bankReceipts',
+        ]);
 
         if ($payment->order->user_id !== auth()->id()) {
             abort(403, 'دسترسی غیرمجاز به این پرداخت');
         }
 
-        if ($payment->method?->type !== 'receipt' || ! in_array($payment->status, ['pending', 'initiated', 'rejected'], true)) {
+        if (! $payment->canUploadReceipt()) {
             return back()->with('error', 'این پرداخت در وضعیت قابل ارسال رسید نیست.');
         }
 
@@ -59,14 +64,15 @@ class OrderController extends Controller
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $path = $request->file('receipt')->store('receipts', 'public');
+        $file = $request->file('receipt');
+        $path = $file->store('receipts', 'public');
 
         BankReceipt::create([
             'payment_id' => $payment->id,
             'tracking_number' => $data['tracking_number'],
             'note' => $data['note'] ?? null,
             'file_path' => $path,
-            'original_name' => $request->file('receipt')->getClientOriginalName(),
+            'original_name' => $file->getClientOriginalName(),
             'uploaded_by' => auth()->id(),
             'uploaded_at' => now(),
             'status' => 'pending_review',
@@ -77,7 +83,7 @@ class OrderController extends Controller
             'callback_data' => array_merge($payment->callback_data ?? [], [
                 'tracking_number' => $data['tracking_number'],
                 'receipt_path' => $path,
-                'receipt_original_name' => $request->file('receipt')->getClientOriginalName(),
+                'receipt_original_name' => $file->getClientOriginalName(),
                 'receipt_note' => $data['note'] ?? null,
                 'uploaded_at' => now()->toDateTimeString(),
             ]),
