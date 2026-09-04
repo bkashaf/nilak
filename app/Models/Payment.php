@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Payment extends Model
 {
@@ -40,17 +42,22 @@ class Payment extends Model
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 
-    public function statusHistories()
+    public function statusHistories(): HasMany
     {
         return $this->hasMany(PaymentStatusHistory::class)->latest();
     }
 
-    public function bankReceipts()
+    public function bankReceipts(): HasMany
     {
-        return $this->hasMany(BankReceipt::class);
+        return $this->hasMany(BankReceipt::class)->latest('id');
     }
 
-    public function refunds()
+    public function latestBankReceipt(): HasOne
+    {
+        return $this->hasOne(BankReceipt::class)->latestOfMany();
+    }
+
+    public function refunds(): HasMany
     {
         return $this->hasMany(Refund::class);
     }

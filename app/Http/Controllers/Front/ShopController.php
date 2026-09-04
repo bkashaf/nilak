@@ -3,91 +3,72 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Attribute;
+use App\Models\Category;
+use App\Models\Product;
 use App\Support\SliderService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
-    /**
-     * نمایش صفحه اصلی فروشگاه (لیست محصولات)
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
     public function index(Request $request)
     {
-        $perPage = 12;
-        if ($request->has('per_page')) {
-            $perPage = (int) $request->input('per_page', $perPage);
-            $perPage = $perPage > 0 ? $perPage : 12;
-        }
+        $perPage = max(1, (int) $request->input('per_page', 12));
+        $categorySlug = trim((string) $request->input('category', ''));
+        $attributeFilters = collect((array) $request->input('attributes', []))
+            ->filter(function ($value) {
+                if (is_array($value)) {
+                    return count(array_filter($value, fn ($item) => $item !== null && $item !== '')) > 0;
+                }
 
-        // -------------------------------
-        // 🔥 فیلتر دسته‌بندی (جدید)
-        // -------------------------------
-        $categorySlug = $request->get('category');
-        $attributeFilters = array_filter((array) $request->input('attributes', []));
-        $sort = $request->input('sort', 'newest');
-        $priceMin = $request->integer('price_min');
-        $priceMax = $request->integer('price_max');
+                return $value !== null && $value !== '';
+            })
+            ->all();
+        $sort = (string) $request->input('sort', 'newest');
 
-        if ($categorySlug) {
+        $priceMinInput = $request->input('price_min');
+        $priceMaxInput = $request->input('price_max');
 
-            // پیدا کردن دسته
+        $priceMin = $priceMinInput === null || $priceMinInput === '' ? null : (int) $priceMinInput;
+        $priceMax = $priceMaxInput === null || $priceMaxInput === '' ? null : (int) $priceMaxInput;
+
+        $query = Product::query()
+            ->active()
+            ->with(['translations', 'category.translations', 'primaryImage']);
+
+        if ($categorySlug !== '') {
             $category = Category::where('slug', $categorySlug)->first();
 
             if ($category) {
-
-                // گرفتن ID دسته و زیر‌دسته‌ها
-                $categoryIds = $this->categoryTreeIds($category);
-
-                // محصولات دسته
-                $products = Product::where('is_active', true)
-                    ->whereIn('category_id', $categoryIds)
-                    ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
-                    ->when($priceMin, fn ($query) => $query->where('price', '>=', $priceMin))
-                    ->when($priceMax, fn ($query) => $query->where('price', '<=', $priceMax))
-                    ->tap(fn ($query) => $this->applySort($query, $sort))
-                    ->paginate($perPage);
-
+                $query->whereIn('category_id', $this->categoryTreeIds($category));
                 $pageTitle = 'محصولات دسته ' . $category->localized_name;
-
             } else {
-
-                // اگر دسته پیدا نشد
-                $products = Product::where('is_active', true)
-                    ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
-                    ->when($priceMin, fn ($query) => $query->where('price', '>=', $priceMin))
-                    ->when($priceMax, fn ($query) => $query->where('price', '<=', $priceMax))
-                    ->tap(fn ($query) => $this->applySort($query, $sort))
-                    ->paginate($perPage);
-
                 $pageTitle = 'فروشگاه نیلَک';
             }
-
         } else {
-
-            // -------------------------------
-            // ❌ کد قبلی (حذف شده)
-            // $products = Product::where('is_active', true)
-            //     ->orderBy('created_at', 'desc')
-            //     ->paginate($perPage);
-            // -------------------------------
-
-            // ✔ نسخهٔ جدید بدون دسته انتخاب‌شده
-            $products = Product::where('is_active', true)
-                ->when($attributeFilters, fn ($query) => $this->applyAttributeFilters($query, $attributeFilters))
-                ->when($priceMin, fn ($query) => $query->where('price', '>=', $priceMin))
-                ->when($priceMax, fn ($query) => $query->where('price', '<=', $priceMax))
-                ->tap(fn ($query) => $this->applySort($query, $sort))
-                ->paginate($perPage);
-
             $pageTitle = 'فروشگاه نیلَک';
         }
 
+        $this->applyAttributeFilters($query, $attributeFilters);
+
+        if ($priceMin !== null) {
+            $query->where('price', '>=', $priceMin);
+        }
+
+        if ($priceMax !== null) {
+            $query->where('price', '<=', $priceMax);
+        }
+
+        $this->applySort($query, $sort);
+
+        $products = $query->paginate($perPage)->appends($request->query());
+
+        return $this->renderShopView($products, $pageTitle, $request);
+    }
+
+    private function renderShopView($products, string $pageTitle, Request $request)
+    {
         $filterableAttributes = Attribute::query()
             ->where('is_filterable', true)
             ->with(['values' => fn ($query) => $query->orderBy('position')])
@@ -95,25 +76,35 @@ class ShopController extends Controller
             ->get();
 
         $priceBounds = [
-            'min' => (int) (Product::where('is_active', true)->min('price') ?? 0),
-            'max' => (int) (Product::where('is_active', true)->max('price') ?? 0),
+            'min' => (int) (Product::active()->min('price') ?? 0),
+            'max' => (int) (Product::active()->max('price') ?? 0),
         ];
+
         $priceBounds['max'] = max($priceBounds['max'], $priceBounds['min']);
 
-        $products->load(['translations', 'category.translations']);
-        $products->appends($request->query());
         $shopSlider = app(SliderService::class)->byKey('shop_hero', 3);
 
-        // نمایش ویو
+        $viewData = compact(
+            'products',
+            'pageTitle',
+            'filterableAttributes',
+            'priceBounds',
+            'shopSlider'
+        );
+
+        if ($request->filled('q')) {
+            $viewData['searchQuery'] = (string) $request->input('q');
+        }
+
         if (view()->exists('themes.default.shop')) {
-            return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds', 'shopSlider'));
+            return view('themes.default.shop', $viewData);
         }
 
         if (view()->exists('themes.shop')) {
-            return view('themes.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds', 'shopSlider'));
+            return view('themes.shop', $viewData);
         }
 
-        return view('themes.default.shop', compact('products', 'pageTitle', 'filterableAttributes', 'priceBounds', 'shopSlider'));
+        return view('themes.default.shop', $viewData);
     }
 
     private function categoryTreeIds(Category $category): array
@@ -127,35 +118,48 @@ class ShopController extends Controller
         return $ids;
     }
 
-    private function applyAttributeFilters($query, array $filters): void
+    private function applyAttributeFilters(Builder $query, array $filters): void
     {
-        foreach ($filters as $attributeSlug => $attributeValueId) {
-            $query->whereHas('attributeValues', function ($relation) use ($attributeSlug, $attributeValueId) {
+        foreach ($filters as $attributeSlug => $attributeValueIds) {
+            $attributeValueIds = array_values(array_filter(array_map('intval', (array) $attributeValueIds)));
+
+            if (empty($attributeValueIds)) {
+                continue;
+            }
+
+            $query->whereHas('attributeValues', function ($relation) use ($attributeSlug, $attributeValueIds) {
                 $relation->whereHas('attribute', fn ($attribute) => $attribute->where('slug', $attributeSlug))
-                    ->where('attribute_value_id', (int) $attributeValueId);
+                    ->whereIn('attribute_value_id', $attributeValueIds);
             });
         }
     }
 
-    private function applySort($query, string $sort): void
+    private function applySort(Builder $query, string $sort): void
     {
         match ($sort) {
             'oldest' => $query->orderBy('created_at', 'asc'),
             'price_asc' => $query->orderBy('price', 'asc'),
             'price_desc' => $query->orderBy('price', 'desc'),
-            'discount' => $query->orderByRaw('(COALESCE(compare_price, price) - price) DESC'),
+            'discount' => $query->orderByRaw(
+                'CASE WHEN compare_price > price THEN (compare_price - price) ELSE 0 END DESC'
+            ),
             default => $query->orderBy('created_at', 'desc'),
         };
     }
 
-    /**
-     * نمایش صفحه محصول تکی
-     */
     public function show(string $slug)
     {
-        $product = Product::where('slug', $slug)
-            ->where('is_active', true)
-            ->with(['images', 'category'])
+        $product = Product::query()
+            ->active()
+            ->where('slug', $slug)
+            ->with([
+                'images',
+                'category',
+                'translations',
+                'primaryImage',
+                'attributeValues.attribute',
+                'attributeValues.attributeValue',
+            ])
             ->first();
 
         if (! $product) {
@@ -170,45 +174,34 @@ class ShopController extends Controller
             return view('themes.product', compact('product'));
         }
 
-        // fallback
-        return response()->view('
-            <html><body><h1>' . e($product->name) . '</h1><p>نمایش محصول</p></body></html>
-        ');
+        return response()->view(
+            '<html><body><h1>' . e($product->name) . '</h1><p>نمایش محصول</p></body></html>'
+        );
     }
 
-    /**
-     * متد قدیمی product
-     */
     public function product(string $slug)
     {
         return $this->show($slug);
     }
 
-    /**
-     * جستجوی محصولات
-     */
     public function search(Request $request)
     {
-        $query = (string) $request->input('q', '');
+        $queryText = trim((string) $request->input('q', ''));
         $perPage = 12;
 
-        $products = Product::where('is_active', true)
-            ->when($query !== '', function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('description', 'like', "%{$query}%");
+        $products = Product::query()
+            ->active()
+            ->with(['translations', 'category.translations', 'primaryImage'])
+            ->when($queryText !== '', function (Builder $query) use ($queryText) {
+                $query->where(function (Builder $innerQuery) use ($queryText) {
+                    $innerQuery->where('name', 'like', "%{$queryText}%")
+                        ->orWhere('description', 'like', "%{$queryText}%");
+                });
             })
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
-            ->appends(['q' => $query]);
+            ->appends(['q' => $queryText]);
 
-        if (view()->exists('themes.default.shop')) {
-            return view('themes.default.shop', compact('products'))->with('searchQuery', $query);
-        }
-
-        if (view()->exists('themes.shop')) {
-            return view('themes.shop', compact('products'))->with('searchQuery', $query);
-        }
-
-        return view('themes.default.shop', compact('products'))->with('searchQuery', $query);
+        return $this->renderShopView($products, 'نتایج جستجو', $request);
     }
 }

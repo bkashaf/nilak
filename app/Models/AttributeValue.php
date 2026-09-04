@@ -13,19 +13,38 @@ class AttributeValue extends Model
     protected $fillable = [
         'attribute_id',
         'value',
+        'color_hex',
+        'meta',
         'slug',
         'position',
     ];
 
     protected $casts = [
+        'meta' => 'array',
         'position' => 'integer',
     ];
 
-    /**
-     * ویژگی والد
-     */
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class, 'attribute_id');
+    }
+
+    public function getNormalizedColorHexAttribute(): ?string
+    {
+        if (! $this->color_hex) {
+            return null;
+        }
+
+        $value = trim((string) $this->color_hex);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if ($value[0] !== '#') {
+            $value = '#' . $value;
+        }
+
+        return strtoupper($value);
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Domain\Payment\Services\PaymentStatusService;
+use App\Domain\Payment\Services\RefundService;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use App\Domain\Payment\Services\RefundService;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -17,7 +17,12 @@ class PaymentController extends Controller
 
     public function index()
     {
-        $payments = Payment::with(['order.user', 'method', 'bankReceipts'])->latest()->paginate(20);
+        $payments = Payment::with([
+            'order.user',
+            'method',
+            'bankReceipts.reviewer',
+            'latestBankReceipt',
+        ])->latest()->paginate(20);
 
         return view('themes.admin.payments.index', compact('payments'));
     }
@@ -33,10 +38,15 @@ class PaymentController extends Controller
         } elseif (in_array($data['status'], ['failed', 'rejected'], true)) {
             app(PaymentStatusService::class)->markFailed($payment, $data['status'], null, auth()->id());
         } else {
-            $payment->update(['status' => $data['status'], 'paid_at' => null]);
+            $payment->update([
+                'status' => $data['status'],
+                'paid_at' => null,
+            ]);
         }
 
-        return redirect()->route('admin.payments.index')->with('success', 'وضعیت پرداخت به‌روزرسانی شد.');
+        return redirect()
+            ->route('admin.payments.index')
+            ->with('success', 'وضعیت پرداخت به‌روزرسانی شد.');
     }
 
     public function refund(Request $request, Payment $payment, RefundService $refundService)
@@ -47,7 +57,12 @@ class PaymentController extends Controller
         ]);
 
         try {
-            $refundService->process($payment, $data['amount'], auth()->id(), $data['reason'] ?? null);
+            $refundService->process(
+                $payment,
+                $data['amount'],
+                auth()->id(),
+                $data['reason'] ?? null
+            );
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }

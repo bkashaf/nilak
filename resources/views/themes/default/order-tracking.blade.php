@@ -14,7 +14,14 @@
                         @csrf
                         <div class="col-md-9">
                             <label for="tracking_code" class="visually-hidden">شماره پیگیری</label>
-                            <input id="tracking_code" name="tracking_code" value="{{ old('tracking_code', $trackingCode ?? '') }}" class="form-control" placeholder="مثلاً NLK-20260823-ABC123" required>
+                            <input
+                                id="tracking_code"
+                                name="tracking_code"
+                                value="{{ old('tracking_code', $trackingCode ?? '') }}"
+                                class="form-control"
+                                placeholder="مثلاً NLK-20260823-ABC123"
+                                required
+                            >
                         </div>
                         <div class="col-md-3 d-grid">
                             <button type="submit" class="btn btn-primary">پیگیری</button>
@@ -28,33 +35,68 @@
                     @isset($order)
                         @if($order)
                             @php($payment = $order->payments->sortByDesc('id')->first())
+                            @php($latestReceipt = $payment?->latestBankReceipt)
+                            @php($isReceiptPayment = $payment && in_array($payment->method?->type, ['receipt'], true))
+                            @php($isReceiptPayment = $isReceiptPayment || ($payment && $payment->method?->name === 'bank_receipt'))
+                            @php($canUploadReceipt = $payment && in_array($payment->status, ['pending', 'initiated', 'rejected'], true))
+
                             <div class="border rounded p-3">
                                 <h2 class="h5">سفارش {{ $order->tracking_code }}</h2>
                                 <p>{{ __('messages.order_status') }}: <strong>{{ __('messages.order_statuses.' . $order->status) }}</strong></p>
                                 <p>{{ __('messages.payment_status') }}: <strong>{{ $payment ? __('messages.payment_statuses.' . $payment->status) : '—' }}</strong></p>
+                                <p>روش پرداخت: <strong>{{ $payment?->method?->title ?? '—' }}</strong></p>
                                 <p>مبلغ: <strong>{{ number_format($order->total_amount) }} تومان</strong></p>
                                 <p>تاریخ ثبت سفارش: <strong>{{ app(\App\Support\DateFormatter::class)->format($order->created_at) }}</strong></p>
-                                <p>آخرین به‌روزرسانی سفارش: <strong>{{ app(\App\Support\DateFormatter::class)->format($order->updated_at) }}</strong></p>
-                                @if($payment)
-                                    <p>آخرین به‌روزرسانی پرداخت: <strong>{{ app(\App\Support\DateFormatter::class)->format($payment->updated_at) }}</strong></p>
+
+                                @if($isReceiptPayment)
+                                    <div class="alert alert-info mt-3">
+                                        این سفارش با روش پرداخت رسید بانکی ثبت شده است.
+                                        @if($canUploadReceipt)
+                                            لطفاً برای تکمیل فرایند پرداخت، رسید بانکی خود را بارگذاری کنید.
+                                        @elseif($payment->status === 'pending_review')
+                                            رسید بانکی ثبت شده و در انتظار بررسی مدیر است.
+                                        @elseif($payment->status === 'paid')
+                                            رسید بانکی توسط مدیر تأیید شده است.
+                                        @endif
+                                    </div>
+
+                                    @if($latestReceipt)
+                                        <div class="border rounded p-3 bg-light mt-3">
+                                            <div class="fw-semibold mb-2">آخرین رسید ثبت‌شده</div>
+                                            <div class="mb-1"><strong>وضعیت رسید:</strong> {{ $latestReceipt->status }}</div>
+                                            <div class="mb-1"><strong>شماره پیگیری بانکی:</strong> {{ $latestReceipt->tracking_number ?: '—' }}</div>
+
+                                            @if($latestReceipt->rejection_reason)
+                                                <div class="text-danger mt-2">
+                                                    <strong>دلیل رد:</strong> {{ $latestReceipt->rejection_reason }}
+                                                </div>
+                                            @endif
+
+                                            @if($latestReceipt->file_url)
+                                                <div class="mt-2">
+                                                    <a href="{{ $latestReceipt->file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        مشاهده فایل رسید
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    @auth
+                                        @if(auth()->id() === $order->user_id)
+                                            <div class="d-flex gap-2 flex-wrap mt-3">
+                                                <a href="{{ route('account.orders.show', $order) }}" class="btn btn-danger">
+                                                    {{ $canUploadReceipt ? 'مشاهده سفارش و ارسال رسید' : 'مشاهده جزئیات سفارش' }}
+                                                </a>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="alert alert-warning mt-3 mb-0">
+                                            برای ارسال رسید بانکی، ابتدا وارد حساب کاربری خود شوید.
+                                        </div>
+                                    @endauth
                                 @endif
-                                @if($order->statusHistories->count())
-                                    <hr>
-                                    <h3 class="h6">تاریخچه وضعیت سفارش</h3>
-                                    <ul class="small mb-2">
-                                        @foreach($order->statusHistories->take(5) as $history)
-                                            <li>{{ __('messages.order_statuses.' . ($history->from_status ?? 'pending')) }} ← {{ __('messages.order_statuses.' . $history->to_status) }} ({{ app(\App\Support\DateFormatter::class)->format($history->created_at) }})</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                                @if($payment && $payment->statusHistories->count())
-                                    <h3 class="h6">تاریخچه وضعیت پرداخت</h3>
-                                    <ul class="small mb-2">
-                                        @foreach($payment->statusHistories->take(5) as $history)
-                                            <li>{{ __('messages.payment_statuses.' . ($history->from_status ?? 'pending')) }} ← {{ __('messages.payment_statuses.' . $history->to_status) }} ({{ app(\App\Support\DateFormatter::class)->format($history->created_at) }})</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+
                                 <h3 class="h6 mt-4">اقلام سفارش</h3>
                                 <ul class="mb-0">
                                     @foreach($order->items as $item)

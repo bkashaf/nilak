@@ -3,34 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with([
+        $query = Product::query()->with([
             'category',
             'images',
+            'primaryImage',
+            'translations',
             'attributeValues.attribute',
             'attributeValues.attributeValue',
         ]);
 
         if ($request->has('active')) {
-            $query->where('is_active', (bool) $request->boolean('active'));
+            $query->where('is_active', $request->boolean('active'));
         }
 
-        if ($request->has('category')) {
-            $query->where('category_id', $request->input('category'));
+        if ($request->filled('category')) {
+            $query->where('category_id', (int) $request->input('category'));
         }
 
         if ($request->filled('price_min')) {
-            $query->where('price', '>=', (int) $request->price_min);
+            $query->where('price', '>=', (float) $request->input('price_min'));
         }
 
         if ($request->filled('price_max')) {
-            $query->where('price', '<=', (int) $request->price_max);
+            $query->where('price', '<=', (float) $request->input('price_max'));
         }
 
         if ($request->boolean('in_stock')) {
@@ -38,67 +41,67 @@ class ProductController extends Controller
         }
 
         if ($request->boolean('discounted')) {
-            $query->whereColumn('compare_price', '>', 'price');
+            $query->discounted();
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = trim((string) $request->input('search'));
 
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('short_description', 'LIKE', "%{$search}%")
-                  ->orWhere('description', 'LIKE', "%{$search}%")
-                  ->orWhere('sku', 'LIKE', "%{$search}%");
+            $query->where(function (Builder $innerQuery) use ($search) {
+                $innerQuery->where('name', 'like', "%{$search}%")
+                    ->orWhere('short_description', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('sort')) {
-            switch ($request->sort) {
-                case 'price_asc':
-                    $query->orderBy('price', 'asc');
-                    break;
+        $this->applyAttributeFilters($query, (array) $request->input('attributes', []));
+        $this->applySort($query, (string) $request->input('sort', 'newest'));
 
-                case 'price_desc':
-                    $query->orderBy('price', 'desc');
-                    break;
+        $perPage = max(1, (int) $request->input('per_page', 15));
 
-                case 'newest':
-                    $query->orderBy('created_at', 'desc');
-                    break;
-
-                case 'oldest':
-                    $query->orderBy('created_at', 'asc');
-                    break;
-
-                case 'discount':
-                    $query->orderByRaw('(compare_price - price) DESC');
-                    break;
-            }
-        }
-
-        if ($request->has('attributes')) {
-            foreach ($request->attributes as $slug => $value) {
-                $query->whereHas('attributeValues', function ($q) use ($slug, $value) {
-                    $q->where('attribute_value_id', (int) $value)
-                        ->whereHas('attribute', fn ($attribute) => $attribute->where('slug', $slug));
-                });
-            }
-        }
-
-        $perPage = (int) $request->input('per_page', 15);
-
-        return response()->json($query->paginate($perPage));
+        return response()->json($query->paginate($perPage)->appends($request->query()));
     }
 
-    public function show($id)
+    public function show(int $id)
     {
-        $product = Product::with([
+        $product = Product::query()->with([
             'category',
             'images',
+            'primaryImage',
+            'translations',
             'attributeValues.attribute',
             'attributeValues.attributeValue',
+            'latestPriceHistory.changedBy',
         ])->findOrFail($id);
 
         return response()->json($product);
+    }
+
+    private function applyAttributeFilters(Builder $query, array $filters): void
+    {
+        foreach ($filters as $slug => $value) {
+            if (blank($value)) {
+                continue;
+            }
+
+            $query->whereHas('attributeValues', function (Builder $relationQuery) use ($slug, $value) {
+                $relationQuery->where('attribute_value_id', (int) $value)
+                    ->whereHas('attribute', fn (Builder $attributeQuery) => $attributeQuery->where('slug', $slug));
+            });
+        }
+    }
+
+    private function applySort(Builder $query, string $sort): void
+    {
+        match ($sort) {
+            'price_asc' => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'oldest' => $query->orderBy('created_at', 'asc'),
+            'discount' => $query->orderByRaw(
+                'CASE WHEN compare_price > price THEN (compare_price - price) ELSE 0 END DESC'
+            ),
+            default => $query->orderBy('created_at', 'desc'),
+        };
     }
 }

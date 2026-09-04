@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Domain\Payment\Services\PaymentStatusService;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Domain\Payment\Services\PaymentStatusService;
 use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
 
@@ -18,7 +18,7 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::query()
-            ->with(['user', 'payments.method'])
+            ->with(['user', 'payments.method', 'payments.latestBankReceipt'])
             ->latest()
             ->paginate(20);
 
@@ -27,10 +27,17 @@ class OrderController extends Controller
 
     public function edit(Order $order)
     {
-        $order->load(['user', 'items.product', 'payments.method']);
-        $payment = $order->payments->sortByDesc('id')->first();
+        $order->load([
+            'user',
+            'items.product',
+            'payments.method',
+            'payments.bankReceipts.reviewer',
+        ]);
 
-        return view('themes.admin.orders.edit', compact('order', 'payment'));
+        $payment = $order->payments->sortByDesc('id')->first();
+        $latestReceipt = $payment?->bankReceipts->sortByDesc('id')->first();
+
+        return view('themes.admin.orders.edit', compact('order', 'payment', 'latestReceipt'));
     }
 
     public function update(Request $request, Order $order)
@@ -42,10 +49,12 @@ class OrderController extends Controller
         ]);
 
         $oldStatus = $order->status;
+
         $order->update([
             'status' => $data['status'],
             'tracking_code' => $data['tracking_code'],
         ]);
+
         if ($oldStatus !== $data['status']) {
             OrderStatusHistory::create([
                 'order_id' => $order->id,
@@ -55,16 +64,20 @@ class OrderController extends Controller
             ]);
         }
 
-        $payment = $order->payments()->latest('id')->first();
+        $payment = $order->payments()->with('method')->latest('id')->first();
+
         if ($payment) {
             if ($data['status'] === 'delivered' && $payment->method?->type === 'cod') {
                 app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
             } elseif ($data['payment_status'] === 'paid') {
-                app(PaymentStatusService::class)->markPaid($payment);
+                app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
             } elseif (in_array($data['payment_status'], ['failed', 'rejected'], true)) {
-                app(PaymentStatusService::class)->markFailed($payment, $data['payment_status']);
+                app(PaymentStatusService::class)->markFailed($payment, $data['payment_status'], null, auth()->id());
             } else {
-                $payment->update(['status' => $data['payment_status'], 'paid_at' => null]);
+                $payment->update([
+                    'status' => $data['payment_status'],
+                    'paid_at' => null,
+                ]);
             }
         }
 

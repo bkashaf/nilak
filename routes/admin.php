@@ -1,18 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\BankReceiptController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\ReportsController;
-use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController;
-use App\Http\Controllers\Admin\AttributeController;
-use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -28,6 +29,12 @@ Route::prefix('payments')->name('payments.')->group(function () {
     Route::post('/{payment}/refund', [PaymentController::class, 'refund'])->name('refund');
 });
 
+Route::prefix('bank-receipts')->name('bank-receipts.')->group(function () {
+    Route::get('/{bankReceipt}', [BankReceiptController::class, 'show'])->name('show');
+    Route::post('/{bankReceipt}/approve', [BankReceiptController::class, 'approve'])->name('approve');
+    Route::post('/{bankReceipt}/reject', [BankReceiptController::class, 'reject'])->name('reject');
+});
+
 Route::prefix('payment-methods')->name('payment-methods.')->group(function () {
     Route::get('/', [PaymentMethodController::class, 'index'])->name('index');
     Route::put('/{paymentMethod}', [PaymentMethodController::class, 'update'])->name('update');
@@ -36,10 +43,14 @@ Route::prefix('payment-methods')->name('payment-methods.')->group(function () {
 Route::prefix('attributes')->name('attributes.')->group(function () {
     Route::get('/', [AttributeController::class, 'index'])->name('index');
     Route::post('/', [AttributeController::class, 'store'])->name('store');
+    Route::put('/{attribute}', [AttributeController::class, 'update'])->name('update');
+    Route::delete('/{attribute}', [AttributeController::class, 'destroy'])->name('destroy');
+
     Route::post('/{attribute}/values', [AttributeController::class, 'storeValue'])->name('values.store');
+    Route::put('/{attribute}/values/{value}', [AttributeController::class, 'updateValue'])->name('values.update');
+    Route::delete('/{attribute}/values/{value}', [AttributeController::class, 'destroyValue'])->name('values.destroy');
 });
 
-// مدیریت کاربران
 Route::prefix('users')->name('users.')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('index');
     Route::get('/create', [UserController::class, 'create'])->name('create');
@@ -49,7 +60,6 @@ Route::prefix('users')->name('users.')->group(function () {
     Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
 });
 
-// مدیریت صفحات
 Route::prefix('pages')->name('pages.')->group(function () {
     Route::get('/', [PageController::class, 'index'])->name('index');
     Route::get('/create', [PageController::class, 'create'])->name('create');
@@ -60,7 +70,6 @@ Route::prefix('pages')->name('pages.')->group(function () {
     Route::delete('/{page}', [PageController::class, 'destroy'])->name('destroy');
 });
 
-// مدیریت منو
 Route::prefix('menu')->name('menu.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.pages.index');
@@ -74,18 +83,15 @@ Route::prefix('sliders')->name('sliders.')->group(function () {
     Route::delete('/{slider}', [SliderController::class, 'destroy'])->name('destroy');
 });
 
-// گزارش‌ها
 Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/', [ReportsController::class, 'index'])->name('index');
 });
 
-// تنظیمات
 Route::prefix('settings')->name('settings.')->group(function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index');
     Route::put('/', [SettingsController::class, 'update'])->name('update');
 });
 
-// مدیریت دسته‌ها
 Route::prefix('categories')->name('categories.')->group(function () {
     Route::get('/', [CategoryController::class, 'index'])->name('index');
     Route::get('/create', [CategoryController::class, 'create'])->name('create');
@@ -95,7 +101,6 @@ Route::prefix('categories')->name('categories.')->group(function () {
     Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
 });
 
-// مدیریت محصولات
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
     Route::get('/create', [ProductController::class, 'create'])->name('create');

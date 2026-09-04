@@ -4,49 +4,158 @@
 
 @section('content')
 <div class="container py-4">
-
     <h1 class="h4 mb-4">جزئیات سفارش شماره {{ $order->id }}</h1>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    {{-- اطلاعات کلی سفارش --}}
-    <div class="card mb-4">
+    @if($errors->any())
+        <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
+
+    @php($payment = $order->payments->sortByDesc('id')->first())
+    @php($latestReceipt = $payment?->bankReceipts->sortByDesc('id')->first())
+    @php($isReceiptPayment = $payment && in_array($payment->method?->type, ['receipt'], true))
+    @php($isReceiptPayment = $isReceiptPayment || ($payment && $payment->method?->name === 'bank_receipt'))
+    @php($canUploadReceipt = $payment && in_array($payment->status, ['pending', 'initiated', 'rejected'], true))
+
+    <div class="card mb-4 shadow-sm">
         <div class="card-body">
-
             <p><strong>تاریخ ثبت:</strong> {{ jdate($order->created_at)->format('Y/m/d') }}</p>
-
             <p><strong>مبلغ کل:</strong> {{ number_format($order->total_amount) }} تومان</p>
-
-            {{-- ⭐ شماره پیگیری + Badge + دکمه کپی --}}
-            <p>
-                <strong>شماره پیگیری سفارش:</strong>
-
-                <span class="badge bg-secondary p-2">{{ $order->tracking_code }}</span>
-
-                <button class="btn btn-outline-dark btn-sm ms-2"
-                        onclick="copyTracking('{{ $order->tracking_code }}')">
-                    📋
-                </button>
-            </p>
-
-            @php($payment = $order->payments->sortByDesc('id')->first())
+            <p><strong>شماره پیگیری سفارش:</strong> <span class="badge bg-secondary p-2">{{ $order->tracking_code }}</span></p>
 
             @if($payment)
-                <p><strong>روش پرداخت:</strong> {{ $payment->method?->type }}</p>
-                <p><strong>وضعیت پرداخت:</strong> {{ $payment->status }}</p>
+                <p><strong>روش پرداخت:</strong> {{ $payment->method?->title ?? $payment->method?->type ?? '—' }}</p>
+                <p><strong>وضعیت پرداخت:</strong> {{ __('messages.payment_statuses.' . $payment->status) }}</p>
             @else
                 <p><strong>وضعیت پرداخت:</strong> ثبت نشده</p>
             @endif
         </div>
     </div>
 
-    {{-- اقلام سفارش --}}
-    <div class="card mb-4">
+    @if($isReceiptPayment)
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">پرداخت با رسید بانکی</div>
+            <div class="card-body">
+                @if($payment->status === 'pending_review')
+                    <div class="alert alert-info mb-3">
+                        رسید شما ثبت شده و در انتظار بررسی مدیر است.
+                    </div>
+                @endif
+
+                @if($payment->status === 'paid')
+                    <div class="alert alert-success mb-3">
+                        این پرداخت توسط مدیر تایید شده است.
+                    </div>
+                @endif
+
+                @if($payment->status === 'rejected' && $latestReceipt?->rejection_reason)
+                    <div class="alert alert-danger mb-3">
+                        رسید قبلی رد شده است: {{ $latestReceipt->rejection_reason }}
+                    </div>
+                @endif
+
+                @if($latestReceipt)
+                    <div class="border rounded p-3 bg-light mb-4">
+                        <div class="fw-semibold mb-3">آخرین رسید ثبت‌شده</div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div><strong>وضعیت رسید:</strong> {{ $latestReceipt->status }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div><strong>شماره پیگیری بانکی:</strong> {{ $latestReceipt->tracking_number ?: '—' }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div><strong>تاریخ ثبت:</strong> {{ jdate($latestReceipt->created_at)->format('Y/m/d H:i') }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div><strong>فایل:</strong>
+                                    @if($latestReceipt->file_url)
+                                        <a href="{{ $latestReceipt->file_url }}" target="_blank">مشاهده فایل رسید</a>
+                                    @else
+                                        <span>—</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($latestReceipt->note)
+                            <div class="mt-3">
+                                <strong>توضیحات:</strong>
+                                <div class="mt-2">{{ $latestReceipt->note }}</div>
+                            </div>
+                        @endif
+
+                        @if($latestReceipt->rejection_reason)
+                            <div class="alert alert-danger mt-3 mb-0">
+                                <strong>دلیل رد:</strong> {{ $latestReceipt->rejection_reason }}
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                @if($canUploadReceipt)
+                    <div class="border rounded p-3">
+                        <h2 class="h6 mb-3">
+                            {{ $payment->status === 'rejected' ? 'ارسال مجدد رسید بانکی' : 'بارگذاری رسید بانکی' }}
+                        </h2>
+
+                        <form action="{{ route('account.receipt.upload', $payment->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+
+                            <div class="mb-3">
+                                <label class="form-label">شماره پیگیری بانکی</label>
+                                <input
+                                    type="text"
+                                    name="tracking_number"
+                                    class="form-control"
+                                    value="{{ old('tracking_number', $latestReceipt?->tracking_number) }}"
+                                    required
+                                >
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">تصویر یا PDF رسید</label>
+                                <input
+                                    type="file"
+                                    name="receipt"
+                                    class="form-control"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    required
+                                >
+                                <div class="form-text">فایل رسید برای ثبت پرداخت الزامی است.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">توضیحات</label>
+                                <textarea name="note" class="form-control" rows="3">{{ old('note', $payment->status === 'rejected' ? $latestReceipt?->note : '') }}</textarea>
+                            </div>
+
+                            <button class="btn btn-danger">
+                                {{ $payment->status === 'rejected' ? 'ارسال مجدد رسید' : 'ثبت رسید بانکی' }}
+                            </button>
+                        </form>
+                    </div>
+                @elseif($payment->status !== 'pending_review' && $payment->status !== 'paid')
+                    <div class="alert alert-warning mb-0">
+                        این پرداخت فعلاً در وضعیتی نیست که امکان ثبت رسید برای آن نمایش داده شود.
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
+    <div class="card mb-4 shadow-sm">
         <div class="card-header">اقلام سفارش</div>
         <div class="card-body">
             <table class="table table-bordered">
@@ -60,7 +169,7 @@
                 <tbody>
                     @foreach($order->items as $item)
                         <tr>
-                            <td>{{ $item->product?->title ?? 'محصول حذف‌شده' }}</td>
+                            <td>{{ $item->product?->localized_name ?? 'محصول حذف‌شده' }}</td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ number_format($item->price) }} تومان</td>
                         </tr>
@@ -70,91 +179,41 @@
         </div>
     </div>
 
-    {{-- فرم ارسال رسید بانکی --}}
-    @if($payment && $payment->method?->type === 'receipt' && $payment->status === 'initiated')
-        <div class="card mb-4">
-            <div class="card-header">ارسال رسید بانکی</div>
-            <div class="card-body">
-
-                <form action="{{ route('account.receipt.upload', $payment->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-
-                    <label class="form-label">شماره پیگیری بانکی</label>
-                    <input type="text" name="tracking_number" class="form-control" required>
-
-                    <label class="form-label mt-3">تصویر رسید (اختیاری)</label>
-                    <input type="file" name="receipt" class="form-control">
-
-                    <label class="form-label mt-3">توضیحات (اختیاری)</label>
-                    <textarea name="note" class="form-control"></textarea>
-
-                    <button class="btn btn-primary mt-3">ارسال رسید</button>
-                </form>
-
-            </div>
-        </div>
-    @endif
-
-    {{-- نمایش رسیدهای قبلی --}}
     @if($payment && $payment->bankReceipts->isNotEmpty())
-        <div class="card mb-4">
+        <div class="card mb-4 shadow-sm">
             <div class="card-header">رسیدهای ارسال‌شده</div>
             <div class="card-body">
-                <ul class="list-group">
-                    @foreach($payment->bankReceipts as $receipt)
-                        <li class="list-group-item">
-                            <strong>وضعیت:</strong> {{ $receipt->status }}  
-                            <br>
-                            <strong>تاریخ:</strong> {{ jdate($receipt->created_at)->format('Y/m/d H:i') }}
-                            @if($receipt->rejection_reason)
-                                <br>
-                                <strong>دلیل رد:</strong> {{ $receipt->rejection_reason }}
-                            @endif
-                        </li>
+                <div class="row g-3">
+                    @foreach($payment->bankReceipts->sortByDesc('id') as $receipt)
+                        <div class="col-12">
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                    <div>
+                                        <div><strong>وضعیت:</strong> {{ $receipt->status }}</div>
+                                        <div><strong>شماره پیگیری بانکی:</strong> {{ $receipt->tracking_number ?: '—' }}</div>
+                                        <div><strong>تاریخ:</strong> {{ jdate($receipt->created_at)->format('Y/m/d H:i') }}</div>
+                                    </div>
+
+                                    @if($receipt->file_url)
+                                        <a href="{{ $receipt->file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            مشاهده فایل رسید
+                                        </a>
+                                    @endif
+                                </div>
+
+                                @if($receipt->note)
+                                    <div class="mb-2"><strong>توضیحات:</strong> {{ $receipt->note }}</div>
+                                @endif
+
+                                @if($receipt->rejection_reason)
+                                    <div class="text-danger"><strong>دلیل رد:</strong> {{ $receipt->rejection_reason }}</div>
+                                @endif
+                            </div>
+                        </div>
                     @endforeach
-                </ul>
+                </div>
             </div>
         </div>
     @endif
-
 </div>
-
-{{-- ⭐ Toast پیام کپی --}}
-<div id="copyToast"
-     style="position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff;
-            padding: 10px 20px; border-radius: 8px; display: none; z-index: 9999;">
-    کپی شد!
-</div>
-
-<script>
-function copyTracking(code) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(code).then(showCopyToast).catch(function () {
-            fallbackCopy(code);
-        });
-    } else {
-        fallbackCopy(code);
-    }
-}
-
-function fallbackCopy(code) {
-    const tempInput = document.createElement('input');
-    tempInput.value = code;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-    showCopyToast();
-}
-
-function showCopyToast() {
-    const toast = document.getElementById('copyToast');
-    toast.style.display = 'block';
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 1500);
-}
-</script>
-
-
 @endsection

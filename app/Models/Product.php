@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
@@ -39,41 +40,33 @@ class Product extends Model
         'meta' => 'array',
     ];
 
-    /**
-     * دسته محصول
-     */
+    protected $appends = [
+        'has_discount',
+        'discount_percent',
+        'price_change_percent',
+        'formatted_compare_price',
+    ];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    /**
-     * تصاویر محصول
-     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class, 'product_id')->orderBy('position');
     }
 
-    /**
-     * تصویر اصلی محصول (به‌صورت رابطه)
-     */
     public function primaryImage(): HasOne
     {
         return $this->hasOne(ProductImage::class, 'product_id')->where('is_primary', true);
     }
 
-    /**
-     * مقادیر ویژگی‌های محصول
-     */
     public function attributeValues(): HasMany
     {
         return $this->hasMany(ProductAttributeValue::class, 'product_id');
     }
 
-    /**
-     * اقلام سفارش مرتبط با این محصول (برای محاسبه پرفروش‌ترین‌ها)
-     */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'product_id');
@@ -82,6 +75,16 @@ class Product extends Model
     public function translations(): HasMany
     {
         return $this->hasMany(ProductTranslation::class);
+    }
+
+    public function priceHistories(): HasMany
+    {
+        return $this->hasMany(ProductPriceHistory::class, 'product_id')->latest('id');
+    }
+
+    public function latestPriceHistory(): HasOne
+    {
+        return $this->hasOne(ProductPriceHistory::class, 'product_id')->latestOfMany();
     }
 
     public function translation(?string $locale = null): ?ProductTranslation
@@ -111,17 +114,61 @@ class Product extends Model
         return $this->translation()?->description ?? $this->description;
     }
 
-    /**
-     * دسترسی سریع به قیمت فرمت‌شده
-     */
     public function getFormattedPriceAttribute(): string
     {
-        return number_format($this->price, 2);
+        return number_format((float) $this->price, 2);
     }
 
-    /**
-     * URL تصویر قابل نمایش محصول با fallback برای فایل‌های حذف‌شده یا ناموجود
-     */
+    public function getFormattedComparePriceAttribute(): ?string
+    {
+        if ($this->compare_price === null) {
+            return null;
+        }
+
+        return number_format((float) $this->compare_price, 2);
+    }
+
+    public function getHasDiscountAttribute(): bool
+    {
+        if ($this->compare_price === null) {
+            return false;
+        }
+
+        return (float) $this->compare_price > (float) $this->price;
+    }
+
+    public function getDiscountPercentAttribute(): ?int
+    {
+        if (! $this->has_discount) {
+            return null;
+        }
+
+        $comparePrice = (float) $this->compare_price;
+        $price = (float) $this->price;
+
+        if ($comparePrice <= 0) {
+            return null;
+        }
+
+        return (int) round((($comparePrice - $price) / $comparePrice) * 100);
+    }
+
+    public function getPriceChangePercentAttribute(): ?int
+    {
+        if ($this->compare_price === null) {
+            return null;
+        }
+
+        $comparePrice = (float) $this->compare_price;
+        $price = (float) $this->price;
+
+        if ($comparePrice <= 0 || $comparePrice == $price) {
+            return 0;
+        }
+
+        return (int) round((($price - $comparePrice) / $comparePrice) * 100);
+    }
+
     public function getImageUrlAttribute(): string
     {
         $image = $this->primaryImage ?: $this->images->first();
@@ -133,11 +180,42 @@ class Product extends Model
         return asset('themes/default/images/no-image.svg');
     }
 
-    /**
-     * Scope برای محصولات فعال
-     */
+    public function getGroupedAttributeValuesAttribute(): Collection
+    {
+        $rows = $this->relationLoaded('attributeValues')
+            ? $this->attributeValues
+            : $this->attributeValues()->with(['attribute', 'attributeValue'])->get();
+
+        return $rows
+            ->filter(fn ($row) => $row->attribute && $row->attributeValue)
+            ->groupBy('attribute_id')
+            ->map(function (Collection $group) {
+                return (object) [
+                    'attribute' => $group->first()->attribute,
+                    'values' => $group
+                        ->map(fn ($item) => $item->attributeValue)
+                        ->unique('id')
+                        ->values(),
+                ];
+            })
+            ->values();
+    }
+
+    public function getColorOptionsAttribute(): Collection
+    {
+        return $this->grouped_attribute_values
+            ->first(fn ($group) => in_array($group->attribute->slug, ['color', 'colour'], true))
+            ?->values ?? collect();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeDiscounted($query)
+    {
+        return $query->whereNotNull('compare_price')
+            ->whereColumn('compare_price', '>', 'price');
     }
 }

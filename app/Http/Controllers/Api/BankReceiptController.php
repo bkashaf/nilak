@@ -2,58 +2,59 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Payment;
-use App\Models\BankReceipt;
 use App\Domain\Payment\Services\PaymentStatusService;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
+use App\Models\BankReceipt;
+use App\Models\Payment;
+use Illuminate\Http\Request;
 
 class BankReceiptController extends Controller
 {
-    /**
-     * آپلود رسید بانکی توسط کاربر
-     */
     public function upload(Request $request)
     {
         $request->validate([
             'payment_id' => 'required|exists:payments,id',
+            'tracking_number' => 'nullable|string|max:100',
             'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'note' => 'nullable|string|max:1000',
         ]);
 
         $payment = Payment::whereHas('order', fn ($query) => $query->where('user_id', $request->user()->id))
             ->findOrFail($request->payment_id);
 
-        if ($payment->method?->type !== 'receipt' || $payment->status !== 'initiated') {
+        if ($payment->method?->type !== 'receipt' || ! in_array($payment->status, ['initiated', 'rejected'], true)) {
             return response()->json(['error' => 'این پرداخت در وضعیت قابل آپلود نیست'], 422);
         }
 
-        // ذخیره فایل
         $path = $request->file('receipt')->store('receipts', 'public');
 
-        // ذخیره اطلاعات در callback_data
-        $payment->update([
-            'callback_data' => [
-                'receipt_path' => $path,
-                'uploaded_at' => now(),
-            ],
+        $receipt = BankReceipt::create([
+            'payment_id' => $payment->id,
+            'tracking_number' => $request->input('tracking_number'),
+            'note' => $request->input('note'),
+            'file_path' => $path,
+            'original_name' => $request->file('receipt')->getClientOriginalName(),
+            'uploaded_by' => $request->user()->id,
+            'uploaded_at' => now(),
             'status' => 'pending_review',
         ]);
-        BankReceipt::create([
-            'payment_id' => $payment->id,
-            'file_path' => $path,
+
+        $payment->update([
+            'callback_data' => array_merge($payment->callback_data ?? [], [
+                'receipt_path' => $path,
+                'tracking_number' => $request->input('tracking_number'),
+                'uploaded_at' => now()->toDateTimeString(),
+            ]),
             'status' => 'pending_review',
         ]);
 
         return response()->json([
             'message' => 'رسید با موفقیت آپلود شد',
-            'payment' => $payment,
+            'receipt' => $receipt,
+            'payment' => $payment->fresh(),
         ]);
     }
 
-    /**
-     * تأیید یا رد رسید توسط مدیر
-     */
     public function approve(Request $request)
     {
         $request->validate([
@@ -62,28 +63,46 @@ class BankReceiptController extends Controller
             'rejection_reason' => 'nullable|string|max:1000',
         ]);
 
-        $payment = Payment::findOrFail($request->payment_id);
+        $payment = Payment::with(['method', 'bankReceipts'])->findOrFail($request->payment_id);
 
         if ($payment->method?->type !== 'receipt' || $payment->status !== 'pending_review') {
             return response()->json(['error' => 'این رسید در وضعیت قابل بررسی نیست'], 422);
         }
 
-        if ($request->approved) {
+        $receipt = $payment->bankReceipts()->latest('id')->first();
+
+        if ($request->boolean('approved')) {
             app(PaymentStatusService::class)->markPaid($payment, null, null, $request->user()->id);
+
+            $receipt?->update([
+                'status' => 'approved',
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => null,
+            ]);
         } else {
-            app(PaymentStatusService::class)->markFailed($payment, 'rejected', null, $request->user()->id);
+            
+app(PaymentStatusService::class)->markFailed(
+    $payment,
+    'rejected',
+    [
+        'rejection_reason' => $request->input('rejection_reason'),
+        'review_source' => 'api.bank-receipts.approve',
+    ],
+    $request->user()->id
+);
+
+            $receipt?->update([
+                'status' => 'rejected',
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => $request->input('rejection_reason'),
+            ]);
         }
 
-        $payment->bankReceipts()->latest('id')->first()?->update([
-            'status' => $request->approved ? 'approved' : 'rejected',
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'rejection_reason' => $request->approved ? null : $request->input('rejection_reason'),
-        ]);
-
         return response()->json([
-            'message' => $request->approved ? 'پرداخت تأیید شد' : 'پرداخت رد شد',
-            'payment' => $payment,
+            'message' => $request->boolean('approved') ? 'پرداخت تأیید شد' : 'پرداخت رد شد',
+            'payment' => $payment->fresh(),
         ]);
     }
 }

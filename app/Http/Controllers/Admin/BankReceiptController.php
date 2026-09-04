@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Domain\Payment\Services\PaymentStatusService;
+use App\Http\Controllers\Controller;
+use App\Models\BankReceipt;
+use Illuminate\Http\Request;
+
+class BankReceiptController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware(['auth', 'admin']);
+    }
+
+    public function show(BankReceipt $bankReceipt)
+    {
+        $bankReceipt->load([
+            'payment.order.user',
+            'payment.method',
+            'uploader',
+            'reviewer',
+        ]);
+
+        return view('themes.admin.payments.show', compact('bankReceipt'));
+    }
+
+    public function approve(Request $request, BankReceipt $bankReceipt)
+    {
+        $payment = $bankReceipt->payment()->with('method', 'order')->firstOrFail();
+
+        if ($payment->method?->type !== 'receipt') {
+            return back()->with('error', 'این پرداخت از نوع رسید بانکی نیست.');
+        }
+
+        app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
+
+        $bankReceipt->update([
+            'status' => 'approved',
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+            'rejection_reason' => null,
+        ]);
+
+        return redirect()
+            ->route('admin.bank-receipts.show', $bankReceipt)
+            ->with('success', 'رسید بانکی تأیید شد.');
+    }
+
+    public function reject(Request $request, BankReceipt $bankReceipt)
+    {
+        $data = $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $payment = $bankReceipt->payment()->with('method')->firstOrFail();
+
+        if ($payment->method?->type !== 'receipt') {
+            return back()->with('error', 'این پرداخت از نوع رسید بانکی نیست.');
+        }
+
+        
+        app(PaymentStatusService::class)->markFailed(
+            $payment,
+            'rejected',
+            [
+                'rejection_reason' => $data['rejection_reason'],
+                'review_source' => 'admin.bank-receipts.reject',
+            ],
+            auth()->id()
+        );
+
+        $bankReceipt->update([
+            'status' => 'rejected',
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+            'rejection_reason' => $data['rejection_reason'],
+        ]);
+
+        return redirect()
+            ->route('admin.bank-receipts.show', $bankReceipt)
+            ->with('success', 'رسید بانکی رد شد.');
+    }
+}
