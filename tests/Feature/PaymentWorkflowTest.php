@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\BankReceipt;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
-use App\Models\PaymentStatusHistory;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,6 +37,18 @@ class PaymentWorkflowTest extends TestCase
     public function test_admin_can_approve_pending_receipt_and_order_becomes_paid(): void
     {
         [$user, $payment] = $this->createPayment('receipt', 'pending_review');
+
+        BankReceipt::create([
+            'payment_id' => $payment->id,
+            'tracking_number' => 'TRK-1001',
+            'note' => 'رسید تست',
+            'file_path' => 'receipts/test-receipt.pdf',
+            'original_name' => 'test-receipt.pdf',
+            'uploaded_by' => $user->id,
+            'uploaded_at' => now(),
+            'status' => 'pending_review',
+        ]);
+
         $admin = User::factory()->create();
         $adminRole = Role::create(['name' => 'admin', 'label' => 'مدیر']);
         $admin->roles()->attach($adminRole);
