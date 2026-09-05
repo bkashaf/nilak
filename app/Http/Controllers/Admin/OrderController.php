@@ -6,7 +6,11 @@ use App\Domain\Payment\Services\PaymentStatusService;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+use RuntimeException;
 
 class OrderController extends Controller
 {
@@ -54,69 +58,68 @@ class OrderController extends Controller
             'tracking_code' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $oldStatus = $order->status;
-
-        $order->update([
-            'status' => $data['status'],
-            'tracking_code' => $data['tracking_code'],
-        ]);
-
-        if ($oldStatus !== $data['status']) {
-            OrderStatusHistory::create([
-                'order_id' => $order->id,
-                'from_status' => $oldStatus,
-                'to_status' => $data['status'],
-                'changed_by' => auth()->id(),
-            ]);
-        }
-
         $payment = $order->payments()->with([
             'method',
             'latestBankReceipt',
             'bankReceipts',
         ])->latest('id')->first();
 
-        if ($payment) {
-            if ($data['status'] === 'delivered' && $payment->method?->type === 'cod') {
-                app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
-            } elseif ($data['payment_status'] === 'paid') {
-                if ($payment->isReceiptPayment() && ! $payment->hasUploadedReceipt()) {
-                    return back()
-                        ->withInput()
-                        ->with('error', 'برای ثبت پرداخت‌شده در پرداخت رسیدی، ابتدا باید یک رسید بانکی ثبت شده باشد.');
-                }
+        $effectivePaymentStatus = $payment
+            ? $this->resolveRequestedPaymentStatus($payment, $data['status'], $data['payment_status'])
+            : null;
 
-                app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
-            } elseif ($data['payment_status'] === 'pending_review') {
-                if ($payment->isReceiptPayment() && ! $payment->hasUploadedReceipt()) {
-                    return back()
-                        ->withInput()
-                        ->with('error', 'بدون رسید ثبت‌شده نمی‌توان پرداخت رسیدی را در وضعیت در انتظار بررسی قرار داد.');
-                }
+        try {
+            DB::transaction(function () use ($order, $payment, $data, $effectivePaymentStatus) {
+                $oldStatus = $order->status;
 
-                $payment->update([
-                    'status' => 'pending_review',
-                    'paid_at' => null,
+                $order->update([
+                    'status' => $data['status'],
+                    'tracking_code' => $data['tracking_code'],
                 ]);
-            } elseif (in_array($data['payment_status'], ['failed', 'rejected'], true)) {
-                app(PaymentStatusService::class)->markFailed(
-                    $payment,
-                    $data['payment_status'],
-                    array_merge($payment->callback_data ?? [], [
+
+                if ($oldStatus !== $data['status']) {
+                    OrderStatusHistory::create([
+                        'order_id' => $order->id,
+                        'from_status' => $oldStatus,
+                        'to_status' => $data['status'],
+                        'changed_by' => auth()->id(),
+                    ]);
+                }
+
+                if (! $payment || ! $effectivePaymentStatus) {
+                    return;
+                }
+
+                $callbackData = in_array($effectivePaymentStatus, ['failed', 'rejected', 'expired'], true)
+                    ? array_merge($payment->callback_data ?? [], [
                         'review_source' => 'admin.orders.update',
-                    ]),
-                    auth()->id()
+                    ])
+                    : null;
+
+                app(PaymentStatusService::class)->applyManualStatus(
+                    $payment,
+                    $effectivePaymentStatus,
+                    auth()->id(),
+                    $callbackData
                 );
-            } else {
-                $payment->update([
-                    'status' => $data['payment_status'],
-                    'paid_at' => null,
-                ]);
-            }
+            });
+        } catch (RuntimeException | InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->with('error', $exception->getMessage());
         }
 
         return redirect()
             ->route('admin.orders.edit', $order)
             ->with('success', 'وضعیت سفارش و شماره پیگیری به‌روزرسانی شد.');
+    }
+
+    private function resolveRequestedPaymentStatus(Payment $payment, string $orderStatus, string $requestedPaymentStatus): string
+    {
+        if ($orderStatus === 'delivered' && $payment->method?->type === 'cod') {
+            return 'paid';
+        }
+
+        return $requestedPaymentStatus;
     }
 }
