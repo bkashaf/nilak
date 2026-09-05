@@ -70,6 +70,48 @@ class PaymentWorkflowTest extends TestCase
         ]);
     }
 
+    public function test_admin_cannot_mark_non_receipt_payment_as_pending_review(): void
+    {
+        $admin = User::factory()->create();
+        $adminRole = Role::create(['name' => 'admin', 'label' => 'مدیر']);
+        $admin->roles()->attach($adminRole);
+
+        $user = User::factory()->create();
+        $order = Order::create([
+            'user_id' => $user->id,
+            'total_amount' => 100000,
+            'status' => 'pending',
+            'tracking_code' => 'NLK-20260823-GATEWAY1',
+            'address' => 'تهران، خیابان نمونه، پلاک ۱',
+        ]);
+
+        $method = PaymentMethod::create([
+            'name' => 'online',
+            'type' => 'gateway',
+            'title' => 'پرداخت آنلاین',
+            'is_active' => true,
+        ]);
+
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'payment_method_id' => $method->id,
+            'amount' => 100000,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->from(route('admin.payments.index'))
+            ->actingAs($admin)
+            ->put(route('admin.payments.update', $payment), [
+                'status' => 'pending_review',
+            ]);
+
+        $response->assertRedirect(route('admin.payments.index'));
+        $response->assertSessionHas('error', 'وضعیت در انتظار بررسی فقط برای پرداخت‌های رسید بانکی مجاز است.');
+
+        $this->assertSame('pending', $payment->fresh()->status);
+        $this->assertSame($user->id, $payment->order->fresh()->user_id);
+    }
+
     private function createPayment(string $type, string $status): array
     {
         $user = User::factory()->create();

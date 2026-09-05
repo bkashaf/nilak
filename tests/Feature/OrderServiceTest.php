@@ -5,13 +5,13 @@ namespace Tests\Feature;
 use App\Domain\Cart\CartService;
 use App\Domain\Order\OrderService;
 use App\Models\Category;
+use App\Models\CategoryTranslation;
 use App\Models\Order;
-use App\Models\OrderItem;
+use App\Models\OrderStatusHistory;
+use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Product;
-use App\Models\Payment;
 use App\Models\Role;
-use App\Models\CategoryTranslation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -124,6 +124,55 @@ class OrderServiceTest extends TestCase
         $response->assertRedirect(route('admin.orders.edit', $order));
         $this->assertSame('shipped', $order->fresh()->status);
         $this->assertSame('paid', $payment->fresh()->status);
+    }
+
+    public function test_admin_cannot_mark_receipt_payment_as_paid_without_uploaded_receipt_and_order_stays_unchanged(): void
+    {
+        $admin = User::factory()->create();
+        $adminRole = Role::create(['name' => 'admin', 'label' => 'مدیر']);
+        $admin->roles()->attach($adminRole);
+
+        $order = Order::create([
+            'user_id' => $admin->id,
+            'total_amount' => 99000,
+            'status' => 'pending',
+            'tracking_code' => 'NLK-20260823-ADMIN02',
+            'address' => 'تهران، خیابان نمونه، پلاک ۱',
+        ]);
+
+        $paymentMethod = PaymentMethod::create([
+            'name' => 'bank_receipt',
+            'type' => 'receipt',
+            'title' => 'رسید بانکی',
+            'is_active' => true,
+        ]);
+
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'payment_method_id' => $paymentMethod->id,
+            'amount' => 99000,
+            'status' => 'initiated',
+        ]);
+
+        $response = $this->from(route('admin.orders.edit', $order))
+            ->actingAs($admin)
+            ->put(route('admin.orders.update', $order), [
+                'status' => 'shipped',
+                'payment_status' => 'paid',
+                'tracking_code' => 'NLK-CHANGED-BY-ADMIN',
+            ]);
+
+        $response->assertRedirect(route('admin.orders.edit', $order));
+        $response->assertSessionHas('error', 'برای این تغییر وضعیت، ابتدا باید یک رسید بانکی ثبت شده باشد.');
+
+        $this->assertSame('pending', $order->fresh()->status);
+        $this->assertSame('NLK-20260823-ADMIN02', $order->fresh()->tracking_code);
+        $this->assertSame('initiated', $payment->fresh()->status);
+        $this->assertDatabaseMissing('order_status_histories', [
+            'order_id' => $order->id,
+            'from_status' => 'pending',
+            'to_status' => 'shipped',
+        ]);
     }
 
     public function test_product_and_category_use_the_current_locale_translation(): void
