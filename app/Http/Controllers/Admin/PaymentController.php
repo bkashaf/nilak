@@ -7,6 +7,8 @@ use App\Domain\Payment\Services\RefundService;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
+use RuntimeException;
 
 class PaymentController extends Controller
 {
@@ -33,46 +35,21 @@ class PaymentController extends Controller
             'status' => ['required', 'string', 'in:pending,initiated,pending_review,paid,failed,rejected,expired'],
         ]);
 
-        $payment->loadMissing([
-            'order',
-            'method',
-            'latestBankReceipt',
-            'bankReceipts',
-        ]);
-
-        if ($data['status'] === 'paid') {
-            if ($payment->isReceiptPayment() && ! $payment->hasUploadedReceipt()) {
-                return back()
-                    ->withInput()
-                    ->with('error', 'برای ثبت پرداخت‌شده در پرداخت رسیدی، ابتدا باید یک رسید بانکی ثبت شده باشد.');
-            }
-
-            app(PaymentStatusService::class)->markPaid($payment, null, null, auth()->id());
-        } elseif ($data['status'] === 'pending_review') {
-            if ($payment->isReceiptPayment() && ! $payment->hasUploadedReceipt()) {
-                return back()
-                    ->withInput()
-                    ->with('error', 'بدون رسید ثبت‌شده نمی‌توان پرداخت رسیدی را در وضعیت در انتظار بررسی قرار داد.');
-            }
-
-            $payment->update([
-                'status' => 'pending_review',
-                'paid_at' => null,
-            ]);
-        } elseif (in_array($data['status'], ['failed', 'rejected'], true)) {
-            app(PaymentStatusService::class)->markFailed(
+        try {
+            app(PaymentStatusService::class)->applyManualStatus(
                 $payment,
                 $data['status'],
-                array_merge($payment->callback_data ?? [], [
-                    'review_source' => 'admin.payments.update',
-                ]),
-                auth()->id()
+                auth()->id(),
+                in_array($data['status'], ['failed', 'rejected', 'expired'], true)
+                    ? array_merge($payment->callback_data ?? [], [
+                        'review_source' => 'admin.payments.update',
+                    ])
+                    : null
             );
-        } else {
-            $payment->update([
-                'status' => $data['status'],
-                'paid_at' => null,
-            ]);
+        } catch (RuntimeException | InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->with('error', $exception->getMessage());
         }
 
         return redirect()
